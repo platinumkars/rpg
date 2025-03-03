@@ -1,6 +1,28 @@
 import random
 import time
 
+def level_up_display(player, old_level, rewards):
+    """Display level up information with visual effects"""
+    print("\n" + "="*50)
+    print(f"╔{'═'*48}╗")
+    print(f"║{' '*17}LEVEL UP!{' '*21}║")
+    print(f"║{' '*13}Level {old_level} → {player.level}{' '*17}║")
+    print(f"╚{'═'*48}╝")
+    print("\nStats increased:")
+    print(f"♥ Max HP: {player.max_health - rewards['health']} → {player.max_health}")
+    print(f"✧ Max MP: {player.max_mana - rewards['mana']} → {player.max_mana}")
+    
+    # Show new abilities if unlocked
+    if player.level in [3, 5]:
+        print("\n⚔ New Abilities Unlocked!")
+        new_abilities = {name: ability for name, ability in player.abilities.items() 
+                        if name not in ["Basic Attack"]}
+        for name, ability in new_abilities.items():
+            print(f"- {name}: {ability['description']}")
+    
+    print("="*50)
+    time.sleep(1)  # Pause for effect
+
 class Character:
     def __init__(self, name, class_type):
         self.name = name
@@ -1205,25 +1227,3 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\nAn error occurred: {e}")
         print("Game terminated.")
-
-def level_up_display(player, old_level, rewards):
-    """Display level up information with visual effects"""
-    print("\n" + "="*50)
-    print(f"╔{'═'*48}╗")
-    print(f"║{' '*17}LEVEL UP!{' '*21}║")
-    print(f"║{' '*13}Level {old_level} → {player.level}{' '*17}║")
-    print(f"╚{'═'*48}╝")
-    print("\nStats increased:")
-    print(f"♥ Max HP: {player.max_health - rewards['health']} → {player.max_health}")
-    print(f"✧ Max MP: {player.max_mana - rewards['mana']} → {player.max_mana}")
-    
-    # Show new abilities if unlocked
-    if player.level in [3, 5]:
-        print("\n⚔ New Abilities Unlocked!")
-        new_abilities = {name: ability for name, ability in player.abilities.items() 
-                        if name not in ["Basic Attack"]}  # Filter out basic abilities
-        for name, ability in new_abilities.items():
-            print(f"- {name}: {ability['description']}")
-    
-    print("="*50)
-    time.sleep(1)  # Pause for effect
