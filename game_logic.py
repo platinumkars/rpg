@@ -388,27 +388,28 @@ class Enemy:
         self.health = max(0, self.health - amount)
         return amount
 
-def combat(player, enemy):
-    print(f"\nA {enemy.name} appears!")
+def combat(player, enemies):
+    """Updated combat function to handle multiple enemies"""
+    print("\nEnemies appear!")
+    for enemy in enemies:
+        print(f"- {enemy.name} (HP: {enemy.health})")
     
-    while enemy.health > 0 and player.health > 0:
-        # Process status effects at start of turn
+    while any(enemy.health > 0 for enemy in enemies) and player.health > 0:
+        # Process status effects
         process_status_effects(player)
-        process_status_effects(enemy)
+        for enemy in enemies:
+            if enemy.health > 0:
+                process_status_effects(enemy)
         
         # Display battle status
         print(f"\n{'-'*40}")
         print(f"Your HP: {player.health}/{player.max_health}")
         print(f"Your MP: {player.mana}/{player.max_mana}")
-        print(f"Enemy HP: {enemy.health}")
+        print("\nEnemies:")
+        for i, enemy in enumerate(enemies, 1):
+            if enemy.health > 0:
+                print(f"{i}. {enemy.name} - HP: {enemy.health}")
         
-        # Show active effects
-        if player.status_effects:
-            print("\nYour status effects:")
-            for effect in player.status_effects:
-                print(f"- {effect['name']} ({effect['duration']} turns)")
-        
-        # Combat options
         print("\nWhat would you like to do?")
         print("1. Attack")
         print("2. Use Ability")
@@ -418,19 +419,51 @@ def combat(player, enemy):
         
         choice = input("> ")
         
-        # Process turn
-        if choice == "1":
-            damage = process_attack(player, enemy)
-            enemy.health -= damage
-            print(f"You deal {damage} damage to the {enemy.name}!")
+        # Target selection for attacks and abilities
+        if choice in ["1", "2", "4"] and any(enemy.health > 0 for enemy in enemies):
+            print("\nChoose your target:")
+            valid_targets = [(i, enemy) for i, enemy in enumerate(enemies, 1) if enemy.health > 0]
+            for i, enemy in valid_targets:
+                print(f"{i}. {enemy.name}")
             
-        elif choice == "2":
+            try:
+                target_idx = int(input("> ")) - 1
+                if 0 <= target_idx < len(valid_targets):
+                    target = enemies[target_idx]
+                else:
+                    print("Invalid target!")
+                    continue
+            except ValueError:
+                print("Invalid input!")
+                continue
+
+        # Process player turn
+        if choice == "1":  # Basic attack
+            damage = process_attack(player, target)
+            target.health -= damage
+            print(f"You deal {damage} damage to {target.name}!")
+            
+        elif choice == "2":  # Use ability
             show_abilities(player)
-            ability = input("Choose ability (or 'back'): ")
-            if ability in player.abilities and player.mana >= player.abilities[ability]["mana_cost"]:
-                process_ability(player, enemy, ability)
+            ability_name = input("Choose ability (or 'back'): ")
+            if ability_name.lower() == 'back':
+                continue
+                
+            if ability_name in player.abilities:
+                ability = player.abilities[ability_name]
+                if player.mana >= ability["mana_cost"]:
+                    process_ability(player, target, ability_name)
+                    if "area_damage" in ability:
+                        # Apply area damage to other enemies
+                        for other in enemies:
+                            if other != target and other.health > 0:
+                                other.health -= ability["area_damage"]
+                                print(f"{other.name} takes {ability['area_damage']} splash damage!")
+                else:
+                    print("Not enough mana!")
+                    continue
             else:
-                print("Not enough mana or invalid ability!")
+                print("Invalid ability!")
                 continue
 
         elif choice == "3":
@@ -466,8 +499,8 @@ def combat(player, enemy):
                 gadget_choice = input("Choose gadget (or 'back'): ").title()
                 if gadget_choice in player.gadgets:
                     gadget = player.gadgets[gadget_choice]
-                    if gadget.use(player, enemy):
-                        process_gadget_effect(player, enemy, gadget.effect)
+                    if gadget.use(player, target):
+                        process_gadget_effect(player, target, gadget.effect)
                     else:
                         print("No charges remaining!")
                         continue
@@ -482,73 +515,35 @@ def combat(player, enemy):
             else:
                 print("You failed to run away!")
         
-        # In combat function, replace enemy attack section
-        if enemy.health > 0:
-            damage_taken = process_enemy_attack(player, enemy)
-            player.health -= damage_taken
-            print(f"The {enemy.name} attacks you for {damage_taken} damage! (Reduced by armor)")
+        # Enemy turns
+        for enemy in enemies:
+            if enemy.health > 0:
+                damage = process_enemy_attack(player, enemy)
+                player.health -= damage
+                print(f"{enemy.name} attacks you for {damage} damage!")
+        
+        # Check player death
+        if player.health <= 0:
+            print("You have been defeated...")
+            return False
             
-    if player.health <= 0:
-        print("You have been defeated...")
-        return False
-    
-    print(f"You defeated the {enemy.name}!")
-    player.exp += enemy.exp_reward
-    player.gold += enemy.gold_reward
-    print(f"You gained {enemy.exp_reward} EXP and {enemy.gold_reward} gold!")
-    
-    # Add post-battle healing based on level
-    heal_amount = int(player.max_health * (0.15 + (player.level * 0.01)))  # 15% + 1% per level
-    mana_restore = int(player.max_mana * (0.1 + (player.level * 0.01)))   # 10% + 1% per level
-    player.health = min(player.max_health, player.health + heal_amount)
-    player.mana = min(player.max_mana, player.mana + mana_restore)
-    print(f"Victory healing: Recovered {heal_amount} HP and {mana_restore} MP!")
-    
-    # In combat victory section
-    tech_points_reward = int(10 * (1 + (enemy.level * 0.5)))
-    player.tech_points += tech_points_reward
-    print(f"Gained {tech_points_reward} Tech Points!")
-    
-    # In combat function, modify level up section
-    if player.exp >= calculate_exp_requirement(player.level):  # Scaling exp requirement
-        old_level = player.level
-        player.level += 1
-        player.exp = 0
-        rewards = calculate_level_rewards(player.level)
-        player.max_health += rewards["health"]
-        player.health = player.max_health
-        player.max_mana += rewards["mana"]
-        player.mana = player.max_mana
-        print(f"\nLevel up! You are now level {player.level}!")
-        print(f"Max HP increased by {rewards['health']}!")
-        print(f"Max MP increased by {rewards['mana']}!")
+    # Combat victory
+    if player.health > 0:
+        print("Victory!")
+        total_exp = sum(enemy.exp_reward for enemy in enemies if enemy.health <= 0)
+        total_gold = sum(enemy.gold_reward for enemy in enemies if enemy.health <= 0)
+        player.exp += total_exp
+        player.gold += total_gold
+        print(f"Gained {total_exp} EXP and {total_gold} gold!")
         
-        # Show new abilities notification
-        level_3_abilities = {
-            "Whirlwind", "Lightning Strike", "Consecration", "Curse", 
-            "Shadow Step", "Entangling Roots", "Flying Kick", "Multi Shot",
-            "Demon Form", "Blood Rage", "Explosive Flask", "Earthquake"
-        }
-        # Add level 5 abilities set before updating abilities
-        level_5_abilities = {
-            "Berserk", "Meteor", "Divine Storm", "Death Nova", 
-            "Death Mark", "Hurricane", "Spirit Burst", "Hunter's Mark",
-            "Chaos Blast", "Rampage", "Transmutation", "Spirit Wolves"
-        }
+        # Victory healing
+        heal_amount = int(player.max_health * (0.15 + (player.level * 0.01)))
+        mana_restore = int(player.max_mana * (0.1 + (player.level * 0.01)))
+        player.health = min(player.max_health, player.health + heal_amount)
+        player.mana = min(player.max_mana, player.mana + mana_restore)
+        print(f"Victory healing: Recovered {heal_amount} HP and {mana_restore} MP!")
         
-        player.update_abilities()  # Update abilities for new level
-        if player.level == 3:
-            print("\nNew level 3 ability unlocked!")
-            for ability_name, ability in player.abilities.items():
-                if ability_name not in level_3_abilities:
-                    print(f"- {ability_name}: {ability['description']}")
-        elif player.level == 5:
-            print("\nNew level 5 ability unlocked!")
-            for ability_name, ability in player.abilities.items():
-                if ability_name in level_5_abilities:
-                    print(f"- {ability_name}: {ability['description']}")
-    
-    return True
+        return True
 
 # Add gadget effect processing
 def process_gadget_effect(player, enemy, effect):
@@ -613,7 +608,40 @@ def shop(player):
         # Tier 3 Equipment (level 5+)
         "Flame Sword": {"cost": 280, "damage": 28, "min_level": 5},
         "Frost Staff": {"cost": 290, "damage": 25, "mana_bonus": 35, "min_level": 5},
-        "Plate Armor": {"cost": 300, "defense": 20, "min_level": 5}
+        "Plate Armor": {"cost": 300, "defense": 20, "min_level": 5},
+
+        # Area damage weapons (level 3+)
+        "War Hammer": {
+            "cost": 200, 
+            "damage": 14, 
+            "area_damage": 8, 
+            "min_level": 3,
+            "description": "Heavy weapon that deals area damage"
+        },
+        "Thundering Bow": {
+            "cost": 220, 
+            "damage": 12, 
+            "area_damage": 10, 
+            "min_level": 3,
+            "description": "Bow that creates lightning area damage"
+        },
+
+        # High-tier area weapons (level 5+)
+        "Dragon Cleaver": {
+            "cost": 400, 
+            "damage": 25, 
+            "area_damage": 15, 
+            "min_level": 5,
+            "description": "Massive sword with wide cleaving damage"
+        },
+        "Storm Staff": {
+            "cost": 450, 
+            "damage": 22, 
+            "area_damage": 18,
+            "mana_bonus": 30,
+            "min_level": 5,
+            "description": "Powerful staff that creates storm damage"
+        }
     }
     
     while True:
@@ -639,7 +667,13 @@ def shop(player):
             if player.gold >= items[choice]["cost"]:
                 player.gold -= items[choice]["cost"]
                 if "damage" in items[choice]:
-                    player.weapons[choice] = items[choice]["damage"]
+                    if "area_damage" in items[choice]:
+                        player.weapons[choice] = {
+                            "damage": items[choice]["damage"],
+                            "area_damage": items[choice]["area_damage"]
+                        }
+                    else:
+                        player.weapons[choice] = items[choice]["damage"]
                 elif "defense" in items[choice]:
                     player.armor[choice] = items[choice]["defense"]
                 else:
@@ -712,11 +746,25 @@ def show_abilities(player):
         print(f"{ability}: {details['description']} (Mana cost: {details['mana_cost']})")
 
 def process_attack(player, enemy):
-    """More balanced attack damage calculation"""
-    base_damage = player.weapons[player.current_weapon]
-    level_bonus = int(player.level * 1.5)  # Reduced from level * 2
-    variation = random.randint(-2, 2)      # Reduced variation range
-    return max(1, base_damage + level_bonus + variation)
+    """Updated attack damage calculation with area damage"""
+    weapon = player.current_weapon
+    base_damage = player.weapons[weapon]
+    level_bonus = int(player.level * 1.5)
+    variation = random.randint(-2, 2)
+    
+    # Check if weapon has area damage
+    if isinstance(base_damage, dict):
+        main_damage = base_damage["damage"]
+        area_damage = base_damage.get("area_damage", 0)
+        
+        # Calculate final damages
+        final_damage = max(1, main_damage + level_bonus + variation)
+        final_area = max(1, area_damage + int(level_bonus * 0.5))
+        
+        return {"damage": final_damage, "area_damage": final_area}
+    else:
+        # Regular weapon damage
+        return max(1, base_damage + level_bonus + variation)
 
 def process_enemy_attack(player, enemy):
     """More balanced enemy damage calculation"""
@@ -946,6 +994,44 @@ def show_inventory_menu(player):
         elif choice == "4":
             break
 
+# Define enemy types as a class for better organization
+class EnemyType:
+    def __init__(self, name, max_health, damage, exp_reward, gold_reward, level=1):
+        self.name = name
+        self.max_health = max_health
+        self.damage = damage
+        self.exp_reward = exp_reward
+        self.gold_reward = gold_reward
+        self.level = level
+
+# Define spawn table with enemy types and their spawn chances
+spawn_table = [
+    # Level 1 enemies
+    (EnemyType("Goblin", 30, 8, 20, 15, 1), 20, 1),        # (enemy_type, spawn_chance, min_level)
+    (EnemyType("Wolf", 35, 10, 25, 20, 1), 20, 1),
+    (EnemyType("Slime", 25, 6, 15, 10, 1), 15, 1),
+    
+    # Level 2 enemies
+    (EnemyType("Bandit", 45, 12, 35, 30, 2), 15, 2),
+    (EnemyType("Skeleton", 40, 13, 30, 25, 2), 15, 2),
+    (EnemyType("Giant Spider", 38, 14, 32, 28, 2), 15, 2),
+    
+    # Level 3 enemies
+    (EnemyType("Orc", 60, 15, 45, 40, 3), 12, 3),
+    (EnemyType("Dark Elf", 55, 18, 48, 45, 3), 12, 3),
+    (EnemyType("Werewolf", 65, 20, 50, 48, 3), 12, 3),
+    
+    # Level 4 enemies
+    (EnemyType("Troll", 80, 20, 60, 50, 4), 10, 4),
+    (EnemyType("Ogre", 85, 22, 65, 55, 4), 10, 4),
+    (EnemyType("Gargoyle", 75, 25, 70, 60, 4), 10, 4),
+    
+    # Level 5+ special enemies
+    (EnemyType("Dragon Whelp", 100, 30, 100, 100, 5), 5, 5),
+    (EnemyType("Necromancer", 90, 35, 110, 110, 5), 5, 5),
+    (EnemyType("Giant", 120, 28, 120, 120, 5), 5, 5)
+]
+
 def main():
     print("Welcome to the Text RPG!")
     print("\nChoose your class:")
@@ -997,38 +1083,35 @@ def main():
         choice = input("> ")
         
         if choice == "1":
-            # Enemy selection based on player level
             enemies = []
-            spawn_table = [
-                (Enemy("Rat", 12, 2, 8, 5, 1), 40, 1),
-                (Enemy("Goblin", 25, 4, 20, 15, 1), 30, 1),
-                (Enemy("Wolf", 35, 6, 30, 25, 2), 15, 2),
-                (Enemy("Bandit", 45, 8, 40, 35, 3), 10, 3),
-                (Enemy("Troll", 80, 10, 50, 45, 4), 5, 4),
-                # Boss enemies (rare spawn)
-                (Enemy("Dragon", 200, 20, 100, 100, 5), 1, 5)
-            ]
+            num_enemies = 1
+            if player.level >= 5:
+                num_enemies = random.randint(2, 3)
             
-            roll = random.uniform(0, 100)
-            cumulative = 0
-            for enemy, chance, min_level in spawn_table:
-                if player.level >= min_level:
-                    cumulative += chance
-                    if roll <= cumulative:
-                        enemies = [enemy]
-                        break
+            for _ in range(num_enemies):
+                roll = random.uniform(0, 100)
+                cumulative = 0
+                for enemy_type, chance, min_level in spawn_table:
+                    if player.level >= min_level:
+                        cumulative += chance
+                        if roll <= cumulative:
+                            new_enemy = Enemy(
+                                enemy_type.name,
+                                enemy_type.max_health,
+                                enemy_type.damage,
+                                enemy_type.exp_reward,
+                                enemy_type.gold_reward,
+                                enemy_type.level
+                            )
+                            enemies.append(new_enemy)
+                            break
             
             if enemies:
-                enemy = random.choice(enemies)
-                result = combat(player, enemy)
-                if result == "fled":
-                    continue
-                elif not result:
+                result = combat(player, enemies)
+                if not result:
                     print(f"\nGame Over! Final Level: {player.level}")
                     print(f"Gold collected: {player.gold}")
                     break
-            else:
-                print("No suitable enemies found!")
                 
         elif choice == "2":
             shop(player)
