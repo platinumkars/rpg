@@ -388,11 +388,36 @@ class Enemy:
         self.health = max(0, self.health - amount)
         return amount
 
+def get_target(enemies, auto=False):
+    """Helper function to handle target selection"""
+    if len(enemies) == 1 or auto:
+        # Auto-target the first living enemy
+        for enemy in enemies:
+            if enemy.health > 0:
+                return enemy
+    else:
+        print("\nChoose your target:")
+        valid_targets = [(i, enemy) for i, enemy in enumerate(enemies, 1) if enemy.health > 0]
+        for i, enemy in valid_targets:
+            print(f"{i}. {enemy.name} - HP: {enemy.health}")
+        
+        try:
+            target_idx = int(input("> ")) - 1
+            if 0 <= target_idx < len(valid_targets):
+                return enemies[target_idx]
+        except ValueError:
+            pass
+    return None
+
+# In combat function, modify the target selection section:
 def combat(player, enemies):
-    """Updated combat function to handle multiple enemies"""
+    """Updated combat function with auto-targeting"""
     print("\nEnemies appear!")
     for enemy in enemies:
         print(f"- {enemy.name} (HP: {enemy.health})")
+    
+    # Add auto-target toggle
+    auto_target = len(enemies) == 1  # Default to auto for single enemy
     
     while any(enemy.health > 0 for enemy in enemies) and player.health > 0:
         # Process status effects
@@ -416,25 +441,20 @@ def combat(player, enemies):
         print("3. Use Item")
         print("4. Use Gadget")
         print("5. Run")
+        print("6. Toggle Auto-target", f"({'ON' if auto_target else 'OFF'})")
         
         choice = input("> ")
         
+        if choice == "6":
+            auto_target = not auto_target
+            print(f"Auto-targeting turned {'ON' if auto_target else 'OFF'}")
+            continue
+        
         # Target selection for attacks and abilities
         if choice in ["1", "2", "4"] and any(enemy.health > 0 for enemy in enemies):
-            print("\nChoose your target:")
-            valid_targets = [(i, enemy) for i, enemy in enumerate(enemies, 1) if enemy.health > 0]
-            for i, enemy in valid_targets:
-                print(f"{i}. {enemy.name}")
-            
-            try:
-                target_idx = int(input("> ")) - 1
-                if 0 <= target_idx < len(valid_targets):
-                    target = enemies[target_idx]
-                else:
-                    print("Invalid target!")
-                    continue
-            except ValueError:
-                print("Invalid input!")
+            target = get_target(enemies, auto_target)
+            if not target:
+                print("Invalid target!")
                 continue
 
         # Process player turn
@@ -1088,9 +1108,15 @@ def main():
             if player.level >= 5:
                 num_enemies = random.randint(2, 3)
             
-            for _ in range(num_enemies):
+            # Try to spawn enemies
+            attempts = 0
+            max_attempts = 3  # Maximum number of spawn attempts
+            
+            while len(enemies) < num_enemies and attempts < max_attempts:
                 roll = random.uniform(0, 100)
                 cumulative = 0
+                enemy_found = False
+                
                 for enemy_type, chance, min_level in spawn_table:
                     if player.level >= min_level:
                         cumulative += chance
@@ -1104,7 +1130,11 @@ def main():
                                 enemy_type.level
                             )
                             enemies.append(new_enemy)
+                            enemy_found = True
                             break
+                
+                if not enemy_found:
+                    attempts += 1
             
             if enemies:
                 result = combat(player, enemies)
@@ -1112,6 +1142,10 @@ def main():
                     print(f"\nGame Over! Final Level: {player.level}")
                     print(f"Gold collected: {player.gold}")
                     break
+            else:
+                print("\nNo suitable enemies found in this area!")
+                print("Try exploring a different area or coming back later.")
+                time.sleep(1)  # Add a small delay for readability
                 
         elif choice == "2":
             shop(player)
