@@ -43,9 +43,18 @@ class Character:
                 "Shield Block": {"defense": int(15 * scaling), "duration": 2, "mana_cost": 10, "description": "Temporary defense boost"}
             }
             if self.level >= 3:
-                base_abilities["Whirlwind"] = {"damage": int(18 * scaling), "hits": 3, "mana_cost": 25, "description": "Hit multiple times"}
+                base_abilities["Whirlwind"] = {
+                    "damage": int(18 * scaling),
+                    "hits": 3,
+                    "mana_cost": 25,
+                    "description": "Hit multiple times"
+                }
             if self.level >= 5:
-                base_abilities["Berserk"] = {"damage": int(40 * scaling), "mana_cost": 30, "description": "Powerful rage attack"}
+                base_abilities["Berserk"] = {
+                    "damage": int(40 * scaling),
+                    "mana_cost": 30,
+                    "description": "Powerful rage attack"
+                }
                 
         elif self.class_type.lower() in ["mage", "2"]:
             self.health = 80 + (self.level - 1) * 12     # Reduced health scaling
@@ -53,13 +62,37 @@ class Character:
             self.mana = 100 + (self.level - 1) * 20      # Increased mana scaling
             self.max_mana = self.mana
             base_abilities = {
-                "Fireball": {"damage": int(20 * scaling), "duration": 3, "mana_cost": 15, "description": "Fire damage over time"},
-                "Frost Bolt": {"damage": int(25 * scaling), "mana_cost": 20, "description": "Direct magic damage"}
+                "Fireball": {
+                    "damage": int(20 * scaling), 
+                    "duration": 3, 
+                    "mana_cost": 15, 
+                    "description": "Fire damage over time",
+                    "effect": "burn"
+                },
+                "Frost Bolt": {
+                    "damage": int(25 * scaling), 
+                    "mana_cost": 20, 
+                    "description": "Direct magic damage",
+                    "effect": "freeze"
+                }
             }
             if self.level >= 3:
-                base_abilities["Lightning Strike"] = {"damage": int(35 * scaling), "mana_cost": 25, "description": "Powerful lightning attack"}
+                base_abilities["Lightning Strike"] = {
+                    "damage": int(35 * scaling),
+                    "mana_cost": 25,
+                    "description": "Powerful lightning attack",
+                    "effect": "stun",
+                    "duration": 1
+                }
             if self.level >= 5:
-                base_abilities["Meteor"] = {"damage": int(50 * scaling), "mana_cost": 40, "description": "Massive area damage"}
+                base_abilities["Meteor"] = {
+                    "damage": int(50 * scaling),
+                    "mana_cost": 40,
+                    "description": "Massive area damage",
+                    "hits": 3,
+                    "effect": "burn",
+                    "duration": 2
+                }
 
         elif self.class_type.lower() in ["paladin", "3"]:
             self.health = 120 + (self.level - 1) * 20    # Balanced health scaling
@@ -71,9 +104,19 @@ class Character:
                 "Divine Shield": {"defense": int(20 * scaling), "duration": 3, "mana_cost": 20, "description": "Strong defensive barrier"}
             }
             if self.level >= 3:
-                base_abilities["Consecration"] = {"damage": int(15 * scaling), "heal": int(15 * scaling), "mana_cost": 25, "description": "Area damage and healing"}
+                base_abilities["Consecration"] = {
+                    "damage": int(15 * scaling),
+                    "heal": int(15 * scaling),
+                    "mana_cost": 25,
+                    "description": "Area damage and healing"
+                }
             if self.level >= 5:
-                base_abilities["Divine Storm"] = {"damage": int(35 * scaling), "heal": int(20 * scaling), "mana_cost": 35, "description": "Powerful holy attack with healing"}
+                base_abilities["Divine Storm"] = {
+                    "damage": int(35 * scaling),
+                    "heal": int(20 * scaling),
+                    "mana_cost": 35,
+                    "description": "Powerful holy attack with healing"
+                }
 
         elif self.class_type.lower() in ["necromancer", "4"]:
             self.health = 90 + (self.level - 1) * 15     # Low health scaling
@@ -85,9 +128,18 @@ class Character:
                 "Life Drain": {"damage": int(18 * scaling), "heal": int(15 * scaling), "mana_cost": 20, "description": "Drain life from enemy"}
             }
             if self.level >= 3:
-                base_abilities["Curse"] = {"damage": int(12 * scaling), "duration": 4, "mana_cost": 25, "description": "Strong damage over time"}
+                base_abilities["Curse"] = {
+                    "damage": int(12 * scaling),
+                    "duration": 4,
+                    "mana_cost": 25,
+                    "description": "Strong damage over time"
+                }
             if self.level >= 5:
-                base_abilities["Death Nova"] = {"damage": int(45 * scaling), "mana_cost": 40, "description": "Massive dark damage"}
+                base_abilities["Death Nova"] = {
+                    "damage": int(45 * scaling),
+                    "mana_cost": 40,
+                    "description": "Massive dark damage"
+                }
 
         elif self.class_type.lower() in ["assassin", "5"]:
             self.health = 95 + (self.level - 1) * 14     # Medium-low health scaling
@@ -99,9 +151,18 @@ class Character:
                 "Poison Strike": {"damage": int(15 * scaling), "duration": 3, "mana_cost": 20, "description": "Poisoned weapon attack"}
             }
             if self.level >= 3:
-                base_abilities["Shadow Step"] = {"damage": int(25 * scaling), "mana_cost": 25, "description": "Teleport behind enemy and strike"}
+                base_abilities["Shadow Step"] = {
+                    "damage": int(25 * scaling),
+                    "mana_cost": 25,
+                    "description": "Teleport behind enemy and strike"
+                }
             if self.level >= 5:
-                base_abilities["Death Mark"] = {"damage": int(45 * scaling), "duration": 2, "mana_cost": 35, "description": "Mark target for death"}
+                base_abilities["Death Mark"] = {
+                    "damage": int(45 * scaling),
+                    "duration": 2,
+                    "mana_cost": 35,
+                    "description": "Mark target for death"
+                }
 
         elif self.class_type.lower() in ["druid", "6"]:
             self.health = 110 + (self.level - 1) * 18    # Medium-high health scaling
@@ -113,9 +174,163 @@ class Character:
                 "Regrowth": {"heal": int(25 * scaling), "duration": 3, "mana_cost": 20, "description": "Strong healing over time"}
             }
             if self.level >= 3:
-                base_abilities["Entangling Roots"] = {"damage": int(18 * scaling), "duration": 2, "mana_cost": 25, "description": "Root and damage over time"}
+                base_abilities["Entangling Roots"] = {
+                    "damage": int(18 * scaling), 
+                    "duration": 2, 
+                    "mana_cost": 25,
+                    "description": "Root and damage over time",
+                    "effect": "root"
+                }
             if self.level >= 5:
-                base_abilities["Hurricane"] = {"damage": int(35 * scaling), "hits": 3, "mana_cost": 35, "description": "Multiple nature damage hits"}
+                base_abilities["Hurricane"] = {
+                    "damage": int(35 * scaling), 
+                    "hits": 3, 
+                    "mana_cost": 35,
+                    "description": "Multiple nature damage hits",
+                    "effect": "wind"
+                }
+
+        elif self.class_type.lower() in ["monk", "7"]:
+            self.health = 100 + (self.level - 1) * 16
+            self.max_health = self.health
+            self.mana = 60 + (self.level - 1) * 12
+            self.max_mana = self.mana
+            base_abilities = {
+                "Chi Strike": {"damage": int(25 * scaling), "mana_cost": 15, "description": "Powerful martial arts attack"},
+                "Meditation": {"heal": int(20 * scaling), "duration": 2, "mana_cost": 20, "description": "Restore health over time"}
+            }
+            if self.level >= 3:
+                base_abilities["Flying Kick"] = {
+                    "damage": int(30 * scaling),
+                    "effect": "stun",
+                    "duration": 1,
+                    "mana_cost": 25,
+                    "description": "High damage leap attack with stun"
+                }
+            if self.level >= 5:
+                base_abilities["Spirit Burst"] = {
+                    "damage": int(35 * scaling),
+                    "heal": int(20 * scaling),
+                    "mana_cost": 35,
+                    "description": "Damage and healing combo"
+                }
+
+        elif self.class_type.lower() in ["ranger", "8"]:
+            self.health = 95 + (self.level - 1) * 15
+            self.max_health = self.health
+            self.mana = 65 + (self.level - 1) * 13
+            self.max_mana = self.mana
+            base_abilities = {
+            "Precise Shot": {"damage": int(28 * scaling), "mana_cost": 15, "description": "Accurate ranged attack"},
+            "Animal Bond": {"heal": int(18 * scaling), "damage": int(15 * scaling), "mana_cost": 20, "description": "Call animal companion"}
+            }
+            if self.level >= 3:
+                base_abilities["Multi Shot"] = {
+                    "damage": int(15 * scaling), 
+                    "hits": 3, 
+                    "mana_cost": 25, 
+                    "description": "Fire multiple arrows"
+                }
+            if self.level >= 5:
+                base_abilities["Hunter's Mark"] = {
+                    "damage": int(35 * scaling), 
+                    "duration": 3, 
+                    "mana_cost": 30,
+                    "description": "Mark target for extra damage"
+                }
+
+        elif self.class_type.lower() in ["warlock", "9"]:
+            self.health = 85 + (self.level - 1) * 14
+            self.max_health = self.health
+            self.mana = 95 + (self.level - 1) * 19
+            self.max_mana = self.mana
+            base_abilities = {
+                "Shadow Bolt": {"damage": int(27 * scaling), "mana_cost": 15, "description": "Dark energy attack"},
+                "Soul Drain": {"damage": int(20 * scaling), "heal": int(10 * scaling), "mana_cost": 20, "description": "Drain enemy life force"}
+            }
+            if self.level >= 3:
+                base_abilities["Demon Form"] = {
+                    "damage": int(25 * scaling), 
+                    "duration": 3, 
+                    "mana_cost": 30,
+                    "description": "Transform for enhanced damage"
+                }
+            if self.level >= 5:
+                base_abilities["Chaos Blast"] = {
+                    "damage": int(45 * scaling), 
+                    "mana_cost": 40,
+                    "description": "Powerful chaotic explosion"
+                }
+
+        elif self.class_type.lower() in ["berserker", "10"]:
+            self.health = 130 + (self.level - 1) * 22
+            self.max_health = self.health
+            self.mana = 35 + (self.level - 1) * 7
+            self.max_mana = self.mana
+            base_abilities = {
+                "Frenzy": {"damage": int(35 * scaling), "mana_cost": 15, "description": "Powerful rage attack"},
+                "Battle Cry": {"damage": int(20 * scaling), "duration": 2, "mana_cost": 20, "description": "Intimidating shout"}
+            }
+            if self.level >= 3:
+                base_abilities["Blood Rage"] = {
+                    "damage": int(30 * scaling), 
+                    "heal": int(15 * scaling), 
+                    "mana_cost": 25,
+                    "description": "Damage boost with life drain"
+                }
+            if self.level >= 5:
+                base_abilities["Rampage"] = {
+                    "damage": int(25 * scaling), 
+                    "hits": 4, 
+                    "mana_cost": 35,
+                    "description": "Multiple savage attacks"
+                }
+
+        elif self.class_type.lower() in ["alchemist", "11"]:
+            self.health = 90 + (self.level - 1) * 15
+            self.max_health = self.health
+            self.mana = 80 + (self.level - 1) * 16
+            self.max_mana = self.mana
+            base_abilities = {
+                "Acid Splash": {"damage": int(23 * scaling), "duration": 2, "mana_cost": 15, "description": "Corrosive damage over time"},
+                "Healing Elixir": {"heal": int(30 * scaling), "mana_cost": 20, "description": "Powerful healing potion"}
+            }
+            if self.level >= 3:
+                base_abilities["Explosive Flask"] = {
+                    "damage": int(35 * scaling), 
+                    "mana_cost": 25, 
+                    "description": "Area damage attack"
+                }
+            if self.level >= 5:
+                base_abilities["Transmutation"] = {
+                    "heal": int(25 * scaling), 
+                    "damage": int(25 * scaling), 
+                    "mana_cost": 35,
+                    "description": "Convert damage to healing"
+                }
+
+        elif self.class_type.lower() in ["shaman", "12"]:
+            self.health = 105 + (self.level - 1) * 17
+            self.max_health = self.health
+            self.mana = 75 + (self.level - 1) * 15
+            self.max_mana = self.mana
+            base_abilities = {
+                "Lightning Chain": {"damage": int(22 * scaling), "hits": 2, "mana_cost": 15, "description": "Chain lightning attack"},
+                "Ancestral Spirit": {"heal": int(25 * scaling), "duration": 2, "mana_cost": 20, "description": "Healing over time"}
+            }
+            if self.level >= 3:
+                base_abilities["Earthquake"] = {
+                    "damage": int(30 * scaling), 
+                    "mana_cost": 25,
+                    "description": "Ground-shaking attack"
+                }
+            if self.level >= 5:
+                base_abilities["Spirit Wolves"] = {
+                    "damage": int(20 * scaling), 
+                    "hits": 3, 
+                    "mana_cost": 35,
+                    "description": "Summon spirit wolves to attack"
+                }
 
         self.abilities = base_abilities
 
@@ -168,14 +383,8 @@ class Enemy:
         self.health = max(0, self.health - amount)
         return amount
 
-def print_slow(text):
-    for char in text:
-        print(char, end='', flush=True)
-        time.sleep(0.03)
-    print()
-
 def combat(player, enemy):
-    print_slow(f"\nA {enemy.name} appears!")
+    print(f"\nA {enemy.name} appears!")
     
     while enemy.health > 0 and player.health > 0:
         # Process status effects at start of turn
@@ -183,24 +392,24 @@ def combat(player, enemy):
         process_status_effects(enemy)
         
         # Display battle status
-        print_slow(f"\n{'-'*40}")
-        print_slow(f"Your HP: {player.health}/{player.max_health}")
-        print_slow(f"Your MP: {player.mana}/{player.max_mana}")
-        print_slow(f"Enemy HP: {enemy.health}")
+        print(f"\n{'-'*40}")
+        print(f"Your HP: {player.health}/{player.max_health}")
+        print(f"Your MP: {player.mana}/{player.max_mana}")
+        print(f"Enemy HP: {enemy.health}")
         
         # Show active effects
         if player.status_effects:
-            print_slow("\nYour status effects:")
+            print("\nYour status effects:")
             for effect in player.status_effects:
-                print_slow(f"- {effect['name']} ({effect['duration']} turns)")
+                print(f"- {effect['name']} ({effect['duration']} turns)")
         
         # Combat options
-        print_slow("\nWhat would you like to do?")
-        print_slow("1. Attack")
-        print_slow("2. Use Ability")
-        print_slow("3. Use Item")
-        print_slow("4. Use Gadget")
-        print_slow("5. Run")
+        print("\nWhat would you like to do?")
+        print("1. Attack")
+        print("2. Use Ability")
+        print("3. Use Item")
+        print("4. Use Gadget")
+        print("5. Run")
         
         choice = input("> ")
         
@@ -208,7 +417,7 @@ def combat(player, enemy):
         if choice == "1":
             damage = process_attack(player, enemy)
             enemy.health -= damage
-            print_slow(f"You deal {damage} damage to the {enemy.name}!")
+            print(f"You deal {damage} damage to the {enemy.name}!")
             
         elif choice == "2":
             show_abilities(player)
@@ -216,38 +425,38 @@ def combat(player, enemy):
             if ability in player.abilities and player.mana >= player.abilities[ability]["mana_cost"]:
                 process_ability(player, enemy, ability)
             else:
-                print_slow("Not enough mana or invalid ability!")
+                print("Not enough mana or invalid ability!")
                 continue
 
         elif choice == "3":
-            print_slow("\nAvailable items:")
+            print("\nAvailable items:")
             if player.inventory.get("Health Potion", 0) > 0:
-                print_slow("1. Health Potion")
+                print("1. Health Potion")
             if player.inventory.get("Mana Potion", 0) > 0:
-                print_slow("2. Mana Potion")
+                print("2. Mana Potion")
             
             item_choice = input("Choose item to use (or 'back'): ")
             
             if item_choice == "1" and player.inventory.get("Health Potion", 0) > 0:
                 player.health = min(player.max_health, player.health + 30)
                 player.inventory["Health Potion"] -= 1
-                print_slow("You drink a health potion and recover 30 HP!")
+                print("You drink a health potion and recover 30 HP!")
             elif item_choice == "2" and player.inventory.get("Mana Potion", 0) > 0:
                 player.mana = min(player.max_mana, player.mana + 25)
                 player.inventory["Mana Potion"] -= 1
-                print_slow("You drink a mana potion and recover 25 MP!")
+                print("You drink a mana potion and recover 25 MP!")
             elif item_choice.lower() == "back":
                 continue
             else:
-                print_slow("Invalid item or not enough potions!")
+                print("Invalid item or not enough potions!")
                 continue
                 
         elif choice == "4":
             if player.gadgets:
-                print_slow("\nAvailable Gadgets:")
+                print("\nAvailable Gadgets:")
                 for name, gadget in player.gadgets.items():
                     if gadget.charges > 0:
-                        print_slow(f"{name} ({gadget.charges} charges)")
+                        print(f"{name} ({gadget.charges} charges)")
                 
                 gadget_choice = input("Choose gadget (or 'back'): ").title()
                 if gadget_choice in player.gadgets:
@@ -255,45 +464,45 @@ def combat(player, enemy):
                     if gadget.use(player, enemy):
                         process_gadget_effect(player, enemy, gadget.effect)
                     else:
-                        print_slow("No charges remaining!")
+                        print("No charges remaining!")
                         continue
             else:
-                print_slow("No gadgets available!")
+                print("No gadgets available!")
                 continue
 
         elif choice == "5":
             if random.random() < 0.5:
-                print_slow("You successfully fled from combat!")
+                print("You successfully fled from combat!")
                 return "fled"  # Changed return value to indicate fled status
             else:
-                print_slow("You failed to run away!")
+                print("You failed to run away!")
         
         # In combat function, replace enemy attack section
         if enemy.health > 0:
             damage_taken = process_enemy_attack(player, enemy)
             player.health -= damage_taken
-            print_slow(f"The {enemy.name} attacks you for {damage_taken} damage! (Reduced by armor)")
+            print(f"The {enemy.name} attacks you for {damage_taken} damage! (Reduced by armor)")
             
     if player.health <= 0:
-        print_slow("You have been defeated...")
+        print("You have been defeated...")
         return False
     
-    print_slow(f"You defeated the {enemy.name}!")
+    print(f"You defeated the {enemy.name}!")
     player.exp += enemy.exp_reward
     player.gold += enemy.gold_reward
-    print_slow(f"You gained {enemy.exp_reward} EXP and {enemy.gold_reward} gold!")
+    print(f"You gained {enemy.exp_reward} EXP and {enemy.gold_reward} gold!")
     
     # Add post-battle healing based on level
     heal_amount = int(player.max_health * (0.15 + (player.level * 0.01)))  # 15% + 1% per level
     mana_restore = int(player.max_mana * (0.1 + (player.level * 0.01)))   # 10% + 1% per level
     player.health = min(player.max_health, player.health + heal_amount)
     player.mana = min(player.max_mana, player.mana + mana_restore)
-    print_slow(f"Victory healing: Recovered {heal_amount} HP and {mana_restore} MP!")
+    print(f"Victory healing: Recovered {heal_amount} HP and {mana_restore} MP!")
     
     # In combat victory section
     tech_points_reward = int(10 * (1 + (enemy.level * 0.5)))
     player.tech_points += tech_points_reward
-    print_slow(f"Gained {tech_points_reward} Tech Points!")
+    print(f"Gained {tech_points_reward} Tech Points!")
     
     # In combat function, modify level up section
     if player.exp >= calculate_exp_requirement(player.level):  # Scaling exp requirement
@@ -304,9 +513,9 @@ def combat(player, enemy):
         player.health = player.max_health
         player.max_mana += rewards["mana"]
         player.mana = player.max_mana
-        print_slow(f"Level up! You are now level {player.level}!")
-        print_slow(f"Max HP increased by {rewards['health']}!")
-        print_slow(f"Max MP increased by {rewards['mana']}!")
+        print(f"Level up! You are now level {player.level}!")
+        print(f"Max HP increased by {rewards['health']}!")
+        print(f"Max MP increased by {rewards['mana']}!")
     
     return True
 
@@ -314,16 +523,16 @@ def combat(player, enemy):
 def process_gadget_effect(player, enemy, effect):
     if "damage" in effect:
         enemy.health -= effect["damage"]
-        print_slow(f"Gadget deals {effect['damage']} damage!")
+        print(f"Gadget deals {effect['damage']} damage!")
         
     if "heal" in effect:
         heal = effect["heal"]
         player.health = min(player.max_health, player.health + heal)
-        print_slow(f"Gadget heals for {heal} HP!")
+        print(f"Gadget heals for {heal} HP!")
         
     if "flee" in effect:
         if random.random() < effect["chance"]:
-            print_slow("Gadget allows you to escape!")
+            print("Gadget allows you to escape!")
             return "fled"
             
     if "defense" in effect:
@@ -332,54 +541,54 @@ def process_gadget_effect(player, enemy, effect):
             "defense": effect["defense"],
             "duration": effect["duration"]
         })
-        print_slow(f"Shield activated for {effect['duration']} turns!")
+        print(f"Shield activated for {effect['duration']} turns!")
         
     if "revive" in effect:
         if player.health <= 0:
             player.health = int(player.max_health * effect["health_percent"])
-            print_slow("Phoenix Protocol activates! You're revived!")
+            print("Phoenix Protocol activates! You're revived!")
 
 # Update experience and level scaling
 def calculate_exp_requirement(level):
-    """Calculate experience needed for next level"""
-    return int(100 * (1 + (level * 0.5)))  # More gradual scaling
+    """More balanced experience requirements"""
+    return int(75 * (1 + (level * 0.4)))  # Reduced from 0.5 to 0.4
 
 def calculate_level_rewards(level):
-    """Calculate stats increase for level up"""
+    """More balanced level-up rewards"""
     return {
-        "health": 15 + (level * 3),
-        "mana": 8 + (level * 2),
-        "damage_bonus": level,
-        "defense_bonus": level
+        "health": 12 + (level * 2),  # Reduced from 15 + (level * 3)
+        "mana": 6 + (level * 1.5),   # Reduced from 8 + (level * 2)
+        "damage_bonus": int(level * 0.8),
+        "defense_bonus": int(level * 0.7)
     }
 
 # Update shop function's item handling
 def shop(player):
     items = {
         # Basic items (always available)
-        "Health Potion": {"cost": 15, "effect": "Restore 40 HP", "min_level": 1},
-        "Mana Potion": {"cost": 20, "effect": "Restore 35 MP", "min_level": 1},
+        "Health Potion": {"cost": 20, "effect": "Restore 35 HP", "min_level": 1},
+        "Mana Potion": {"cost": 25, "effect": "Restore 30 MP", "min_level": 1},
         
         # Tier 1 Equipment (level 1-2)
-        "Iron Sword": {"cost": 50, "damage": 12, "min_level": 1},
-        "Wooden Staff": {"cost": 45, "damage": 10, "mana_bonus": 15, "min_level": 1},
-        "Leather Armor": {"cost": 60, "defense": 8, "min_level": 1},
+        "Iron Sword": {"cost": 60, "damage": 10, "min_level": 1},
+        "Wooden Staff": {"cost": 55, "damage": 8, "mana_bonus": 12, "min_level": 1},
+        "Leather Armor": {"cost": 70, "defense": 6, "min_level": 1},
         
         # Tier 2 Equipment (level 3-4)
-        "Steel Sword": {"cost": 120, "damage": 20, "min_level": 3},
-        "Magic Staff": {"cost": 140, "damage": 18, "mana_bonus": 25, "min_level": 3},
-        "Chain Mail": {"cost": 150, "defense": 15, "min_level": 3},
+        "Steel Sword": {"cost": 140, "damage": 16, "min_level": 3},
+        "Magic Staff": {"cost": 160, "damage": 14, "mana_bonus": 20, "min_level": 3},
+        "Chain Mail": {"cost": 170, "defense": 12, "min_level": 3},
         
         # Tier 3 Equipment (level 5+)
-        "Flame Sword": {"cost": 250, "damage": 35, "min_level": 5},
-        "Frost Staff": {"cost": 260, "damage": 30, "mana_bonus": 40, "min_level": 5},
-        "Plate Armor": {"cost": 280, "defense": 25, "min_level": 5}
+        "Flame Sword": {"cost": 280, "damage": 28, "min_level": 5},
+        "Frost Staff": {"cost": 290, "damage": 25, "mana_bonus": 35, "min_level": 5},
+        "Plate Armor": {"cost": 300, "defense": 20, "min_level": 5}
     }
     
     while True:
-        print_slow("\nWelcome to the shop!")
-        print_slow(f"Your gold: {player.gold}")
-        print_slow("\nAvailable items:")
+        print("\nWelcome to the shop!")
+        print(f"Your gold: {player.gold}")
+        print("\nAvailable items:")
         for item, details in items.items():
             desc = details.get('effect', 'Equipment')
             if 'damage' in details:
@@ -388,8 +597,8 @@ def shop(player):
                 desc = f"Defense: {details['defense']}"
             if 'mana_bonus' in details:
                 desc += f", Mana Bonus: {details['mana_bonus']}"
-            print_slow(f"{item}: {details['cost']} gold - {desc}")
-        print_slow("\nEnter item name to buy (or 'exit' to leave):")
+            print(f"{item}: {details['cost']} gold - {desc}")
+        print("\nEnter item name to buy (or 'exit' to leave):")
         
         choice = input("> ").title()
         if choice.lower() == "exit":
@@ -404,11 +613,11 @@ def shop(player):
                     player.armor[choice] = items[choice]["defense"]
                 else:
                     player.inventory[choice] = player.inventory.get(choice, 0) + 1
-                print_slow(f"Bought {choice}!")
+                print(f"Bought {choice}!")
             else:
-                print_slow("Not enough gold!")
+                print("Not enough gold!")
         else:
-            print_slow("Invalid item!")
+            print("Invalid item!")
 
 # Add Gadget Shop function
 def gadget_shop(player):
@@ -439,17 +648,17 @@ def gadget_shop(player):
     }
     
     while True:
-        print_slow("\n=== Gadget Shop ===")
-        print_slow(f"Tech Points: {player.tech_points}")
-        print_slow("\nAvailable Gadgets:")
+        print("\n=== Gadget Shop ===")
+        print(f"Tech Points: {player.tech_points}")
+        print("\nAvailable Gadgets:")
         
         for name, gadget in gadgets.items():
             if name not in player.gadgets:
-                print_slow(f"{name} ({gadget.rarity.title()}) - {gadget.cost} TP")
-                print_slow(f"  Effect: {gadget.effect}")
-                print_slow(f"  Charges: {gadget.get_charges()}")
+                print(f"{name} ({gadget.rarity.title()}) - {gadget.cost} TP")
+                print(f"  Effect: {gadget.effect}")
+                print(f"  Charges: {gadget.get_charges()}")
         
-        print_slow("\nEnter gadget name to buy (or 'exit' to leave):")
+        print("\nEnter gadget name to buy (or 'exit' to leave):")
         choice = input("> ").title()
         
         if choice.lower() == "exit":
@@ -459,30 +668,30 @@ def gadget_shop(player):
             if player.tech_points >= gadgets[choice].cost:
                 player.tech_points -= gadgets[choice].cost
                 player.gadgets[choice] = gadgets[choice]
-                print_slow(f"Bought {choice}!")
+                print(f"Bought {choice}!")
             else:
-                print_slow("Not enough Tech Points!")
+                print("Not enough Tech Points!")
         else:
-            print_slow("Invalid gadget or already owned!")
+            print("Invalid gadget or already owned!")
 
 def show_abilities(player):
     """Display available abilities and their descriptions"""
-    print_slow("\nAvailable Abilities:")
+    print("\nAvailable Abilities:")
     for ability, details in player.abilities.items():
-        print_slow(f"{ability}: {details['description']} (Mana cost: {details['mana_cost']})")
+        print(f"{ability}: {details['description']} (Mana cost: {details['mana_cost']})")
 
 def process_attack(player, enemy):
-    """Calculate attack damage with better scaling"""
+    """More balanced attack damage calculation"""
     base_damage = player.weapons[player.current_weapon]
-    level_bonus = player.level * 2
-    variation = random.randint(-3, 3)
+    level_bonus = int(player.level * 1.5)  # Reduced from level * 2
+    variation = random.randint(-2, 2)      # Reduced variation range
     return max(1, base_damage + level_bonus + variation)
 
 def process_enemy_attack(player, enemy):
-    """Calculate enemy damage with better defense scaling"""
+    """More balanced enemy damage calculation"""
     base_damage = enemy.damage
     armor_value = player.armor[player.current_armor]
-    defense_reduction = int(armor_value * (0.4 + (player.level * 0.02)))  # Scales with level
+    defense_reduction = int(armor_value * (0.3 + (player.level * 0.015)))  # Reduced scaling
     final_damage = max(1, base_damage - defense_reduction)
     return final_damage
 
@@ -492,6 +701,44 @@ def process_ability(player, enemy, ability_name):
     player.mana -= ability["mana_cost"]
     total_damage = 0
     
+    if "effect" in ability:
+        if ability["effect"] == "burn":
+            # Apply burn effect
+            enemy.status_effects.append({
+                "name": "Burned",
+                "damage": int(ability["damage"] * 0.3), # 30% of initial damage as burn
+                "duration": ability["duration"]
+            })
+            print(f"{enemy.name} is burned for {ability['duration']} turns!")
+            
+        elif ability["effect"] == "root":
+            # Apply root effect
+            enemy.status_effects.append({
+                "name": "Rooted",
+                "damage": int(ability["damage"] * 0.5),
+                "duration": ability["duration"],
+                "movement_blocked": True
+            })
+            print(f"{enemy.name} is rooted for {ability['duration']} turns!")
+            
+        elif ability["effect"] == "wind":
+            # Process hurricane hits
+            for i in range(ability["hits"]):
+                hit_damage = int(ability["damage"] * (0.8 + random.random() * 0.4))  # 80-120% damage per hit
+                enemy.health -= hit_damage
+                total_damage += hit_damage
+                print(f"Hurricane hit {i+1}: {hit_damage} damage!")
+            print(f"Total hurricane damage: {total_damage}")
+            
+        elif ability["effect"] == "stun":
+            # Apply stun effect
+            enemy.status_effects.append({
+                "name": "Stunned",
+                "duration": ability["duration"],
+                "skip_turn": True
+            })
+            print(f"{enemy.name} is stunned for {ability['duration']} turns!")
+    
     if "damage" in ability:
         damage = ability["damage"]
         if "hits" in ability:  # For multi-hit abilities
@@ -499,19 +746,19 @@ def process_ability(player, enemy, ability_name):
                 hit_damage = damage + random.randint(-2, 2)  # Add variation per hit
                 enemy.health -= hit_damage
                 total_damage += hit_damage
-                print_slow(f"Hit {hit + 1}: {hit_damage} damage!")
-            print_slow(f"Total damage: {total_damage}")
+                print(f"Hit {hit + 1}: {hit_damage} damage!")
+            print(f"Total damage: {total_damage}")
         else:
             damage = damage + random.randint(-5, 5)  # Add variation for single hit
             enemy.health -= damage
-            print_slow(f"You use {ability_name} and deal {damage} damage!")
+            print(f"You use {ability_name} and deal {damage} damage!")
     
     if "heal" in ability:
         heal = ability["heal"]
         original_health = player.health
         player.health = min(player.max_health, player.health + heal)
         actual_heal = player.health - original_health
-        print_slow(f"You heal for {actual_heal} HP!")
+        print(f"You heal for {actual_heal} HP!")
     
     if "defense" in ability:
         defense_boost = {
@@ -523,7 +770,7 @@ def process_ability(player, enemy, ability_name):
         player.status_effects = [effect for effect in player.status_effects 
                                if effect["name"] != ability_name]
         player.status_effects.append(defense_boost)
-        print_slow(f"Gained {ability['defense']} defense for {ability['duration']} turns!")
+        print(f"Gained {ability['defense']} defense for {ability['duration']} turns!")
     
     if "duration" in ability and "damage" in ability:  # For damage over time effects
         effect_name = ability_name.lower()
@@ -535,58 +782,69 @@ def process_ability(player, enemy, ability_name):
             "damage": int(ability["damage"] / 2),  # DoT deals half damage per tick
             "duration": ability["duration"]
         })
-        print_slow(f"Applied {effect_name} effect for {ability['duration']} turns!")
+        print(f"Applied {effect_name} effect for {ability['duration']} turns!")
 
 def process_status_effects(entity):
     """Process status effects at the start of turn"""
+    is_stunned = False
+    
     for effect in entity.status_effects[:]:  # Create a copy to modify during iteration
         if effect["name"] == "Poison":
             damage = effect["damage"]
             entity.health -= damage
-            print_slow(f"{entity.name} takes {damage} poison damage!")
+            print(f"{entity.name} takes {damage} poison damage!")
+        elif effect["name"] == "Burned":
+            damage = effect["damage"]
+            entity.health -= damage
+            print(f"{entity.name} takes {damage} burn damage!")
         elif effect["name"] == "Regeneration":
             heal = effect["heal"]
             entity.health = min(entity.max_health, entity.health + heal)
-            print_slow(f"{entity.name} regenerates {heal} health!")
+            print(f"{entity.name} regenerates {heal} health!")
+        elif effect["name"] == "Stunned":
+            is_stunned = True
+            print(f"{entity.name} is stunned and skips their turn!")
             
         effect["duration"] -= 1
         if effect["duration"] <= 0:
             entity.status_effects.remove(effect)
-            print_slow(f"{effect['name']} effect has worn off!")
+            print(f"{effect['name']} effect has worn off!")
+            
+    return is_stunned
 
 # Update show_inventory_menu function
 def show_inventory_menu(player):
     """Show inventory menu with weapon and armor switching options"""
     while True:
-        print_slow("\n=== Inventory Menu ===")
-        print_slow("1. View Items")
-        print_slow("2. Change Weapon")
-        print_slow("3. Change Armor")
-        print_slow("4. Back")
+        print("\n=== Inventory Menu ===")
+        print("1. View Items")
+        print("2. Change Weapon")
+        print("3. Change Armor")
+        print("4. Back")
         
         choice = input("> ")
         
         if choice == "1":
-            print_slow("\nInventory:")
+            print("\nInventory:")
             for item, quantity in player.inventory.items():
-                print_slow(f"{item}: {quantity}")
-            print_slow("\nWeapons:")
+                print(f"{item}: {quantity}")
+            print("\nWeapons:")
             for weapon, damage in player.weapons.items():
-                print_slow(f"{weapon} (Damage: {damage})")
-            print_slow(f"Currently equipped weapon: {player.current_weapon}")
-            print_slow("\nArmor:")
+                print(f"{weapon} (Damage: {damage})")
+            print(f"Currently equipped weapon: {player.current_weapon}")
+            print("\nArmor:")
             for armor, defense in player.armor.items():
-                print_slow(f"{armor} (Defense: {defense})")
-            print_slow(f"Currently equipped armor: {player.current_armor}")
+                print(f"{armor} (Defense: {defense})")
+            print(f"Currently equipped armor: {player.current_armor}")
             
         elif choice == "2":
-            print_slow("\nAvailable Weapons:")
+            print("\nAvailable Weapons:")
             weapons = list(player.weapons.keys())
             for i, weapon in enumerate(weapons, 1):
                 damage = player.weapons[weapon]
-                print_slow(f"{i}. {weapon} (Damage: {damage})")
+                print(f"{i}. {weapon} (Damage: {damage})")
                 if weapon == player.current_weapon:
-                    print_slow("   *Currently Equipped*")
+                    print("   *Currently Equipped*")
             
             try:
                 weapon_choice = int(input("\nChoose weapon number (0 to cancel): "))
@@ -594,22 +852,22 @@ def show_inventory_menu(player):
                     new_weapon = weapons[weapon_choice - 1]
                     if new_weapon != player.current_weapon:
                         player.current_weapon = new_weapon
-                        print_slow(f"Equipped {new_weapon}!")
+                        print(f"Equipped {new_weapon}!")
                     else:
-                        print_slow("That weapon is already equipped!")
+                        print("That weapon is already equipped!")
                 elif weapon_choice != 0:
-                    print_slow("Invalid weapon number!")
+                    print("Invalid weapon number!")
             except ValueError:
-                print_slow("Invalid input!")
+                print("Invalid input!")
                 
         elif choice == "3":
-            print_slow("\nAvailable Armor:")
+            print("\nAvailable Armor:")
             armors = list(player.armor.keys())
             for i, armor in enumerate(armors, 1):
                 defense = player.armor[armor]
-                print_slow(f"{i}. {armor} (Defense: {defense})")
+                print(f"{i}. {armor} (Defense: {defense})")
                 if armor == player.current_armor:
-                    print_slow("   *Currently Equipped*")
+                    print("   *Currently Equipped*")
             
             try:
                 armor_choice = int(input("\nChoose armor number (0 to cancel): "))
@@ -617,59 +875,64 @@ def show_inventory_menu(player):
                     new_armor = armors[armor_choice - 1]
                     if new_armor != player.current_armor:
                         player.current_armor = new_armor
-                        print_slow(f"Equipped {new_armor}!")
+                        print(f"Equipped {new_armor}!")
                     else:
-                        print_slow("That armor is already equipped!")
+                        print("That armor is already equipped!")
                 elif armor_choice != 0:
-                    print_slow("Invalid armor number!")
+                    print("Invalid armor number!")
             except ValueError:
-                print_slow("Invalid input!")
+                print("Invalid input!")
                 
         elif choice == "4":
             break
 
 def main():
-    print_slow("Welcome to the Text RPG!")
-    print_slow("\nChoose your class:")
-    print_slow("1. Warrior - High HP and defense, strong melee attacks")
-    print_slow("2. Mage - Powerful spells and high mana")
-    print_slow("3. Paladin - Balanced stats with healing abilities")
-    print_slow("4. Necromancer - Dark magic and life drain")
-    print_slow("5. Assassin - High damage and critical strikes")
-    print_slow("6. Druid - Nature magic and versatile abilities")
+    print("Welcome to the Text RPG!")
+    print("\nChoose your class:")
+    print("1. Warrior - High HP and defense, strong melee attacks")
+    print("2. Mage - Powerful spells and high mana")
+    print("3. Paladin - Balanced stats with healing abilities") 
+    print("4. Necromancer - Dark magic and life drain")
+    print("5. Assassin - High damage and critical strikes")
+    print("6. Druid - Nature magic and versatile abilities")
+    print("7. Monk - Martial arts and meditation")
+    print("8. Ranger - Skilled archer and animal companion")
+    print("9. Warlock - Demonic powers and curses")
+    print("10. Berserker - Rage and powerful attacks")
+    print("11. Alchemist - Potions and explosives")
+    print("12. Shaman - Elemental and spiritual magic")
     
     name = input("\nEnter your character's name: ")
     while True:
-        class_choice = input("Choose your class (1-6): ")
-        if class_choice in ["1", "2", "3", "4", "5", "6"]:
+        class_choice = input("Choose your class (1-12): ")
+        if class_choice in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]:
             break
-        print_slow("Invalid choice!")
+        print("Invalid choice!")
     
     player = Character(name, class_choice)
-    print_slow(f"\nWelcome, {player.name} the {player.class_type}!")
+    print(f"\nWelcome, {player.name} the {player.class_type}!")
     
     while True:
         # Status display
-        print_slow(f"\n{'='*50}")
-        print_slow(f"{player.name} - Level {player.level}")
-        print_slow(f"HP: {player.health}/{player.max_health}")
-        print_slow(f"MP: {player.mana}/{player.max_mana}")
-        print_slow(f"EXP: {player.exp}/{calculate_exp_requirement(player.level)}")
-        print_slow(f"Gold: {player.gold}")
-        print_slow(f"Current Weapon: {player.current_weapon}")
-        print_slow(f"Current Armor: {player.current_armor}")
-        print_slow(f"{'='*50}")
+        print(f"\n{'='*50}")
+        print(f"{player.name} - Level {player.level}")
+        print(f"HP: {player.health}/{player.max_health}")
+        print(f"MP: {player.mana}/{player.max_mana}")
+        print(f"EXP: {player.exp}/{calculate_exp_requirement(player.level)}")
+        print(f"Gold: {player.gold}")
+        print(f"Current Weapon: {player.current_weapon}")
+        print(f"Current Armor: {player.current_armor}")
+        print(f"{'='*50}")
         
         # Main menu
-        print_slow("\nWhat would you like to do?")
-        print_slow("1. Fight monsters")
-        print_slow("2. Visit shop")
-        print_slow("3. Check inventory")
-        print_slow("4. Rest (Heal 50% HP/MP for 20 gold)")
-        print_slow("5. Show abilities")
-        print_slow("6. Visit gadget shop")
-        print_slow("7. Visit Gadget Shop")
-        print_slow("7. Quit")
+        print("\nWhat would you like to do?")
+        print("1. Fight monsters")
+        print("2. Visit shop")
+        print("3. Check inventory")
+        print("4. Rest (Heal 50% HP/MP for 20 gold)")
+        print("5. Show abilities")
+        print("6. Visit gadget shop")
+        print("7. Quit")
         
         choice = input("> ")
         
@@ -677,7 +940,7 @@ def main():
             # Enemy selection based on player level
             enemies = []
             spawn_table = [
-                (Enemy("Rat", 15, 2, 10, 5, 1), 40, 1),
+                (Enemy("Rat", 12, 2, 8, 5, 1), 40, 1),
                 (Enemy("Goblin", 25, 4, 20, 15, 1), 30, 1),
                 (Enemy("Wolf", 35, 6, 30, 25, 2), 15, 2),
                 (Enemy("Bandit", 45, 8, 40, 35, 3), 10, 3),
@@ -701,11 +964,11 @@ def main():
                 if result == "fled":
                     continue
                 elif not result:
-                    print_slow(f"\nGame Over! Final Level: {player.level}")
-                    print_slow(f"Gold collected: {player.gold}")
+                    print(f"\nGame Over! Final Level: {player.level}")
+                    print(f"Gold collected: {player.gold}")
                     break
             else:
-                print_slow("No suitable enemies found!")
+                print("No suitable enemies found!")
                 
         elif choice == "2":
             shop(player)
@@ -720,9 +983,9 @@ def main():
                 player.health = min(player.max_health, player.health + heal_amount)
                 player.mana = min(player.max_mana, player.mana + mana_amount)
                 player.gold -= 20
-                print_slow(f"Rested and recovered {heal_amount} HP and {mana_amount} MP!")
+                print(f"Rested and recovered {heal_amount} HP and {mana_amount} MP!")
             else:
-                print_slow("Not enough gold to rest!")
+                print("Not enough gold to rest!")
                 
         elif choice == "5":
             show_abilities(player)
@@ -733,14 +996,14 @@ def main():
         elif choice == "7":
             confirm = input("Are you sure you want to quit? (y/n): ").lower()
             if confirm == 'y':
-                print_slow("Thanks for playing!")
+                print("Thanks for playing!")
                 break
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print_slow("\nGame terminated by user.")
+        print("\nGame terminated by user.")
     except Exception as e:
-        print_slow(f"\nAn error occurred: {e}")
-        print_slow("Game terminated.")
+        print(f"\nAn error occurred: {e}")
+        print("Game terminated.")
