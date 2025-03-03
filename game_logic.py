@@ -45,9 +45,10 @@ class Character:
             if self.level >= 3:
                 base_abilities["Whirlwind"] = {
                     "damage": int(18 * scaling),
+                    "area_damage": int(15 * scaling),
                     "hits": 3,
                     "mana_cost": 25,
-                    "description": "Hit multiple times"
+                    "description": "Spin attack hitting multiple enemies"
                 }
             if self.level >= 5:
                 base_abilities["Berserk"] = {
@@ -86,10 +87,10 @@ class Character:
                 }
             if self.level >= 5:
                 base_abilities["Meteor"] = {
-                    "damage": int(50 * scaling),
+                    "damage": int(35 * scaling),
+                    "area_damage": int(25 * scaling),
                     "mana_cost": 40,
-                    "description": "Massive area damage",
-                    "hits": 3,
+                    "description": "Massive area damage spell",
                     "effect": "burn",
                     "duration": 2
                 }
@@ -106,9 +107,10 @@ class Character:
             if self.level >= 3:
                 base_abilities["Consecration"] = {
                     "damage": int(15 * scaling),
+                    "area_damage": int(12 * scaling),
                     "heal": int(15 * scaling),
                     "mana_cost": 25,
-                    "description": "Area damage and healing"
+                    "description": "Holy area damage and healing"
                 }
             if self.level >= 5:
                 base_abilities["Divine Storm"] = {
@@ -136,9 +138,10 @@ class Character:
                 }
             if self.level >= 5:
                 base_abilities["Death Nova"] = {
-                    "damage": int(45 * scaling),
-                    "mana_cost": 40,
-                    "description": "Massive dark damage"
+                    "damage": int(30 * scaling),
+                    "area_damage": int(20 * scaling),
+                    "mana_cost": 35,
+                    "description": "Explosion of dark energy"
                 }
 
         elif self.class_type.lower() in ["assassin", "5"]:
@@ -183,10 +186,11 @@ class Character:
                 }
             if self.level >= 5:
                 base_abilities["Hurricane"] = {
-                    "damage": int(35 * scaling), 
+                    "damage": int(25 * scaling), 
+                    "area_damage": int(18 * scaling),
                     "hits": 3, 
                     "mana_cost": 35,
-                    "description": "Multiple nature damage hits",
+                    "description": "Multiple nature damage hits in area",
                     "effect": "wind"
                 }
 
@@ -297,9 +301,10 @@ class Character:
             }
             if self.level >= 3:
                 base_abilities["Explosive Flask"] = {
-                    "damage": int(35 * scaling), 
+                    "damage": int(25 * scaling), 
+                    "area_damage": int(20 * scaling),
                     "mana_cost": 25, 
-                    "description": "Area damage attack"
+                    "description": "Area damage chemical explosion"
                 }
             if self.level >= 5:
                 base_abilities["Transmutation"] = {
@@ -727,6 +732,18 @@ def process_ability(player, enemy, ability_name):
     player.mana -= ability["mana_cost"]
     total_damage = 0
     
+    # Add area damage handling
+    if "area_damage" in ability:
+        base_damage = ability["area_damage"]
+        num_targets = random.randint(2, 4)  # Hit 2-4 targets
+        for i in range(num_targets):
+            hit_damage = int(base_damage * (0.7 + random.random() * 0.6))  # 70-130% variance
+            enemy.health -= hit_damage
+            total_damage += hit_damage
+            print(f"Area Hit {i+1}: {hit_damage} damage!")
+        print(f"Total area damage: {total_damage}")
+    
+    # Existing ability processing code...
     if "effect" in ability:
         if ability["effect"] == "burn":
             # Apply burn effect
