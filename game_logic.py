@@ -5,8 +5,8 @@ def level_up_display(player, old_level, rewards):
     """Display level up information with visual effects"""
     print("\n" + "="*50)
     print(f"╔{'═'*48}╗")
-    print(f"║{' '*17}LEVEL UP!{' '*21}║")
-    print(f"║{' '*13}Level {old_level} → {player.level}{' '*17}║")
+    print(f"║{' '*17}LEVEL UP!{' '*22}║")
+    print(f"║{' '*16}Level {old_level} → {player.level}{' '*21}║")
     print(f"╚{'═'*48}╝")
     print("\nStats increased:")
     print(f"♥ Max HP: {player.max_health - rewards['health']} → {player.max_health}")
