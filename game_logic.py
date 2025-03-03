@@ -506,6 +506,7 @@ def combat(player, enemy):
     
     # In combat function, modify level up section
     if player.exp >= calculate_exp_requirement(player.level):  # Scaling exp requirement
+        old_level = player.level
         player.level += 1
         player.exp = 0
         rewards = calculate_level_rewards(player.level)
@@ -513,9 +514,34 @@ def combat(player, enemy):
         player.health = player.max_health
         player.max_mana += rewards["mana"]
         player.mana = player.max_mana
-        print(f"Level up! You are now level {player.level}!")
+        print(f"\nLevel up! You are now level {player.level}!")
         print(f"Max HP increased by {rewards['health']}!")
         print(f"Max MP increased by {rewards['mana']}!")
+        
+        # Show new abilities notification
+        level_3_abilities = {
+            "Whirlwind", "Lightning Strike", "Consecration", "Curse", 
+            "Shadow Step", "Entangling Roots", "Flying Kick", "Multi Shot",
+            "Demon Form", "Blood Rage", "Explosive Flask", "Earthquake"
+        }
+        # Add level 5 abilities set before updating abilities
+        level_5_abilities = {
+            "Berserk", "Meteor", "Divine Storm", "Death Nova", 
+            "Death Mark", "Hurricane", "Spirit Burst", "Hunter's Mark",
+            "Chaos Blast", "Rampage", "Transmutation", "Spirit Wolves"
+        }
+        
+        player.update_abilities()  # Update abilities for new level
+        if player.level == 3:
+            print("\nNew level 3 ability unlocked!")
+            for ability_name, ability in player.abilities.items():
+                if ability_name not in level_3_abilities:
+                    print(f"- {ability_name}: {ability['description']}")
+        elif player.level == 5:
+            print("\nNew level 5 ability unlocked!")
+            for ability_name, ability in player.abilities.items():
+                if ability_name in level_5_abilities:
+                    print(f"- {ability_name}: {ability['description']}")
     
     return True
 
@@ -711,6 +737,16 @@ def process_ability(player, enemy, ability_name):
             })
             print(f"{enemy.name} is burned for {ability['duration']} turns!")
             
+        elif ability["effect"] == "freeze":
+            # Apply freeze effect
+            enemy.status_effects.append({
+                "name": "Frozen",
+                "damage": int(ability["damage"] * 0.2),  # 20% of initial damage as freeze
+                "duration": 2,  # Fixed 2 turn duration
+                "damage_reduction": 0.5  # Reduces enemy damage by 50%
+            })
+            print(f"{enemy.name} is frozen for 2 turns! Their damage is reduced!")
+            
         elif ability["effect"] == "root":
             # Apply root effect
             enemy.status_effects.append({
@@ -787,6 +823,7 @@ def process_ability(player, enemy, ability_name):
 def process_status_effects(entity):
     """Process status effects at the start of turn"""
     is_stunned = False
+    damage_multiplier = 1.0
     
     for effect in entity.status_effects[:]:  # Create a copy to modify during iteration
         if effect["name"] == "Poison":
@@ -797,6 +834,11 @@ def process_status_effects(entity):
             damage = effect["damage"]
             entity.health -= damage
             print(f"{entity.name} takes {damage} burn damage!")
+        elif effect["name"] == "Frozen":
+            damage = effect["damage"]
+            entity.health -= damage
+            damage_multiplier *= effect.get("damage_reduction", 1.0)
+            print(f"{entity.name} takes {damage} frost damage and has reduced damage!")
         elif effect["name"] == "Regeneration":
             heal = effect["heal"]
             entity.health = min(entity.max_health, entity.health + heal)
@@ -810,7 +852,8 @@ def process_status_effects(entity):
             entity.status_effects.remove(effect)
             print(f"{effect['name']} effect has worn off!")
             
-    return is_stunned
+    return is_stunned, damage_multiplier
+
 
 # Update show_inventory_menu function
 def show_inventory_menu(player):
