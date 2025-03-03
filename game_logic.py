@@ -552,9 +552,30 @@ def combat(player, enemies):
         print("Victory!")
         total_exp = sum(enemy.exp_reward for enemy in enemies if enemy.health <= 0)
         total_gold = sum(enemy.gold_reward for enemy in enemies if enemy.health <= 0)
+        
+        # Store old level for comparison
+        old_level = player.level
+        
+        # Add experience
         player.exp += total_exp
-        player.gold += total_gold
         print(f"Gained {total_exp} EXP and {total_gold} gold!")
+        
+        # Check for level up
+        while player.exp >= calculate_exp_requirement(player.level):
+            player.exp -= calculate_exp_requirement(player.level)
+            player.level += 1
+            rewards = calculate_level_rewards(player.level)
+            player.max_health += rewards["health"]
+            player.health = player.max_health
+            player.max_mana += rewards["mana"]
+            player.mana = player.max_mana
+            
+            # Display level up screen
+            level_up_display(player, old_level, rewards)
+            
+            # Update abilities for new level
+            player.update_abilities()
+            old_level = player.level
         
         # Victory healing
         heal_amount = int(player.max_health * (0.15 + (player.level * 0.01)))
@@ -1184,3 +1205,25 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\nAn error occurred: {e}")
         print("Game terminated.")
+
+def level_up_display(player, old_level, rewards):
+    """Display level up information with visual effects"""
+    print("\n" + "="*50)
+    print(f"╔{'═'*48}╗")
+    print(f"║{' '*17}LEVEL UP!{' '*21}║")
+    print(f"║{' '*13}Level {old_level} → {player.level}{' '*17}║")
+    print(f"╚{'═'*48}╝")
+    print("\nStats increased:")
+    print(f"♥ Max HP: {player.max_health - rewards['health']} → {player.max_health}")
+    print(f"✧ Max MP: {player.max_mana - rewards['mana']} → {player.max_mana}")
+    
+    # Show new abilities if unlocked
+    if player.level in [3, 5]:
+        print("\n⚔ New Abilities Unlocked!")
+        new_abilities = {name: ability for name, ability in player.abilities.items() 
+                        if name not in ["Basic Attack"]}  # Filter out basic abilities
+        for name, ability in new_abilities.items():
+            print(f"- {name}: {ability['description']}")
+    
+    print("="*50)
+    time.sleep(1)  # Pause for effect
