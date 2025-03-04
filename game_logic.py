@@ -1031,8 +1031,10 @@ def process_ability(player, target, enemies, ability_name):
     ability = player.abilities[ability_name]
     player.mana -= ability["mana_cost"]
     total_damage = 0
-    living_enemies = [e for e in enemies if e.health > 0]
-    current_target = target
+    
+    # Get base damage and duration if they exist
+    base_damage = ability.get("damage", 0)
+    duration = ability.get("duration", 0)
     
     if "area_damage" in ability:
         # Handle area damage abilities
@@ -1040,22 +1042,25 @@ def process_ability(player, target, enemies, ability_name):
         area_damage = ability["area_damage"]
         
         # Deal main damage to primary target
-        current_target.health -= main_damage
+        target.health -= main_damage
         total_damage += main_damage
-        print(f"Main target {current_target.name} takes {main_damage} damage!")
+        print(f"Main target {target.name} takes {main_damage} damage!")
+        
+        # Apply status effect to main target if ability has effect
+        if "effect" in ability and duration > 0:
+            apply_status_effect(target, ability["effect"], base_damage, duration)
         
         # Deal area damage to other living enemies
-        for other in living_enemies:
-            if other != current_target and other.health > 0:
-                other.health -= area_damage
-                total_damage += area_damage
-                print(f"{other.name} takes {area_damage} area damage!")
+        for other in [e for e in enemies if e.health > 0 and e != target]:
+            other.health -= area_damage
+            total_damage += area_damage
+            print(f"{other.name} takes {area_damage} area damage!")
     
     elif "hits" in ability:
         # Handle multi-hit abilities
         remaining_hits = ability["hits"]
-        base_damage = ability["damage"]
-        duration = ability["duration"]  # Get duration if it exists
+        current_target = target
+        living_enemies = [e for e in enemies if e.health > 0]
         
         while remaining_hits > 0 and living_enemies:
             if current_target not in living_enemies:
@@ -1063,15 +1068,14 @@ def process_ability(player, target, enemies, ability_name):
                 if not current_target:
                     break
             
-            # Calculate hit damage with variance
             hit_damage = int(base_damage * (0.8 + random.random() * 0.4))
             current_target.health -= hit_damage
             total_damage += hit_damage
             print(f"Hit {ability['hits'] - remaining_hits + 1}: {hit_damage} damage to {current_target.name}!")
             
-            # Apply duration effects if they exist
+            # Apply duration effect for each hit
             if duration > 0:
-                effect_damage = int(hit_damage * 0.3)  # 30% of hit damage as duration damage
+                effect_damage = int(hit_damage * 0.3)
                 current_target.status_effects.append({
                     "name": "Damage Over Time",
                     "damage": effect_damage,
@@ -1079,39 +1083,48 @@ def process_ability(player, target, enemies, ability_name):
                 })
                 print(f"{current_target.name} will take {effect_damage} damage for {duration} turns!")
             
-            # Check if target died and update living enemies
             if current_target.health <= 0:
                 print(f"{current_target.name} has been defeated!")
                 living_enemies = [e for e in enemies if e.health > 0]
                 current_target = living_enemies[0] if living_enemies else None
             
             remaining_hits -= 1
-        
-        if total_damage > 0:
-            print(f"Total multi-hit damage: {total_damage}")
     
     else:
         # Handle single target abilities
-        base_damage = ability["damage"]
-        current_target.health -= base_damage
+        target.health -= base_damage
         total_damage = base_damage
-        print(f"{current_target.name} takes {base_damage} damage!")
-    
-    # Process status effects
-    if "effect" in ability:
-        effect = ability["effect"]
-        duration = ability["duration"]
-        if effect == "burn":
-            current_target.status_effects.append({"name": "Burned", "damage": base_damage // 2, "duration": duration})
-            print(f"{current_target.name} is burned for {duration} turns!")
-        elif effect == "freeze":
-            current_target.status_effects.append({"name": "Frozen", "damage": base_damage // 2, "duration": duration, "damage_reduction": 0.5})
-            print(f"{current_target.name} is frozen for {duration} turns!")
-        elif effect == "stun":
-            current_target.status_effects.append({"name": "Stunned", "duration": duration})
-            print(f"{current_target.name} is stunned for {duration} turns!")
+        print(f"{target.name} takes {base_damage} damage!")
+        
+        # Apply status effect if ability has one
+        if "effect" in ability and duration > 0:
+            apply_status_effect(target, ability["effect"], base_damage, duration)
     
     return total_damage
+
+def apply_status_effect(target, effect_type, base_damage, duration):
+    """Helper function to apply status effects"""
+    if effect_type == "burn":
+        target.status_effects.append({
+            "name": "Burned",
+            "damage": base_damage // 2,
+            "duration": duration
+        })
+        print(f"{target.name} is burned for {duration} turns!")
+    elif effect_type == "freeze":
+        target.status_effects.append({
+            "name": "Frozen",
+            "damage": base_damage // 2,
+            "duration": duration,
+            "damage_reduction": 0.5
+        })
+        print(f"{target.name} is frozen for {duration} turns!")
+    elif effect_type == "stun":
+        target.status_effects.append({
+            "name": "Stunned",
+            "duration": duration
+        })
+        print(f"{target.name} is stunned for {duration} turns!")
 
 def process_status_effects(entity):
     """Process status effects at the start of turn"""
