@@ -535,22 +535,31 @@ def combat(player, enemies):
                 
         elif choice == "4":
             if player.gadgets:
-                print("\nAvailable Gadgets:")
-                for name, gadget in player.gadgets.items():
-                    if gadget.charges > 0:
-                        print(f"{name} ({gadget.charges} charges)")
-                
-                gadget_choice = input("Choose gadget (or 'back'): ").title()
-                if gadget_choice in player.gadgets:
-                    gadget = player.gadgets[gadget_choice]
-                    if gadget.use(player, target):
-                        process_gadget_effect(player, target, gadget.effect)
-                    else:
-                        print("No charges remaining!")
+                gadget_list = show_gadgets(player)
+                if gadget_list:
+                    gadget_choice = input("Choose gadget number (or 'back'): ")
+                    
+                    if gadget_choice.lower() == 'back':
                         continue
+                        
+                    try:
+                        gadget_idx = int(gadget_choice) - 1
+                        if 0 <= gadget_idx < len(gadget_list):
+                            name, gadget = gadget_list[gadget_idx]
+                            if gadget.use(player, target):
+                                result = process_gadget_effect(player, target, enemies, gadget.effect)
+                                if result == "fled":
+                                    return "fled"
+                            else:
+                                print("Failed to use gadget!")
+                        else:
+                            print("Invalid gadget number!")
+                    except ValueError:
+                        print("Invalid input!")
+                else:
+                    print("No charges remaining on any gadgets!")
             else:
                 print("No gadgets available!")
-                continue
 
         elif choice == "5":
             if random.random() < 0.5:
@@ -869,6 +878,16 @@ def show_abilities(player):
         mana = details['mana_cost']
         print(f"{i}. {ability} - {desc} (Mana: {mana})")
     return abilities_list
+
+def show_gadgets(player):
+    """Display available gadgets with numbers"""
+    gadget_list = []
+    print("\nAvailable Gadgets:")
+    for name, gadget in player.gadgets.items():
+        if gadget.charges > 0:
+            gadget_list.append((name, gadget))
+            print(f"{len(gadget_list)}. {name} ({gadget.charges} charges)")
+    return gadget_list
 
 def process_attack(player, target, enemies):
     """Process attack with multi-hit and area damage"""
@@ -1344,3 +1363,4 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\nAn error occurred: {e}")
         print("Game terminated.")
+
