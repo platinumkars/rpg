@@ -649,21 +649,18 @@ def process_gadget_effect(player, target, enemies, effect):
             print(f"Gadget heals you for {actual_heal} HP!")
         
         if "flee" in effect:
-            if random.random() < effect["chance"]:
+            if random.random() < effect.get("chance", 0.5):
                 print("Gadget allows you to escape!")
                 return "fled"
         
         if "defense" in effect:
-            # Remove any existing shield effect
-            player.status_effects = [effect for effect in player.status_effects 
-                                   if effect["name"] != "Shield"]
             player.status_effects.append({
                 "name": "Shield",
                 "defense": effect["defense"],
                 "duration": effect["duration"]
             })
             print(f"Shield activated! +{effect['defense']} defense for {effect['duration']} turns!")
-        
+
     if "revive" in effect:
         if player.health <= 0:
             player.health = int(player.max_health * effect["health_percent"])
