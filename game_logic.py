@@ -488,8 +488,11 @@ def combat(player, enemies):
             
         elif choice == "2":  # Use ability
             abilities_list = show_abilities(player)
+            if not abilities_list:
+                print("No abilities available!")
+                continue
+                
             ability_choice = input("Choose ability number (or 'back'): ")
-            
             if ability_choice.lower() == 'back':
                 continue
             
@@ -547,12 +550,13 @@ def combat(player, enemies):
                 if gadget_list:
                     gadget_choice = input("Choose gadget number (or 'back'): ")
                     
-                    if gadget_choice.lower() == 'back':
-                        continue
-                        
                     try:
                         gadget_idx = int(gadget_choice) - 1
                         if 0 <= gadget_idx < len(gadget_list):
+                            _, gadget = gadget_list[gadget_idx]
+                            if gadget.charges > 0:
+                                gadget.charges -= 1
+                                result = process_gadget_effect(player, target, enemies, gadget.effect)
                             name, gadget = gadget_list[gadget_idx]
                             if gadget.use(player, target):
                                 result = process_gadget_effect(player, target, enemies, gadget.effect)
@@ -590,12 +594,10 @@ def combat(player, enemies):
             
     # Combat victory
     if player.health > 0:
-        print("Victory!")
-        defeated_enemies = [e for e in enemies if e.health <= 0]
-        total_exp = sum(e.exp_reward for e in defeated_enemies)
-        total_gold = sum(e.gold_reward for e in defeated_enemies)
-        # Calculate tech points based on enemy level
-        total_tp = sum(player.level * 25 for e in defeated_enemies)
+        # Calculate rewards from the original enemies list
+        total_tp = sum(player.level * 25 for e in enemies if e.health <= 0)
+        total_exp = sum(e.exp_reward for e in enemies if e.health <= 0)
+        total_gold = sum(e.gold_reward for e in enemies if e.health <= 0)
         
         # Apply rewards once
         player.exp += total_exp
