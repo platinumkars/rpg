@@ -1034,8 +1034,11 @@ def process_ability(player, target, enemies, ability_name, duration=0):
     player.mana -= ability["mana_cost"]
     total_damage = 0
     
-    # Get base damage
+    # Get base damage and effect info
     base_damage = ability.get("damage", 0)
+    effect_type = ability.get("effect", None)
+    # Get duration from the ability itself if not provided
+    duration = ability.get("duration", duration)
     
     if "area_damage" in ability:
         # Handle area damage abilities
@@ -1047,16 +1050,16 @@ def process_ability(player, target, enemies, ability_name, duration=0):
         total_damage += main_damage
         print(f"Main target {target.name} takes {main_damage} damage!")
         
-        # Apply status effect to main target if ability has effect
-        if "effect" in ability and duration > 0:
-            apply_status_effect(target, ability["effect"], base_damage, duration)
+        # Apply effect to main target
+        if effect_type:
+            apply_status_effect(target, effect_type, base_damage, duration)
         
         # Deal area damage to other living enemies
         for other in [e for e in enemies if e.health > 0 and e != target]:
             other.health -= area_damage
             total_damage += area_damage
             print(f"{other.name} takes {area_damage} area damage!")
-    
+            
     elif "hits" in ability:
         # Handle multi-hit abilities
         remaining_hits = ability["hits"]
@@ -1074,32 +1077,21 @@ def process_ability(player, target, enemies, ability_name, duration=0):
             total_damage += hit_damage
             print(f"Hit {ability['hits'] - remaining_hits + 1}: {hit_damage} damage to {current_target.name}!")
             
-            # Apply duration effect for each hit
-            if duration > 0:
-                effect_damage = int(hit_damage * 0.3)
-                current_target.status_effects.append({
-                    "name": "Damage Over Time",
-                    "damage": effect_damage,
-                    "duration": duration
-                })
-                print(f"{current_target.name} will take {effect_damage} damage for {duration} turns!")
-            
-            if current_target.health <= 0:
-                print(f"{current_target.name} has been defeated!")
-                living_enemies = [e for e in enemies if e.health > 0]
-                current_target = living_enemies[0] if living_enemies else None
+            # Apply effect on final hit
+            if effect_type and remaining_hits == 1:
+                apply_status_effect(current_target, effect_type, base_damage, duration)
             
             remaining_hits -= 1
-    
+            
     else:
         # Handle single target abilities
         target.health -= base_damage
         total_damage = base_damage
         print(f"{target.name} takes {base_damage} damage!")
         
-        # Apply status effect if ability has one
-        if "effect" in ability and duration > 0:
-            apply_status_effect(target, ability["effect"], base_damage, duration)
+        # Apply effect for single target abilities
+        if effect_type:
+            apply_status_effect(target, effect_type, base_damage, duration)
     
     return total_damage
 
