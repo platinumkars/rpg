@@ -400,6 +400,7 @@ class Enemy:
         self.status_effects = []
         self.abilities = {}
         self.is_boss = False
+        self.tech_points = int(level * 1.5)  # Tech points based on enemy level
         
     def is_alive(self):
         """Check if enemy is still alive"""
