@@ -481,31 +481,33 @@ def combat(player, enemies):
 
         # Process player turn
         if choice == "1":  # Basic attack
-            damage = process_attack(player, target)
-            target.health -= damage
-            print(f"You deal {damage} damage to {target.name}!")
+            if target:
+                process_attack(player, target, enemies)
+            else:
+                print("No valid target!")
+                continue
             
         elif choice == "2":  # Use ability
-            show_abilities(player)
-            ability_name = input("Choose ability (or 'back'): ")
-            if ability_name.lower() == 'back':
+            abilities_list = show_abilities(player)
+            ability_choice = input("Choose ability number (or 'back'): ")
+            
+            if ability_choice.lower() == 'back':
                 continue
-                
-            if ability_name in player.abilities:
-                ability = player.abilities[ability_name]
-                if player.mana >= ability["mana_cost"]:
-                    process_ability(player, target, ability_name)
-                    if "area_damage" in ability:
-                        # Apply area damage to other enemies
-                        for other in enemies:
-                            if other != target and other.health > 0:
-                                other.health -= ability["area_damage"]
-                                print(f"{other.name} takes {ability['area_damage']} splash damage!")
+            
+            try:
+                ability_idx = int(ability_choice) - 1
+                if 0 <= ability_idx < len(abilities_list):
+                    ability_name, ability = abilities_list[ability_idx]
+                    if player.mana >= ability["mana_cost"]:
+                        process_ability(player, target, ability_name)
+                    else:
+                        print("Not enough mana!")
+                        continue
                 else:
-                    print("Not enough mana!")
+                    print("Invalid ability number!")
                     continue
-            else:
-                print("Invalid ability!")
+            except ValueError:
+                print("Invalid input!")
                 continue
 
         elif choice == "3":
@@ -721,7 +723,33 @@ def shop(player):
         # Armor remains the same
         "Leather Armor": {"cost": 50, "defense": 6, "min_level": 1},
         "Chain Mail": {"cost": 120, "defense": 12, "min_level": 3},
-        "Plate Armor": {"cost": 250, "defense": 20, "min_level": 5}
+        "Plate Armor": {"cost": 250, "defense": 20, "min_level": 5},
+
+        # Multi-hit weapons
+        "Twin Daggers": {
+            "cost": 160,
+            "damage": 8,
+            "hits": 2,
+            "type": "melee",
+            "min_level": 3,
+            "description": "Strike twice per attack"
+        },
+        "Triple Crossbow": {
+            "cost": 180,
+            "damage": 7,
+            "hits": 3,
+            "type": "ranged",
+            "min_level": 3,
+            "description": "Fire three bolts per attack"
+        },
+        "Flurry Blade": {
+            "cost": 350,
+            "damage": 12,
+            "hits": 4,
+            "type": "melee",
+            "min_level": 5,
+            "description": "Fast blade dealing multiple hits"
+        }
     }
     
     while True:
@@ -833,31 +861,64 @@ def gadget_shop(player):
             print("Invalid gadget or already owned!")
 
 def show_abilities(player):
-    """Display available abilities and their descriptions"""
+    """Display available abilities with numbers"""
     print("\nAvailable Abilities:")
-    for ability, details in player.abilities.items():
-        print(f"{ability}: {details['description']} (Mana cost: {details['mana_cost']})")
+    abilities_list = list(player.abilities.items())
+    for i, (ability, details) in enumerate(abilities_list, 1):
+        desc = details['description']
+        mana = details['mana_cost']
+        print(f"{i}. {ability} - {desc} (Mana: {mana})")
+    return abilities_list
 
-def process_attack(player, enemy):
-    """Updated attack damage calculation with area damage"""
-    weapon = player.current_weapon
-    base_damage = player.weapons[weapon]
-    level_bonus = int(player.level * 1.5)
-    variation = random.randint(-2, 2)
+def process_attack(player, target, enemies):
+    """Process attack with multi-hit and area damage"""
+    weapon_stats = player.weapons[player.current_weapon]
+    total_damage = 0
     
-    # Check if weapon has area damage
-    if isinstance(base_damage, dict):
-        main_damage = base_damage["damage"]
-        area_damage = base_damage.get("area_damage", 0)
+    if isinstance(weapon_stats, dict):
+        base_damage = weapon_stats["damage"]
+        level_bonus = int(player.level * 1.5)
         
-        # Calculate final damages
-        final_damage = max(1, main_damage + level_bonus + variation)
-        final_area = max(1, area_damage + int(level_bonus * 0.5))
+        # Handle multi-hit weapons
+        if "hits" in weapon_stats:
+            for hit in range(weapon_stats["hits"]):
+                variation = random.randint(-2, 2)
+                hit_damage = max(1, base_damage + level_bonus + variation)
+                target.health -= hit_damage
+                total_damage += hit_damage
+                print(f"Hit {hit + 1}: {hit_damage} damage!")
+                
+                # Check if target died and switch to next enemy
+                if target.health <= 0:
+                    print(f"{target.name} has been defeated!")
+                    living_enemies = [e for e in enemies if e.health > 0]
+                    if living_enemies and hit < weapon_stats["hits"] - 1:
+                        target = living_enemies[0]
+                        print(f"Attacking next target: {target.name}")
+                    else:
+                        break
+            
+            print(f"Total damage: {total_damage}")
+        else:
+            # Single hit processing
+            variation = random.randint(-2, 2)
+            main_damage = max(1, base_damage + level_bonus + variation)
+            target.health -= main_damage
+            total_damage += main_damage
+            print(f"You deal {main_damage} damage to {target.name}!")
         
-        return {"damage": final_damage, "area_damage": final_area}
-    else:
-        # Regular weapon damage
-        return max(1, base_damage + level_bonus + variation)
+        # Process area damage
+        if "area_damage" in weapon_stats:
+            area_damage = weapon_stats["area_damage"]
+            level_bonus = int(player.level * 0.75)
+            for other in enemies:
+                if other != target and other.health > 0:
+                    splash_damage = max(1, area_damage + level_bonus)
+                    other.health -= splash_damage
+                    total_damage += splash_damage
+                    print(f"{other.name} takes {splash_damage} splash damage!")
+    
+    return total_damage
 
 def process_enemy_attack(player, enemy):
     """More balanced enemy damage calculation"""
