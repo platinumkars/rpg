@@ -1055,6 +1055,7 @@ def process_ability(player, target, enemies, ability_name):
         # Handle multi-hit abilities
         remaining_hits = ability["hits"]
         base_damage = ability["damage"]
+        duration = ability.get("duration", 0)  # Get duration if it exists
         
         while remaining_hits > 0 and living_enemies:
             if current_target not in living_enemies:
@@ -1067,6 +1068,16 @@ def process_ability(player, target, enemies, ability_name):
             current_target.health -= hit_damage
             total_damage += hit_damage
             print(f"Hit {ability['hits'] - remaining_hits + 1}: {hit_damage} damage to {current_target.name}!")
+            
+            # Apply duration effects if they exist
+            if duration > 0:
+                effect_damage = int(hit_damage * 0.3)  # 30% of hit damage as duration damage
+                current_target.status_effects.append({
+                    "name": "Damage Over Time",
+                    "damage": effect_damage,
+                    "duration": duration
+                })
+                print(f"{current_target.name} will take {effect_damage} damage for {duration} turns!")
             
             # Check if target died and update living enemies
             if current_target.health <= 0:
