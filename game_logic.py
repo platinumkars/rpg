@@ -532,16 +532,21 @@ def combat(player, enemies):
                 print("Invalid item or not enough potions!")
                 continue
                 
-        elif choice == "4":
+        elif choice == "4":  # Use Gadget
             if player.gadgets:
-                gadget_list = show_gadgets(player)
+                print("\nAvailable Gadgets:")
+                gadget_list = []
+                for name, gadget in player.gadgets.items():
+                    if gadget.charges > 0:
+                        gadget_list.append((name, gadget))
+                        print(f"{len(gadget_list)}. {name} ({gadget.charges} charges)")
+                
                 if gadget_list:
-                    gadget_choice = input("Choose gadget number (or 'back'): ")
-                    
-                    if gadget_choice.lower() == 'back':
-                        continue
-                        
                     try:
+                        gadget_choice = input("Choose gadget number (or 'back'): ")
+                        if gadget_choice.lower() == 'back':
+                            continue
+                            
                         gadget_idx = int(gadget_choice) - 1
                         if 0 <= gadget_idx < len(gadget_list):
                             name, gadget = gadget_list[gadget_idx]
