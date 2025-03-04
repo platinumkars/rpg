@@ -498,10 +498,16 @@ def combat(player, enemies):
                 if 0 <= ability_idx < len(abilities_list):
                     ability_name, ability = abilities_list[ability_idx]
                     if player.mana >= ability["mana_cost"]:
-                        if "area_damage" in ability or "hits" in ability:
-                            process_ability(player, target, enemies, ability_name)
+                        # Get target before using ability
+                        target = get_target(enemies, auto_target)
+                        if target:
+                            if "area_damage" in ability or "hits" in ability:
+                                process_ability(player, target, enemies, ability_name)
+                            else:
+                                process_ability(player, target, [target], ability_name)
                         else:
-                            process_ability(player, target, [target], ability_name)
+                            print("Invalid target!")
+                            continue
                     else:
                         print("Not enough mana!")
                         continue
