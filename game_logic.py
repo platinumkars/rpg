@@ -1226,6 +1226,65 @@ spawn_table = [
     (EnemyType("Giant", 120, 28, 120, 120, 5), 5, 5)
 ]
 
+def currency_exchange(player):
+    """Exchange gold for tech points and vice versa"""
+    GOLD_TO_TP_RATE = 100  # 100 gold = 1 tech point
+    TP_TO_GOLD_RATE = 75   # 1 tech point = 75 gold (loss on conversion to prevent abuse)
+    
+    while True:
+        print("\n=== Currency Exchange ===")
+        print(f"Gold: {player.gold}")
+        print(f"Tech Points: {player.tech_points}")
+        print(f"\nExchange Rates:")
+        print(f"• {GOLD_TO_TP_RATE} Gold -> 1 Tech Point")
+        print(f"• 1 Tech Point -> {TP_TO_GOLD_RATE} Gold")
+        print("\nOptions:")
+        print("1. Convert Gold to Tech Points")
+        print("2. Convert Tech Points to Gold")
+        print("3. Back")
+        
+        choice = input("> ")
+        
+        if choice == "1":
+            max_conversion = player.gold // GOLD_TO_TP_RATE
+            if max_conversion < 1:
+                print(f"Not enough gold! You need at least {GOLD_TO_TP_RATE} gold.")
+                continue
+                
+            print(f"\nYou can convert up to {max_conversion} tech points")
+            try:
+                amount = int(input("How many tech points to buy? (0 to cancel): "))
+                if 0 < amount <= max_conversion:
+                    gold_cost = amount * GOLD_TO_TP_RATE
+                    player.gold -= gold_cost
+                    player.tech_points += amount
+                    print(f"Converted {gold_cost} gold to {amount} tech points!")
+                elif amount != 0:
+                    print("Invalid amount!")
+            except ValueError:
+                print("Invalid input!")
+                
+        elif choice == "2":
+            if player.tech_points < 1:
+                print("Not enough tech points!")
+                continue
+                
+            print(f"\nYou can convert up to {player.tech_points} tech points")
+            try:
+                amount = int(input("How many tech points to convert? (0 to cancel): "))
+                if 0 < amount <= player.tech_points:
+                    gold_gain = amount * TP_TO_GOLD_RATE
+                    player.tech_points -= amount
+                    player.gold += gold_gain
+                    print(f"Converted {amount} tech points to {gold_gain} gold!")
+                elif amount != 0:
+                    print("Invalid amount!")
+            except ValueError:
+                print("Invalid input!")
+                
+        elif choice == "3":
+            break
+
 def main():
     print("Welcome to the Text RPG!")
     print("\nChoose your class:")
@@ -1272,7 +1331,8 @@ def main():
         print("4. Rest (Heal 50% HP/MP for 15 gold)")
         print("5. Show abilities")
         print("6. Visit gadget shop")
-        print("7. Quit")
+        print("7. Currency exchange")
+        print("8. Quit")
         
         choice = input("> ")
         
@@ -1344,8 +1404,11 @@ def main():
         
         elif choice == "6":
             gadget_shop(player)
-            
+        
         elif choice == "7":
+            currency_exchange(player)
+            
+        elif choice == "8":
             confirm = input("Are you sure you want to quit? (y/n): ").lower()
             if confirm == 'y':
                 print("Thanks for playing!")
