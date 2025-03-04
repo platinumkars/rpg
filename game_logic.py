@@ -390,7 +390,6 @@ class Enemy:
     def __init__(self, name, health, damage, exp_reward, gold_reward, level=1):
         self.name = name
         self.level = level
-        # Scale stats based on level
         level_multiplier = 1 + (level - 1) * 0.2
         self.health = int(health * level_multiplier)
         self.max_health = self.health
@@ -400,8 +399,7 @@ class Enemy:
         self.status_effects = []
         self.abilities = {}
         self.is_boss = False
-        self.tech_points = int(level * 1.5)  # Tech points based on enemy level
-        
+
     def is_alive(self):
         """Check if enemy is still alive"""
         return self.health > 0
