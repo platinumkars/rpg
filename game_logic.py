@@ -874,49 +874,67 @@ def process_attack(player, target, enemies):
     """Process attack with multi-hit and area damage"""
     weapon_stats = player.weapons[player.current_weapon]
     total_damage = 0
+    living_enemies = [e for e in enemies if e.health > 0]
+    current_target = target
     
+    # Calculate base damage
     if isinstance(weapon_stats, dict):
         base_damage = weapon_stats["damage"]
         level_bonus = int(player.level * 1.5)
         
         # Handle multi-hit weapons
         if "hits" in weapon_stats:
-            for hit in range(weapon_stats["hits"]):
+            hits = weapon_stats["hits"]
+            
+            for hit in range(hits):
+                if not living_enemies:  # Stop if no more targets
+                    break
+                
+                # Find current target in living enemies
+                if current_target not in living_enemies:
+                    current_target = living_enemies[0] if living_enemies else None
+                    if not current_target:  # No more living targets
+                        break
+                
                 variation = random.randint(-2, 2)
                 hit_damage = max(1, base_damage + level_bonus + variation)
-                target.health -= hit_damage
-                total_damage += hit_damage
-                print(f"Hit {hit + 1}: {hit_damage} damage!")
                 
-                # Check if target died and switch to next enemy
-                if target.health <= 0:
-                    print(f"{target.name} has been defeated!")
+                current_target.health -= hit_damage
+                total_damage += hit_damage
+                print(f"Hit {hit + 1}: {hit_damage} damage to {current_target.name}!")
+                
+                # Check if current target died
+                if current_target.health <= 0:
+                    print(f"{current_target.name} has been defeated!")
                     living_enemies = [e for e in enemies if e.health > 0]
-                    if living_enemies and hit < weapon_stats["hits"] - 1:
-                        target = living_enemies[0]
-                        print(f"Attacking next target: {target.name}")
-                    else:
-                        break
+                    current_target = living_enemies[0] if living_enemies else None
             
-            print(f"Total damage: {total_damage}")
+            if total_damage > 0:
+                print(f"Total damage dealt: {total_damage}")
+            
         else:
             # Single hit processing
             variation = random.randint(-2, 2)
             main_damage = max(1, base_damage + level_bonus + variation)
             target.health -= main_damage
-            total_damage += main_damage
+            total_damage = main_damage
             print(f"You deal {main_damage} damage to {target.name}!")
-        
+            
         # Process area damage
-        if "area_damage" in weapon_stats:
-            area_damage = weapon_stats["area_damage"]
-            level_bonus = int(player.level * 0.75)
-            for other in enemies:
+        if "area_damage" in weapon_stats and living_enemies:
+            for other in living_enemies:
                 if other != target and other.health > 0:
-                    splash_damage = max(1, area_damage + level_bonus)
+                    splash_damage = max(1, weapon_stats["area_damage"] + int(level_bonus * 0.5))
                     other.health -= splash_damage
                     total_damage += splash_damage
                     print(f"{other.name} takes {splash_damage} splash damage!")
+    else:
+        # Simple weapon damage
+        variation = random.randint(-2, 2)
+        main_damage = max(1, weapon_stats + int(player.level * 1.5) + variation)
+        target.health -= main_damage
+        total_damage = main_damage
+        print(f"You deal {main_damage} damage to {target.name}!")
     
     return total_damage
 
