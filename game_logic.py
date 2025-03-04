@@ -33,7 +33,7 @@ class Character:
         self.max_mana = 50
         self.level = 1
         self.exp = 0
-        self.gold = 50
+        self.gold = 100  # Increased starting gold
         self.inventory = {"Health Potion": 2, "Mana Potion": 2}
         self.weapons = {"Basic Sword": 8}
         self.current_weapon = "Basic Sword"
@@ -574,6 +574,9 @@ def combat(player, enemies):
         print("Victory!")
         total_exp = sum(enemy.exp_reward for enemy in enemies if enemy.health <= 0)
         total_gold = sum(enemy.gold_reward for enemy in enemies if enemy.health <= 0)
+        player.exp += total_exp
+        player.gold += total_gold  # Add gold to player's total
+        print(f"Gained {total_exp} EXP and {total_gold} gold!")
         
         # Store old level for comparison
         old_level = player.level
@@ -654,14 +657,14 @@ def calculate_level_rewards(level):
 # Update shop function's item handling
 def shop(player):
     items = {
-        # Basic items (always available)
-        "Health Potion": {"cost": 20, "effect": "Restore 35 HP", "min_level": 1},
-        "Mana Potion": {"cost": 25, "effect": "Restore 30 MP", "min_level": 1},
+        # Basic items (adjusted prices)
+        "Health Potion": {"cost": 15, "effect": "Restore 35 HP", "min_level": 1},
+        "Mana Potion": {"cost": 15, "effect": "Restore 30 MP", "min_level": 1},
         
         # Melee Weapons
         # Tier 1
-        "Iron Sword": {"cost": 60, "damage": 10, "type": "melee", "min_level": 1},
-        "Bronze Axe": {"cost": 65, "damage": 12, "type": "melee", "min_level": 1},
+        "Iron Sword": {"cost": 45, "damage": 10, "type": "melee", "min_level": 1},
+        "Bronze Axe": {"cost": 50, "damage": 12, "type": "melee", "min_level": 1},
         
         # Tier 2
         "Steel Sword": {"cost": 140, "damage": 16, "type": "melee", "min_level": 3},
@@ -688,8 +691,8 @@ def shop(player):
 
         # Ranged Weapons
         # Tier 1
-        "Wooden Bow": {"cost": 55, "damage": 8, "type": "ranged", "min_level": 1},
-        "Wooden Staff": {"cost": 55, "damage": 8, "mana_bonus": 12, "type": "ranged", "min_level": 1},
+        "Wooden Bow": {"cost": 40, "damage": 8, "type": "ranged", "min_level": 1},
+        "Wooden Staff": {"cost": 45, "damage": 8, "mana_bonus": 12, "type": "ranged", "min_level": 1},
         
         # Tier 2
         "Longbow": {"cost": 145, "damage": 15, "type": "ranged", "min_level": 3},
@@ -716,9 +719,9 @@ def shop(player):
         },
         
         # Armor remains the same
-        "Leather Armor": {"cost": 70, "defense": 6, "min_level": 1},
-        "Chain Mail": {"cost": 170, "defense": 12, "min_level": 3},
-        "Plate Armor": {"cost": 300, "defense": 20, "min_level": 5}
+        "Leather Armor": {"cost": 50, "defense": 6, "min_level": 1},
+        "Chain Mail": {"cost": 120, "defense": 12, "min_level": 3},
+        "Plate Armor": {"cost": 250, "defense": 20, "min_level": 5}
     }
     
     while True:
@@ -741,23 +744,36 @@ def shop(player):
             break
         
         if choice in items:
-            if player.gold >= items[choice]["cost"]:
-                player.gold -= items[choice]["cost"]
-                if "damage" in items[choice]:
-                    if "area_damage" in items[choice]:
-                        player.weapons[choice] = {
-                            "damage": items[choice]["damage"],
-                            "area_damage": items[choice]["area_damage"]
-                        }
+            if player.level >= items[choice]["min_level"]:  # Check level requirement
+                if player.gold >= items[choice]["cost"]:
+                    # Store old gold for verification
+                    old_gold = player.gold
+                    player.gold -= items[choice]["cost"]
+                    
+                    # Verify transaction
+                    if player.gold >= 0:
+                        if "damage" in items[choice]:
+                            if "area_damage" in items[choice]:
+                                player.weapons[choice] = {
+                                    "damage": items[choice]["damage"],
+                                    "area_damage": items[choice]["area_damage"],
+                                    "type": items[choice]["type"]
+                                }
+                            else:
+                                player.weapons[choice] = items[choice]
+                        elif "defense" in items[choice]:
+                            player.armor[choice] = items[choice]["defense"]
+                        else:
+                            player.inventory[choice] = player.inventory.get(choice, 0) + 1
+                        print(f"Bought {choice}!")
+                        print(f"Remaining gold: {player.gold}")
                     else:
-                        player.weapons[choice] = items[choice]["damage"]
-                elif "defense" in items[choice]:
-                    player.armor[choice] = items[choice]["defense"]
+                        player.gold = old_gold  # Revert if something went wrong
+                        print("Transaction failed!")
                 else:
-                    player.inventory[choice] = player.inventory.get(choice, 0) + 1
-                print(f"Bought {choice}!")
+                    print("Not enough gold!")
             else:
-                print("Not enough gold!")
+                print(f"Required level: {items[choice]['min_level']}")
         else:
             print("Invalid item!")
 
@@ -984,9 +1000,6 @@ def process_status_effects(entity):
         elif effect["name"] == "Regeneration":
             heal = effect["heal"]
             entity.health = min(entity.max_health, entity.health + heal)
-            print(f"{entity.name} regenerates {heal} health!")
-        elif effect["name"] == "Stunned":
-            is_stunned = True
             print(f"{entity.name} is stunned and skips their turn!")
             
         effect["duration"] -= 1
@@ -1093,14 +1106,14 @@ class EnemyType:
 
 # Define spawn table with enemy types and their spawn chances
 spawn_table = [
-    # Level 1 enemies
-    (EnemyType("Goblin", 30, 8, 20, 15, 1), 20, 1),        # (enemy_type, spawn_chance, min_level)
-    (EnemyType("Wolf", 35, 10, 25, 20, 1), 20, 1),
-    (EnemyType("Slime", 25, 6, 15, 10, 1), 15, 1),
+    # Level 1 enemies (increased rewards)
+    (EnemyType("Goblin", 30, 8, 20, 25, 1), 20, 1),    # Increased from 15 to 25 gold
+    (EnemyType("Wolf", 35, 10, 25, 30, 1), 20, 1),     # Increased from 20 to 30 gold
+    (EnemyType("Slime", 25, 6, 15, 20, 1), 15, 1),     # Increased from 10 to 20 gold
     
     # Level 2 enemies
-    (EnemyType("Bandit", 45, 12, 35, 30, 2), 15, 2),
-    (EnemyType("Skeleton", 40, 13, 30, 25, 2), 15, 2),
+    (EnemyType("Bandit", 45, 12, 35, 45, 2), 15, 2),
+    (EnemyType("Skeleton", 40, 13, 30, 40, 2), 15, 2),
     (EnemyType("Giant Spider", 38, 14, 32, 28, 2), 15, 2),
     
     # Level 3 enemies
@@ -1162,7 +1175,7 @@ def main():
         print("1. Fight monsters")
         print("2. Visit shop")
         print("3. Check inventory")
-        print("4. Rest (Heal 50% HP/MP for 20 gold)")
+        print("4. Rest (Heal 50% HP/MP for 15 gold)")
         print("5. Show abilities")
         print("6. Visit gadget shop")
         print("7. Quit")
@@ -1221,12 +1234,13 @@ def main():
             show_inventory_menu(player)
             
         elif choice == "4":
-            if player.gold >= 20:
+            rest_cost = 15  # Reduced from 20
+            if player.gold >= rest_cost:
                 heal_amount = player.max_health // 2
                 mana_amount = player.max_mana // 2
                 player.health = min(player.max_health, player.health + heal_amount)
                 player.mana = min(player.max_mana, player.mana + mana_amount)
-                player.gold -= 20
+                player.gold -= rest_cost
                 print(f"Rested and recovered {heal_amount} HP and {mana_amount} MP!")
             else:
                 print("Not enough gold to rest!")
