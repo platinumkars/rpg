@@ -608,7 +608,7 @@ def combat(player, enemies):
         
         # Add experience
         player.exp += total_exp
-        print(f"Gained {total_exp} EXP and {total_gold} gold!")
+        print(f"Gained {total_exp} EXP, {total_gold} gold and {total_tp} Tech Points!")
         
         # Check for level up
         while player.exp >= calculate_exp_requirement(player.level):
