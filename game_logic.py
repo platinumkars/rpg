@@ -587,9 +587,15 @@ def combat(player, enemies):
         print("Victory!")
         total_exp = sum(enemy.exp_reward for enemy in enemies if enemy.health <= 0)
         total_gold = sum(enemy.gold_reward for enemy in enemies if enemy.health <= 0)
+        total_tp = sum(1 for enemy in enemies if enemy.health <= 0 and enemy.level >= 3)  # Tech points from higher level enemies
+        
         player.exp += total_exp
-        player.gold += total_gold  # Add gold to player's total
+        player.gold += total_gold
+        player.tech_points += total_tp
+        
         print(f"Gained {total_exp} EXP and {total_gold} gold!")
+        if total_tp > 0:
+            print(f"Gained {total_tp} Tech Points!")
         
         # Store old level for comparison
         old_level = player.level
