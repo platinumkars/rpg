@@ -1026,7 +1026,7 @@ def process_enemy_attack(player, enemy):
     final_damage = max(1, base_damage - defense_reduction)
     return final_damage
 
-def process_ability(player, target, enemies, ability_name):
+def process_ability(player, target, enemies, ability_name,duration):
     """Process ability with multi-target support"""
     ability = player.abilities[ability_name]
     player.mana -= ability["mana_cost"]
@@ -1034,7 +1034,6 @@ def process_ability(player, target, enemies, ability_name):
     
     # Get base damage and duration if they exist
     base_damage = ability.get("damage", 0)
-    duration = ability.get("duration", 0)
     
     if "area_damage" in ability:
         # Handle area damage abilities
