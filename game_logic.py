@@ -379,7 +379,7 @@ class Gadget:
         }
         return charges.get(self.rarity, 1)
 
-    def use(self, player, enemy):
+    def use(self):
         if self.charges > 0:
             self.charges -= 1
             return True
