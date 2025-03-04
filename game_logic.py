@@ -488,11 +488,8 @@ def combat(player, enemies):
             
         elif choice == "2":  # Use ability
             abilities_list = show_abilities(player)
-            if not abilities_list:
-                print("No abilities available!")
-                continue
-                
             ability_choice = input("Choose ability number (or 'back'): ")
+            
             if ability_choice.lower() == 'back':
                 continue
             
@@ -501,15 +498,11 @@ def combat(player, enemies):
                 if 0 <= ability_idx < len(abilities_list):
                     ability_name, ability = abilities_list[ability_idx]
                     if player.mana >= ability["mana_cost"]:
-                        # Get target before using ability
                         target = get_target(enemies, auto_target)
                         if target:
-                            if "area_damage" in ability or "hits" in ability:
-                                process_ability(player, target, enemies, ability_name)
-                            else:
-                                process_ability(player, target, [target], ability_name)
+                            process_ability(player, target, enemies, ability_name)
                         else:
-                            print("Invalid target!")
+                            print("No valid target!")
                             continue
                     else:
                         print("Not enough mana!")
@@ -1058,7 +1051,7 @@ def process_ability(player, target, enemies, ability_name):
                 total_damage += area_damage
                 print(f"{other.name} takes {area_damage} area damage!")
     
-    if "hits" in ability:
+    elif "hits" in ability:
         # Handle multi-hit abilities
         remaining_hits = ability["hits"]
         base_damage = ability["damage"]
@@ -1086,11 +1079,28 @@ def process_ability(player, target, enemies, ability_name):
         if total_damage > 0:
             print(f"Total multi-hit damage: {total_damage}")
     
+    else:
+        # Handle single target abilities
+        base_damage = ability["damage"]
+        current_target.health -= base_damage
+        total_damage = base_damage
+        print(f"{current_target.name} takes {base_damage} damage!")
+    
     # Process status effects
     if "effect" in ability:
-        # ... existing status effect code ...
-
-        return total_damage
+        effect = ability["effect"]
+        duration = ability.get("duration", 0)
+        if effect == "burn":
+            current_target.status_effects.append({"name": "Burned", "damage": base_damage // 2, "duration": duration})
+            print(f"{current_target.name} is burned for {duration} turns!")
+        elif effect == "freeze":
+            current_target.status_effects.append({"name": "Frozen", "damage": base_damage // 2, "duration": duration, "damage_reduction": 0.5})
+            print(f"{current_target.name} is frozen for {duration} turns!")
+        elif effect == "stun":
+            current_target.status_effects.append({"name": "Stunned", "duration": duration})
+            print(f"{current_target.name} is stunned for {duration} turns!")
+    
+    return total_damage
 
 def process_status_effects(entity):
     """Process status effects at the start of turn"""
