@@ -589,7 +589,7 @@ def combat(player, enemies):
         total_exp = sum(e.exp_reward for e in defeated_enemies)
         total_gold = sum(e.gold_reward for e in defeated_enemies)
         # Calculate tech points based on enemy level
-        total_tp = sum(max(1, int(e.level * 0.5)) for e in defeated_enemies if e.level >= 3)
+        total_tp = sum(player.level * 25 for e in defeated_enemies)
         
         # Apply rewards once
         player.exp += total_exp
