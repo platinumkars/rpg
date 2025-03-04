@@ -658,53 +658,67 @@ def shop(player):
         "Health Potion": {"cost": 20, "effect": "Restore 35 HP", "min_level": 1},
         "Mana Potion": {"cost": 25, "effect": "Restore 30 MP", "min_level": 1},
         
-        # Tier 1 Equipment (level 1-2)
-        "Iron Sword": {"cost": 60, "damage": 10, "min_level": 1},
-        "Wooden Staff": {"cost": 55, "damage": 8, "mana_bonus": 12, "min_level": 1},
-        "Leather Armor": {"cost": 70, "defense": 6, "min_level": 1},
+        # Melee Weapons
+        # Tier 1
+        "Iron Sword": {"cost": 60, "damage": 10, "type": "melee", "min_level": 1},
+        "Bronze Axe": {"cost": 65, "damage": 12, "type": "melee", "min_level": 1},
         
-        # Tier 2 Equipment (level 3-4)
-        "Steel Sword": {"cost": 140, "damage": 16, "min_level": 3},
-        "Magic Staff": {"cost": 160, "damage": 14, "mana_bonus": 20, "min_level": 3},
-        "Chain Mail": {"cost": 170, "defense": 12, "min_level": 3},
-        
-        # Tier 3 Equipment (level 5+)
-        "Flame Sword": {"cost": 280, "damage": 28, "min_level": 5},
-        "Frost Staff": {"cost": 290, "damage": 25, "mana_bonus": 35, "min_level": 5},
-        "Plate Armor": {"cost": 300, "defense": 20, "min_level": 5},
-
-        # Area damage weapons (level 3+)
+        # Tier 2
+        "Steel Sword": {"cost": 140, "damage": 16, "type": "melee", "min_level": 3},
+        "Battle Axe": {"cost": 150, "damage": 18, "type": "melee", "min_level": 3},
         "War Hammer": {
             "cost": 200, 
             "damage": 14, 
             "area_damage": 8, 
+            "type": "melee",
             "min_level": 3,
             "description": "Heavy weapon that deals area damage"
         },
-        "Thundering Bow": {
-            "cost": 220, 
-            "damage": 12, 
-            "area_damage": 10, 
-            "min_level": 3,
-            "description": "Bow that creates lightning area damage"
-        },
-
-        # High-tier area weapons (level 5+)
+        
+        # Tier 3
+        "Flame Sword": {"cost": 280, "damage": 28, "type": "melee", "min_level": 5},
         "Dragon Cleaver": {
             "cost": 400, 
             "damage": 25, 
             "area_damage": 15, 
+            "type": "melee",
             "min_level": 5,
             "description": "Massive sword with wide cleaving damage"
         },
+
+        # Ranged Weapons
+        # Tier 1
+        "Wooden Bow": {"cost": 55, "damage": 8, "type": "ranged", "min_level": 1},
+        "Wooden Staff": {"cost": 55, "damage": 8, "mana_bonus": 12, "type": "ranged", "min_level": 1},
+        
+        # Tier 2
+        "Longbow": {"cost": 145, "damage": 15, "type": "ranged", "min_level": 3},
+        "Magic Staff": {"cost": 160, "damage": 14, "mana_bonus": 20, "type": "ranged", "min_level": 3},
+        "Thundering Bow": {
+            "cost": 220, 
+            "damage": 12, 
+            "area_damage": 10, 
+            "type": "ranged",
+            "min_level": 3,
+            "description": "Bow that creates lightning area damage"
+        },
+        
+        # Tier 3
+        "Frost Staff": {"cost": 290, "damage": 25, "mana_bonus": 35, "type": "ranged", "min_level": 5},
         "Storm Staff": {
             "cost": 450, 
             "damage": 22, 
-            "area_damage": 18,
+            "area_damage": 18, 
             "mana_bonus": 30,
+            "type": "ranged",
             "min_level": 5,
             "description": "Powerful staff that creates storm damage"
-        }
+        },
+        
+        # Armor remains the same
+        "Leather Armor": {"cost": 70, "defense": 6, "min_level": 1},
+        "Chain Mail": {"cost": 170, "defense": 12, "min_level": 3},
+        "Plate Armor": {"cost": 300, "defense": 20, "min_level": 5}
     }
     
     while True:
@@ -985,7 +999,6 @@ def process_status_effects(entity):
 
 # Update show_inventory_menu function
 def show_inventory_menu(player):
-    """Show inventory menu with weapon and armor switching options"""
     while True:
         print("\n=== Inventory Menu ===")
         print("1. View Items")
@@ -999,10 +1012,21 @@ def show_inventory_menu(player):
             print("\nInventory:")
             for item, quantity in player.inventory.items():
                 print(f"{item}: {quantity}")
-            print("\nWeapons:")
-            for weapon, damage in player.weapons.items():
-                print(f"{weapon} (Damage: {damage})")
-            print(f"Currently equipped weapon: {player.current_weapon}")
+            
+            print("\nMelee Weapons:")
+            for weapon, stats in player.weapons.items():
+                if isinstance(stats, dict) and stats.get("type") == "melee":
+                    print(f"{weapon} (Damage: {stats['damage']})")
+            
+            print("\nRanged Weapons:")
+            for weapon, stats in player.weapons.items():
+                if isinstance(stats, dict) and stats.get("type") == "ranged":
+                    desc = f"Damage: {stats['damage']}"
+                    if "mana_bonus" in stats:
+                        desc += f", Mana Bonus: {stats['mana_bonus']}"
+                    print(f"{weapon} ({desc})")
+            
+            print(f"\nCurrently equipped weapon: {player.current_weapon}")
             print("\nArmor:")
             for armor, defense in player.armor.items():
                 print(f"{armor} (Defense: {defense})")
