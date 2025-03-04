@@ -957,7 +957,14 @@ def process_attack(player, target, enemies):
     weapon_stats = player.weapons[player.current_weapon]
     total_damage = 0
     living_enemies = [e for e in enemies if e.health > 0]
-    current_target = target
+    current_target = target if target.health > 0 else None
+
+    if not living_enemies:
+        print("No valid targets remaining!")
+        return total_damage
+
+    if not current_target and living_enemies:
+        current_target = living_enemies[0]
     
     # Calculate base damage
     if isinstance(weapon_stats, dict):
@@ -967,16 +974,14 @@ def process_attack(player, target, enemies):
         # Handle multi-hit weapons
         if "hits" in weapon_stats:
             hits = weapon_stats["hits"]
+            enemy_index = living_enemies.index(current_target)
             
             for hit in range(hits):
                 if not living_enemies:  # Stop if no more targets
                     break
                 
-                # Find current target in living enemies
-                if current_target not in living_enemies:
-                    current_target = living_enemies[0] if living_enemies else None
-                    if not current_target:  # No more living targets
-                        break
+                # Get current target, cycle through living enemies
+                current_target = living_enemies[enemy_index % len(living_enemies)]
                 
                 variation = random.randint(-2, 2)
                 hit_damage = max(1, base_damage + level_bonus + variation)
@@ -989,10 +994,14 @@ def process_attack(player, target, enemies):
                 if current_target.health <= 0:
                     print(f"{current_target.name} has been defeated!")
                     living_enemies = [e for e in enemies if e.health > 0]
-                    current_target = living_enemies[0] if living_enemies else None
+                    if living_enemies:
+                        enemy_index = (enemy_index + 1) % len(living_enemies)
+                    else:
+                        break
+                else:
+                    enemy_index += 1
             
-            if total_damage > 0:
-                print(f"Total damage dealt: {total_damage}")
+            print(f"Total damage dealt: {total_damage}")
             
         else:
             # Single hit processing
