@@ -831,30 +831,63 @@ def shop(player):
 
 # Add Gadget Shop function
 def gadget_shop(player):
+    """Shop for tech gadgets with balanced effects"""
     gadgets = {
-        # Common gadgets
-        "Smoke Bomb": Gadget("Smoke Bomb", "common", 
-            {"effect": "flee", "chance": 0.8}, 50),
-        "Health Generator": Gadget("Health Generator", "common",
-            {"heal": 50}, 50),
+        # Common gadgets (50 TP)
+        "Smoke Bomb": Gadget("Smoke Bomb", "common", {
+            "flee": True,
+            "chance": 0.8,
+            "description": "80% chance to escape combat"
+        }, 50),
+        "Health Injector": Gadget("Health Injector", "common", {
+            "heal": 40,
+            "description": "Restore 40 HP instantly"
+        }, 50),
+        "Energy Cell": Gadget("Energy Cell", "common", {
+            "mana": 35,
+            "description": "Restore 35 MP instantly"
+        }, 50),
         
-        # Rare gadgets
-        "Lightning Rod": Gadget("Lightning Rod", "rare",
-            {"damage": 80, "stun": 1}, 100),
-        "Shield Generator": Gadget("Shield Generator", "rare",
-            {"defense": 30, "duration": 3}, 100),
-            
-        # Epic gadgets
-        "Time Distorter": Gadget("Time Distorter", "epic",
-            {"extra_turns": 1}, 200),
-        "Damage Amplifier": Gadget("Damage Amplifier", "epic",
-            {"damage_boost": 1.5, "duration": 2}, 200),
-            
-        # Legendary gadgets
-        "Ultimate Nullifier": Gadget("Ultimate Nullifier", "legendary",
-            {"damage": 200}, 500),
-        "Phoenix Protocol": Gadget("Phoenix Protocol", "legendary",
-            {"revive": True, "health_percent": 0.5}, 500)
+        # Rare gadgets (100 TP)
+        "Shock Generator": Gadget("Shock Generator", "rare", {
+            "damage": 60,
+            "stun": 1,
+            "description": "Deal 60 damage and stun for 1 turn"
+        }, 100),
+        "Force Field": Gadget("Force Field", "rare", {
+            "defense": 25,
+            "duration": 3,
+            "description": "+25 defense for 3 turns"
+        }, 100),
+        "Multi Targeter": Gadget("Multi Targeter", "rare", {
+            "damage": 30,
+            "targets": 3,
+            "description": "Hit 3 enemies for 30 damage each"
+        }, 100),
+        
+        # Epic gadgets (200 TP)
+        "Chrono Shifter": Gadget("Chrono Shifter", "epic", {
+            "extra_turn": True,
+            "heal": 30,
+            "description": "Take another turn and heal 30 HP"
+        }, 200),
+        "Power Amplifier": Gadget("Power Amplifier", "epic", {
+            "damage_boost": 1.5,
+            "duration": 2,
+            "description": "Increase damage by 50% for 2 turns"
+        }, 200),
+        
+        # Legendary gadgets (400 TP)
+        "Quantum Annihilator": Gadget("Quantum Annihilator", "legendary", {
+            "damage": 150,
+            "area_damage": 75,
+            "description": "Deal 150 damage + 75 area damage"
+        }, 400),
+        "Phoenix Core": Gadget("Phoenix Core", "legendary", {
+            "revive": True,
+            "health_percent": 0.5,
+            "description": "Revive with 50% HP when defeated"
+        }, 400)
     }
     
     while True:
