@@ -1055,7 +1055,7 @@ def process_ability(player, target, enemies, ability_name):
         # Handle multi-hit abilities
         remaining_hits = ability["hits"]
         base_damage = ability["damage"]
-        duration = ability.get("duration", 0)  # Get duration if it exists
+        duration = ability["duration"]  # Get duration if it exists
         
         while remaining_hits > 0 and living_enemies:
             if current_target not in living_enemies:
