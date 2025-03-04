@@ -583,29 +583,19 @@ def combat(player, enemies):
             return False
             
     # Combat victory
-    # In the combat victory section, update the rewards calculation:
-        if player.health > 0:
-            print("Victory!")
-            defeated_enemies = [e for e in enemies if e.health <= 0]
-            total_exp = sum(e.exp_reward for e in defeated_enemies)
-            total_gold = sum(e.gold_reward for e in defeated_enemies)
-            # Calculate tech points based on enemy level
-            total_tp = sum(max(1, int(e.level * 0.5)) for e in defeated_enemies if e.level >= 3)
-            
-            # Apply rewards once
-            player.exp += total_exp
-            player.gold += total_gold
-            player.tech_points += total_tp
-            
-            # Show rewards
-            print(f"\nRewards:")
-            print(f"• {total_exp} EXP")
-            print(f"• {total_gold} Gold")
-            if total_tp > 0:
-                print(f"• {total_tp} Tech Points")
-            
-            # Remove second exp addition that was causing double rewards
-            # player.exp += total_exp  # Remove this line
+    if player.health > 0:
+        print("Victory!")
+        total_exp = sum(enemy.exp_reward for enemy in enemies if enemy.health <= 0)
+        total_gold = sum(enemy.gold_reward for enemy in enemies if enemy.health <= 0)
+        total_tp = sum(1 for enemy in enemies if enemy.health <= 0 and enemy.level >= 3)  # Tech points from higher level enemies
+        
+        player.exp += total_exp
+        player.gold += total_gold
+        player.tech_points += total_tp
+        
+        print(f"Gained {total_exp} EXP and {total_gold} gold!")
+        if total_tp > 0:
+            print(f"Gained {total_tp} Tech Points!")
         
         # Store old level for comparison
         old_level = player.level
