@@ -1229,7 +1229,7 @@ spawn_table = [
 def currency_exchange(player):
     """Exchange gold for tech points and vice versa"""
     GOLD_TO_TP_RATE = 100  # 100 gold = 1 tech point
-    TP_TO_GOLD_RATE = 75   # 1 tech point = 75 gold (loss on conversion to prevent abuse)
+    TP_TO_GOLD_RATE = 100   # 1 tech point = 100 gold 
     
     while True:
         print("\n=== Currency Exchange ===")
@@ -1331,7 +1331,7 @@ def main():
         print("4. Rest (Heal 50% HP/MP for 15 gold)")
         print("5. Show abilities")
         print("6. Visit gadget shop")
-        print("7. Currency exchange")
+        print("7. Currency Exchange")  # New option
         print("8. Quit")
         
         choice = input("> ")
