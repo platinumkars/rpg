@@ -1100,7 +1100,7 @@ def process_ability(player, target, enemies, ability_name):
     # Process status effects
     if "effect" in ability:
         effect = ability["effect"]
-        duration = ability.get("duration", 0)
+        duration = ability["duration"]
         if effect == "burn":
             current_target.status_effects.append({"name": "Burned", "damage": base_damage // 2, "duration": duration})
             print(f"{current_target.name} is burned for {duration} turns!")
