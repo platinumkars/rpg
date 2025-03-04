@@ -500,7 +500,9 @@ def combat(player, enemies):
                     if player.mana >= ability["mana_cost"]:
                         target = get_target(enemies, auto_target)
                         if target:
-                            process_ability(player, target, enemies, ability_name)
+                            # Get duration from ability if it exists, otherwise default to 0
+                            duration = ability.get("duration", 0)
+                            process_ability(player, target, enemies, ability_name, duration)
                         else:
                             print("No valid target!")
                             continue
@@ -1026,13 +1028,13 @@ def process_enemy_attack(player, enemy):
     final_damage = max(1, base_damage - defense_reduction)
     return final_damage
 
-def process_ability(player, target, enemies, ability_name,duration):
+def process_ability(player, target, enemies, ability_name, duration=0):
     """Process ability with multi-target support"""
     ability = player.abilities[ability_name]
     player.mana -= ability["mana_cost"]
     total_damage = 0
     
-    # Get base damage and duration if they exist
+    # Get base damage
     base_damage = ability.get("damage", 0)
     
     if "area_damage" in ability:
