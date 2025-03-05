@@ -43,6 +43,7 @@ class Character:
         self.current_armor = "Basic Leather"
         self.tech_points = 0
         self.gadgets = {}
+        self.powers = {}  # Dictionary to store unlocked powers
         
         # Initialize base abilities based on class
         self.update_abilities()
@@ -368,6 +369,18 @@ class Character:
 
         self.abilities = base_abilities
 
+    def unlock_power(self, power_name):
+        """Unlock a new power if player has enough tech points"""
+        if power_name in AVAILABLE_POWERS and power_name not in self.powers:
+            power = AVAILABLE_POWERS[power_name]
+            if self.tech_points >= power.cost:
+                self.tech_points -= power.cost
+                self.powers[power_name] = power
+                print(f"Unlocked power: {power_name}!")
+                print(f"Effect: {power.description}")
+                return True
+        return False
+
 # Add Gadget class
 class Gadget:
     def __init__(self, name, rarity, effect, cost):
@@ -391,6 +404,42 @@ class Gadget:
             self.charges -= 1
             return True
         return False
+
+# Add Power class to define available powers
+class Power:
+    def __init__(self, name, effect, description, cost):
+        self.name = name
+        self.effect = effect
+        self.description = description
+        self.cost = cost  # Cost in tech points to unlock
+
+# Add available powers dictionary
+AVAILABLE_POWERS = {
+    "Life Link": Power(
+        "Life Link",
+        {"heal_percent": 0.15, "cooldown": 3},
+        "Heal 15% of damage dealt",
+        100
+    ),
+    "Critical Strike": Power(
+        "Critical Strike",
+        {"crit_chance": 0.2, "crit_multiplier": 2.0},
+        "20% chance to deal double damage",
+        150
+    ),
+    "Mana Shield": Power(
+        "Mana Shield",
+        {"damage_to_mana": 0.3, "threshold": 0.5},
+        "30% of damage taken uses mana instead when above 50% mana",
+        200
+    ),
+    "Battle Rage": Power(
+        "Battle Rage",
+        {"damage_boost": 0.25, "health_threshold": 0.3},
+        "Deal 25% more damage when below 30% health",
+        250
+    )
+}
 
 # Update Enemy class for better balance
 class Enemy:
@@ -939,6 +988,35 @@ def gadget_shop(player):
         else:
             print("Invalid gadget or already owned!")
 
+def power_shop(player):
+    """Shop for unlocking new powers"""
+    while True:
+        print("\n=== Power Shop ===")
+        print(f"Tech Points: {player.tech_points}")
+        print("\nAvailable Powers:")
+        
+        for name, power in AVAILABLE_POWERS.items():
+            if name not in player.powers:
+                print(f"\n{name} - {power.cost} TP")
+                print(f"Effect: {power.description}")
+        
+        print("\nEnter power name to unlock (or 'exit' to leave):")
+        choice = input("> ").title()
+        
+        if choice.lower() == "exit":
+            break
+            
+        if choice in AVAILABLE_POWERS:
+            if choice not in player.powers:
+                if player.unlock_power(choice):
+                    print(f"Successfully unlocked {choice}!")
+                else:
+                    print("Not enough Tech Points!")
+            else:
+                print("Power already unlocked!")
+        else:
+            print("Invalid power name!")
+
 def show_abilities(player):
     """Display available abilities with numbers"""
     print("\nAvailable Abilities:")
@@ -1414,12 +1492,12 @@ def main():
         print("3. Check inventory")
         print("4. Rest (Heal 50% HP/MP for 15 gold)")
         print("5. Show abilities")
-        print("6. Visit gadget shop")
-        print("7. Currency Exchange")  # New option
-        print("8. Quit")
+        print("6. Visit gadget shop") 
+        print("7. Currency Exchange")
+        print("8. Visit power shop")
+        print("9. Quit")
         
         choice = input("> ")
-        
         if choice == "1":
             enemies = []
             num_enemies = 1
@@ -1428,13 +1506,12 @@ def main():
             
             # Try to spawn enemies
             attempts = 0
-            max_attempts = 3  # Maximum number of spawn attempts
-            
+            max_attempts = 3
             while len(enemies) < num_enemies and attempts < max_attempts:
                 roll = random.uniform(0, 100)
                 cumulative = 0
                 enemy_found = False
-                
+                for enemy_type, chance, min_level in spawn_table:time.sleep(1)  # Add a small delay for readability
                 for enemy_type, chance, min_level in spawn_table:
                     if player.level >= min_level:
                         cumulative += chance
@@ -1447,13 +1524,13 @@ def main():
                                 enemy_type.gold_reward,
                                 enemy_type.level
                             )
-                            enemies.append(new_enemy)
-                            enemy_found = True
-                            break
-                
-                if not enemy_found:
-                    attempts += 1
+                        enemies.append(new_enemy)
+                        enemy_found = True
+                        break
             
+            if not enemy_found:
+                attempts += 1
+                result = combat(player, enemies)
             if enemies:
                 result = combat(player, enemies)
                 if not result:
@@ -1463,16 +1540,16 @@ def main():
             else:
                 print("\nNo suitable enemies found in this area!")
                 print("Try exploring a different area or coming back later.")
-                time.sleep(1)  # Add a small delay for readability
-                
+                time.sleep(1)
+
         elif choice == "2":
             shop(player)
-            
+           
         elif choice == "3":
             show_inventory_menu(player)
             
         elif choice == "4":
-            rest_cost = 15  # Reduced from 20
+            rest_cost = 15
             if player.gold >= rest_cost:
                 heal_amount = player.max_health // 2
                 mana_amount = player.max_mana // 2
@@ -1482,17 +1559,20 @@ def main():
                 print(f"Rested and recovered {heal_amount} HP and {mana_amount} MP!")
             else:
                 print("Not enough gold to rest!")
-                
+                        
         elif choice == "5":
             show_abilities(player)
-        
+            
         elif choice == "6":
             gadget_shop(player)
-        
+            
         elif choice == "7":
             currency_exchange(player)
             
         elif choice == "8":
+            power_shop(player)
+            
+        elif choice == "9":
             confirm = input("Are you sure you want to quit? (y/n): ").lower()
             if confirm == 'y':
                 print("Thanks for playing!")
@@ -1506,4 +1586,3 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\nAn error occurred: {e}")
         print("Game terminated.")
-
