@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Game</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #gameContainer {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        #gameOutput {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            padding: 15px;
+            height: 400px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+        }
+
+        #playerStats {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .button-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #666;
+        }
+
+        #userInput {
+            width: 100%;
+            padding: 10px;
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            color: white;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="gameContainer">
+        <div id="playerStats"></div>
+        <div id="gameOutput"></div>
+        <input type="text" id="userInput" placeholder="Enter your command...">
+        <div class="button-container">
+            <button onclick="handleCommand('1')">Fight</button>
+            <button onclick="handleCommand('2')">Shop</button>
+            <button onclick="handleCommand('3')">Inventory</button>
+            <button onclick="handleCommand('4')">Rest</button>
+            <button onclick="handleCommand('5')">Abilities</button>
+            <button onclick="handleCommand('6')">Gadgets</button>
+            <button onclick="handleCommand('7')">Exchange</button>
+            <button onclick="handleCommand('8')">Powers</button>
+            <button onclick="handleCommand('9')">Quit</button>
+        </div>
+    </div>
+
+    <script>
+        // Redirect console.log to game output
+        const gameOutput = document.getElementById('gameOutput');
+        const userInput = document.getElementById('userInput');
+        const playerStats = document.getElementById('playerStats');
+
+        // Override console.log
+        const originalLog = console.log;
+        console.log = function (message) {
+            originalLog.apply(console, arguments);
+            gameOutput.innerHTML += message + '\n';
+            gameOutput.scrollTop = gameOutput.scrollHeight;
+        };
+
+        // Override prompt
+        window.prompt = function (message) {
+            return new Promise((resolve) => {
+                console.log(message);
+                userInput.focus();
+                userInput.onkeypress = function (e) {
+                    if (e.key === 'Enter') {
+                        const value = userInput.value;
+                        userInput.value = '';
+                        console.log(value);
+                        resolve(value);
+                    }
+                };
+            });
+        };
+
+        function updatePlayerStats(player) {
+            if (player) {
+                playerStats.innerHTML = `
+                    ${player.name} - Level ${player.level}<br>
+                    HP: ${player.health}/${player.maxHealth} | 
+                    MP: ${player.mana}/${player.maxMana}<br>
+                    EXP: ${player.exp}/${calculateExpRequirement(player.level)} | 
+                    Gold: ${player.gold}
+                `;
+            }
+        }
+
+        async function handleCommand(command) {
+            userInput.value = command;
+            userInput.dispatchEvent(new KeyboardEvent('keypress', { key: 'Enter' }));
+        }
+
+        // Start the game
+        window.onload = function () {
+            main();
+        };
+    </script>
+    <script src="game_logic.js"></script>
+</body>
+
+</html>
