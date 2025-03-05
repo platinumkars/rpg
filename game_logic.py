@@ -749,7 +749,7 @@ def combat(player, enemies):
         defeated_enemies = [e for e in enemies if e.health <= 0]
         total_exp = sum(e.exp_reward for e in defeated_enemies)
         total_gold = sum(e.gold_reward for e in defeated_enemies)
-        total_tp = sum(max(1, int(e.level * 0.5)) for e in defeated_enemies)
+        total_tp = sum((player.level * 15) for e in defeated_enemies)
         
         # Apply rewards once
         player.exp += total_exp
@@ -1499,8 +1499,8 @@ spawn_table = [
 
 def currency_exchange(player):
     """Exchange gold for tech points and vice versa"""
-    GOLD_TO_TP_RATE = 100  # 100 gold = 1 tech point
-    TP_TO_GOLD_RATE = 100   # 1 tech point = 100 gold 
+    GOLD_TO_TP_RATE = 10  # 100 gold = 1 tech point
+    TP_TO_GOLD_RATE = 10   # 1 tech point = 100 gold 
     
     while True:
         print("\n=== Currency Exchange ===")
