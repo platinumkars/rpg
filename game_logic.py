@@ -79,6 +79,13 @@ class Character:
                     "mana_cost": 30,
                     "description": "Powerful rage attack"
                 }
+            if self.level >= 7:
+                base_abilities["Battle Shout"] = {
+                    "damage_boost": int(15 * scaling),
+                    "duration": 3,
+                    "mana_cost": 25,
+                    "description": "Increase damage for 3 turns"
+                }
                 
         elif self.class_type.lower() in ["mage", "2"]:
             self.health = 80 + (self.level - 1) * 12     # Reduced health scaling
@@ -117,6 +124,15 @@ class Character:
                     "effect": "burn",
                     "duration": 2
                 }
+            if self.level >= 7:
+                base_abilities["Chain Lightning"] = {
+                    "damage": int(20 * scaling),
+                    "hits": 3,
+                    "effect": "stun",
+                    "duration": 1,
+                    "mana_cost": 45,
+                    "description": "Lightning jumps between targets"
+                }
 
         elif self.class_type.lower() in ["paladin", "3"]:
             self.health = 120 + (self.level - 1) * 20    # Balanced health scaling
@@ -142,6 +158,14 @@ class Character:
                     "mana_cost": 35,
                     "description": "Powerful holy attack with healing"
                 }
+            if self.level >= 7:
+                base_abilities["Holy Nova"] = {
+                    "damage": int(30 * scaling),
+                    "area_damage": int(20 * scaling),
+                    "heal": int(25 * scaling),
+                    "mana_cost": 40,
+                    "description": "Area damage and group healing"
+                }
 
         elif self.class_type.lower() in ["necromancer", "4"]:
             self.health = 90 + (self.level - 1) * 15     # Low health scaling
@@ -166,6 +190,14 @@ class Character:
                     "mana_cost": 35,
                     "description": "Explosion of dark energy"
                 }
+            if self.level >= 7:
+                base_abilities["Soul Harvest"] = {
+                    "damage": int(25 * scaling),
+                    "heal": int(15 * scaling),
+                    "hits": 3,
+                    "mana_cost": 45,
+                    "description": "Multiple life drains"
+                }
 
         elif self.class_type.lower() in ["assassin", "5"]:
             self.health = 95 + (self.level - 1) * 14     # Medium-low health scaling
@@ -188,6 +220,13 @@ class Character:
                     "duration": 2,
                     "mana_cost": 35,
                     "description": "Mark target for death"
+                }
+            if self.level >= 7:
+                base_abilities["Shadow Dance"] = {
+                    "damage": int(20 * scaling),
+                    "hits": 5,
+                    "mana_cost": 40,
+                    "description": "Rapid strikes from shadows"
                 }
 
         elif self.class_type.lower() in ["druid", "6"]:
@@ -216,6 +255,15 @@ class Character:
                     "description": "Multiple nature damage hits in area",
                     "effect": "wind"
                 }
+            if self.level >= 7:
+                base_abilities["Nature's Fury"] = {
+                    "damage": int(35 * scaling),
+                    "area_damage": int(20 * scaling),
+                    "effect": "root",
+                    "duration": 2,
+                    "mana_cost": 45,
+                    "description": "Massive nature damage and root"
+                }
 
         elif self.class_type.lower() in ["monk", "7"]:
             self.health = 100 + (self.level - 1) * 16
@@ -241,6 +289,14 @@ class Character:
                     "mana_cost": 35,
                     "description": "Damage and healing combo"
                 }
+            if self.level >= 7:
+                base_abilities["Chakra Burst"] = {
+                    "damage": int(40 * scaling),
+                    "hits": 3,
+                    "heal": int(15 * scaling),
+                    "mana_cost": 35,
+                    "description": "Energy strikes with healing"
+                }
 
         elif self.class_type.lower() in ["ranger", "8"]:
             self.health = 95 + (self.level - 1) * 15
@@ -265,6 +321,14 @@ class Character:
                     "mana_cost": 30,
                     "description": "Mark target for extra damage"
                 }
+            if self.level >= 7:
+                base_abilities["Arrow Storm"] = {
+                    "damage": int(15 * scaling),
+                    "hits": 6,
+                    "area_damage": int(10 * scaling),
+                    "mana_cost": 45,
+                    "description": "Rain of arrows"
+                }
 
         elif self.class_type.lower() in ["warlock", "9"]:
             self.health = 85 + (self.level - 1) * 14
@@ -287,6 +351,14 @@ class Character:
                     "damage": int(45 * scaling), 
                     "mana_cost": 40,
                     "description": "Powerful chaotic explosion"
+                }
+            if self.level >= 7:
+                base_abilities["Soul Fire"] = {
+                    "damage": int(50 * scaling),
+                    "effect": "burn",
+                    "duration": 3,
+                    "mana_cost": 50,
+                    "description": "Massive fire damage with burn"
                 }
 
         elif self.class_type.lower() in ["berserker", "10"]:
@@ -312,6 +384,15 @@ class Character:
                     "mana_cost": 35,
                     "description": "Multiple savage attacks"
                 }
+            if self.level >= 7:
+                base_abilities["Unstoppable"] = {
+                    "damage": int(45 * scaling),
+                    "heal": int(20 * scaling),
+                    "effect": "rage",
+                    "duration": 2,
+                    "mana_cost": 40,
+                    "description": "Powerful attack with healing rage"
+                }
 
         elif self.class_type.lower() in ["alchemist", "11"]:
             self.health = 90 + (self.level - 1) * 15
@@ -319,7 +400,7 @@ class Character:
             self.mana = 80 + (self.level - 1) * 16
             self.max_mana = self.mana
             base_abilities = {
-                "Acid Splash": {"damage": int(23 * scaling), "duration": 2, "mana_cost": 15, "description": "Corrosive damage over time"},
+                "Acid Splash": {"damage": int(23 * scaling), "hits": 2, "mana_cost": 15, "description": "Corrosive damage over time"},
                 "Healing Elixir": {"heal": int(30 * scaling), "mana_cost": 20, "description": "Powerful healing potion"}
             }
             if self.level >= 3:
@@ -343,6 +424,15 @@ class Character:
                     "mana_cost": 35,
                     "description": "Convert damage to healing"
                 }
+            if self.level >= 7:
+                base_abilities["Chain Reaction"] = {
+                    "damage": int(30 * scaling),
+                    "area_damage": int(25 * scaling),
+                    "effect": "acid",
+                    "duration": 3,
+                    "mana_cost": 45,
+                    "description": "Explosive chain of reactions"
+                }
 
         elif self.class_type.lower() in ["shaman", "12"]:
             self.health = 105 + (self.level - 1) * 17
@@ -365,6 +455,15 @@ class Character:
                     "hits": 3, 
                     "mana_cost": 35,
                     "description": "Summon spirit wolves to attack"
+                }
+            if self.level >= 7:
+                base_abilities["Elemental Fury"] = {
+                    "damage": int(25 * scaling),
+                    "hits": 4,
+                    "effect": "stun",
+                    "duration": 1,
+                    "mana_cost": 45,
+                    "description": "Multiple elemental strikes"
                 }
 
         self.abilities = base_abilities
@@ -486,15 +585,15 @@ def get_target(enemies, auto=False):
             pass
     return None
 
-# In combat function, modify the target selection section:
+# In the combat function, update the auto-target initialization
 def combat(player, enemies):
     """Updated combat function with auto-targeting"""
     print("\nEnemies appear!")
     for enemy in enemies:
         print(f"- {enemy.name} (HP: {enemy.health})")
     
-    # Add auto-target toggle
-    auto_target = len(enemies) == 1  # Default to auto for single enemy
+    # Set auto-target to False by default
+    auto_target = False
     
     while any(enemy.health > 0 for enemy in enemies) and player.health > 0:
         # Process status effects
@@ -1447,6 +1546,7 @@ def currency_exchange(player):
         elif choice == "3":
             break
 
+# Fix enemy spawn logic in main()
 def main():
     print("Welcome to the Text RPG!")
     print("\nChoose your class:")
@@ -1504,14 +1604,10 @@ def main():
             if player.level >= 5:
                 num_enemies = random.randint(2, 3)
             
-            # Try to spawn enemies
-            attempts = 0
-            max_attempts = 3
-            while len(enemies) < num_enemies and attempts < max_attempts:
+            # Fix the enemy spawn loop
+            for _ in range(num_enemies):
                 roll = random.uniform(0, 100)
                 cumulative = 0
-                enemy_found = False
-                for enemy_type, chance, min_level in spawn_table:time.sleep(1)  # Add a small delay for readability
                 for enemy_type, chance, min_level in spawn_table:
                     if player.level >= min_level:
                         cumulative += chance
@@ -1524,13 +1620,10 @@ def main():
                                 enemy_type.gold_reward,
                                 enemy_type.level
                             )
-                        enemies.append(new_enemy)
-                        enemy_found = True
-                        break
-            
-            if not enemy_found:
-                attempts += 1
-                result = combat(player, enemies)
+                            enemies.append(new_enemy)
+                            break
+
+            # Remove duplicate combat call and time.sleep
             if enemies:
                 result = combat(player, enemies)
                 if not result:
