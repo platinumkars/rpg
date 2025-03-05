@@ -445,7 +445,9 @@ class Character:
             }
             if self.level >= 3:
                 base_abilities["Earthquake"] = {
-                    "damage": int(30 * scaling), 
+                    "damage": int(30 * scaling),
+                    "area_damage": int(25 * scaling),
+                    "effect": "stun",
                     "mana_cost": 25,
                     "description": "Ground-shaking attack"
                 }
@@ -1217,50 +1219,82 @@ def process_enemy_attack(player, enemy):
     return final_damage
 
 def process_ability(player, target, enemies, ability_name, duration=0):
-    """Process ability with multi-target support"""
+    """Process ability with multi-target and healing support"""
     ability = player.abilities[ability_name]
     player.mana -= ability["mana_cost"]
     total_damage = 0
+    total_healing = 0
     
-    # Get base damage, healing, and effect info
+    # Get ability parameters
     base_damage = ability.get("damage", 0)
-    heal_amount = ability.get("heal", 0)
+    base_heal = ability.get("heal", 0)
+    hits = ability.get("hits", 1)
     effect_type = ability.get("effect", None)
     duration = ability.get("duration", duration)
     
-    # Process healing first if ability has it
-    if heal_amount > 0:
-        original_health = player.health
-        player.health = min(player.max_health, player.health + heal_amount)
-        actual_heal = player.health - original_health
-        print(f"You heal for {actual_heal} HP!")
+    # Process healing over time
+    if base_heal > 0 and duration > 0:
+        player.status_effects.append({
+            "name": "Regeneration",
+            "heal": base_heal,
+            "duration": duration
+        })
+        print(f"Regeneration effect: {base_heal} HP per turn for {duration} turns!")
     
-    # Process damage and effects
+    # Process immediate healing with hits
+    elif base_heal > 0:
+        for hit in range(hits):
+            heal_amount = base_heal
+            original_health = player.health
+            player.health = min(player.max_health, player.health + heal_amount)
+            actual_heal = player.health - original_health
+            total_healing += actual_heal
+            if actual_heal > 0:
+                print(f"Heal {hit + 1}: Restored {actual_heal} HP!")
+    
+    # Process damage
     if "area_damage" in ability:
-        # Handle area damage abilities
+        # Area damage to all enemies
+        main_damage = base_damage
+        area_damage = ability["area_damage"]
+        
+        # Apply main damage to target
+        target.health -= main_damage
+        total_damage += main_damage
+        print(f"Main damage: {main_damage} to {target.name}")
+        
+        # Apply area damage to other enemies
         for enemy in enemies:
-            if enemy.health > 0:
-                enemy.health -= ability["area_damage"]
-                total_damage += ability["area_damage"]
-                print(f"{enemy.name} takes {ability['area_damage']} area damage!")
+            if enemy != target and enemy.health > 0:
+                enemy.health -= area_damage
+                total_damage += area_damage
+                print(f"Area damage: {area_damage} to {enemy.name}")
+                
     elif "hits" in ability:
-        # Handle multi-hit abilities
-        hits = ability.get("hits", 1)
         for hit in range(hits):
             if target.health > 0:
                 target.health -= base_damage
                 total_damage += base_damage
                 print(f"Hit {hit + 1}: {base_damage} damage to {target.name}!")
-    else:
-        # Handle single target abilities
-        if base_damage > 0:
-            target.health -= base_damage
-            total_damage = base_damage
-            print(f"{target.name} takes {base_damage} damage!")
-        
-        # Apply effect for single target abilities
-        if effect_type:
-            apply_status_effect(target, effect_type, base_damage, duration)
+                
+                # Process healing from damage if ability has both
+                if base_heal > 0:
+                    heal_from_damage = int(base_damage * 0.5)  # 50% of damage dealt
+                    original_health = player.health
+                    player.health = min(player.max_health, player.health + heal_from_damage)
+                    actual_heal = player.health - original_health
+                    total_healing += actual_heal
+                    if actual_heal > 0:
+                        print(f"Life drain from hit {hit + 1}: Restored {actual_heal} HP!")
+    
+    if total_healing > 0:
+        print(f"Total healing done: {total_healing}")
+    if total_damage > 0:
+        print(f"Total damage dealt: {total_damage}")
+    
+    # Apply status effect if present
+    if effect_type:
+        apply_status_effect(target, effect_type, base_damage, duration)
     
     return total_damage
 
