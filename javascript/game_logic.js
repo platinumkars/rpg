@@ -132,479 +132,476 @@ class Character {
       }
     }
 
-    if (
-      this.class_type.toLowerCase() === "paladin" ||
-      this.class_type === "3"
-    ) {
+    if (this.classType.toLowerCase() === "paladin" || this.classType === "3") {
       this.health = 120 + (this.level - 1) * 20; // Balanced health scaling
-      this.max_health = this.health;
+      this.maxHealth = this.health;
       this.mana = 60 + (this.level - 1) * 12; // Balanced mana scaling
-      this.max_mana = this.mana;
-      let base_abilities = {
+      this.maxMana = this.mana;
+      let baseAbilities = {
         "Holy Strike": {
           damage: Math.floor(20 * scaling),
           heal: Math.floor(10 * scaling),
-          mana_cost: 15,
+          manaCost: 15,
           description: "Holy damage with healing",
         },
         "Divine Shield": {
           defense: Math.floor(20 * scaling),
           duration: 3,
-          mana_cost: 20,
+          manaCost: 20,
           description: "Strong defensive barrier",
         },
       };
       if (this.level >= 3) {
-        base_abilities["Consecration"] = {
+        baseAbilities["Consecration"] = {
           damage: Math.floor(15 * scaling),
-          area_damage: Math.floor(12 * scaling),
+          areaDamage: Math.floor(12 * scaling),
           heal: Math.floor(15 * scaling),
-          mana_cost: 25,
+          manaCost: 25,
           description: "Holy area damage and healing",
         };
       }
       if (this.level >= 5) {
-        base_abilities["Divine Storm"] = {
+        baseAbilities["Divine Storm"] = {
           damage: Math.floor(35 * scaling),
           heal: Math.floor(20 * scaling),
-          mana_cost: 35,
+          manaCost: 35,
           description: "Powerful holy attack with healing",
         };
       }
       if (this.level >= 7) {
-        base_abilities["Holy Nova"] = {
+        baseAbilities["Holy Nova"] = {
           damage: Math.floor(30 * scaling),
-          area_damage: Math.floor(20 * scaling),
+          areaDamage: Math.floor(20 * scaling),
           heal: Math.floor(25 * scaling),
-          mana_cost: 40,
+          manaCost: 40,
           description: "Area damage and group healing",
         };
       }
     } else if (
-      this.class_type.toLowerCase() === "necromancer" ||
-      this.class_type === "4"
+      this.classType.toLowerCase() === "necromancer" ||
+      this.classType === "4"
     ) {
       this.health = 90 + (this.level - 1) * 15; // Low health scaling
-      this.max_health = this.health;
+      this.maxHealth = this.health;
       this.mana = 90 + (this.level - 1) * 18; // High mana scaling
-      this.max_mana = this.mana;
-      let base_abilities = {
+      this.maxMana = this.mana;
+      let baseAbilities = {
         "Death Bolt": {
           damage: Math.floor(22 * scaling),
-          mana_cost: 15,
+          manaCost: 15,
           description: "Dark magic damage",
         },
         "Life Drain": {
           damage: Math.floor(18 * scaling),
           heal: Math.floor(15 * scaling),
-          mana_cost: 20,
+          manaCost: 20,
           description: "Drain life from enemy",
         },
       };
       if (this.level >= 3) {
-        base_abilities["Curse"] = {
+        baseAbilities["Curse"] = {
           damage: Math.floor(12 * scaling),
           duration: 4,
-          mana_cost: 25,
+          manaCost: 25,
           description: "Strong damage over time",
         };
       }
       if (this.level >= 5) {
-        base_abilities["Death Nova"] = {
+        baseAbilities["Death Nova"] = {
           damage: Math.floor(30 * scaling),
-          area_damage: Math.floor(20 * scaling),
-          mana_cost: 35,
+          areaDamage: Math.floor(20 * scaling),
+          manaCost: 35,
           description: "Explosion of dark energy",
         };
       }
       if (this.level >= 7) {
-        base_abilities["Soul Harvest"] = {
+        baseAbilities["Soul Harvest"] = {
           damage: Math.floor(25 * scaling),
           heal: Math.floor(15 * scaling),
           hits: 3,
-          mana_cost: 45,
+          manaCost: 45,
           description: "Multiple life drains",
         };
       }
     } else if (
-      this.class_type.toLowerCase() === "assassin" ||
-      this.class_type === "5"
+      this.classType.toLowerCase() === "assassin" ||
+      this.classType === "5"
     ) {
       this.health = 95 + (this.level - 1) * 14; // Medium-low health scaling
-      this.max_health = this.health;
+      this.maxHealth = this.health;
       this.mana = 50 + (this.level - 1) * 10; // Medium mana scaling
-      this.max_mana = this.mana;
-      let base_abilities = {
+      this.maxMana = this.mana;
+      let baseAbilities = {
         Backstab: {
           damage: Math.floor(30 * scaling),
-          mana_cost: 15,
+          manaCost: 15,
           description: "High damage from stealth",
         },
         "Poison Strike": {
           damage: Math.floor(15 * scaling),
           duration: 3,
-          mana_cost: 20,
+          manaCost: 20,
           description: "Poisoned weapon attack",
         },
       };
       if (this.level >= 3) {
-        base_abilities["Shadow Step"] = {
+        baseAbilities["Shadow Step"] = {
           damage: Math.floor(25 * scaling),
-          mana_cost: 25,
+          manaCost: 25,
           description: "Teleport behind enemy and strike",
         };
       }
       if (this.level >= 5) {
-        base_abilities["Death Mark"] = {
+        baseAbilities["Death Mark"] = {
           damage: Math.floor(45 * scaling),
           duration: 2,
-          mana_cost: 35,
+          manaCost: 35,
           description: "Mark target for death",
         };
       }
       if (this.level >= 7) {
-        base_abilities["Shadow Dance"] = {
+        baseAbilities["Shadow Dance"] = {
           damage: Math.floor(20 * scaling),
           hits: 5,
-          mana_cost: 40,
+          manaCost: 40,
           description: "Rapid strikes from shadows",
         };
       }
     } else if (
-      this.class_type.toLowerCase() === "druid" ||
-      this.class_type === "6"
+      this.classType.toLowerCase() === "druid" ||
+      this.classType === "6"
     ) {
       this.health = 110 + (this.level - 1) * 18; // Medium-high health scaling
-      this.max_health = this.health;
+      this.maxHealth = this.health;
       this.mana = 70 + (this.level - 1) * 15; // Medium-high mana scaling
-      this.max_mana = this.mana;
-      let base_abilities = {
+      this.maxMana = this.mana;
+      let baseAbilities = {
         "Nature's Wrath": {
           damage: Math.floor(20 * scaling),
-          mana_cost: 15,
+          manaCost: 15,
           description: "Nature damage",
         },
         Regrowth: {
           heal: Math.floor(25 * scaling),
           duration: 3,
-          mana_cost: 20,
+          manaCost: 20,
           description: "Strong healing over time",
         },
       };
       if (this.level >= 3) {
-        base_abilities["Entangling Roots"] = {
+        baseAbilities["Entangling Roots"] = {
           damage: Math.floor(18 * scaling),
           duration: 2,
-          mana_cost: 25,
+          manaCost: 25,
           description: "Root and damage over time",
           effect: "root",
         };
       }
       if (this.level >= 5) {
-        base_abilities["Hurricane"] = {
+        baseAbilities["Hurricane"] = {
           damage: Math.floor(25 * scaling),
-          area_damage: Math.floor(18 * scaling),
+          areaDamage: Math.floor(18 * scaling),
           hits: 3,
-          mana_cost: 35,
+          manaCost: 35,
           description: "Multiple nature damage hits in area",
           effect: "wind",
         };
       }
       if (this.level >= 7) {
-        base_abilities["Nature's Fury"] = {
+        baseAbilities["Nature's Fury"] = {
           damage: Math.floor(35 * scaling),
-          area_damage: Math.floor(20 * scaling),
+          areaDamage: Math.floor(20 * scaling),
           effect: "root",
           duration: 2,
-          mana_cost: 45,
+          manaCost: 45,
           description: "Massive nature damage and root",
         };
       }
     } else if (
-      this.class_type.toLowerCase() === "monk" ||
-      this.class_type === "7"
+      this.classType.toLowerCase() === "monk" ||
+      this.classType === "7"
     ) {
       this.health = 100 + (this.level - 1) * 16;
-      this.max_health = this.health;
+      this.maxHealth = this.health;
       this.mana = 60 + (this.level - 1) * 12;
-      this.max_mana = this.mana;
-      let base_abilities = {
+      this.maxMana = this.mana;
+      let baseAbilities = {
         "Chi Strike": {
           damage: Math.floor(25 * scaling),
-          mana_cost: 15,
+          manaCost: 15,
           description: "Powerful martial arts attack",
         },
         Meditation: {
           heal: Math.floor(20 * scaling),
           duration: 2,
-          mana_cost: 20,
+          manaCost: 20,
           description: "Restore health over time",
         },
       };
       if (this.level >= 3) {
-        base_abilities["Flying Kick"] = {
+        baseAbilities["Flying Kick"] = {
           damage: Math.floor(30 * scaling),
           effect: "stun",
           duration: 1,
-          mana_cost: 25,
+          manaCost: 25,
           description: "High damage leap attack with stun",
         };
       }
       if (this.level >= 5) {
-        base_abilities["Spirit Burst"] = {
+        baseAbilities["Spirit Burst"] = {
           damage: Math.floor(35 * scaling),
           heal: Math.floor(20 * scaling),
-          mana_cost: 35,
+          manaCost: 35,
           description: "Damage and healing combo",
         };
       }
       if (this.level >= 7) {
-        base_abilities["Chakra Burst"] = {
+        baseAbilities["Chakra Burst"] = {
           damage: Math.floor(40 * scaling),
           hits: 3,
           heal: Math.floor(15 * scaling),
-          mana_cost: 35,
+          manaCost: 35,
           description: "Energy strikes with healing",
         };
       }
     } else if (
-      this.class_type.toLowerCase() === "ranger" ||
-      this.class_type === "8"
+      this.classType.toLowerCase() === "ranger" ||
+      this.classType === "8"
     ) {
       this.health = 95 + (this.level - 1) * 15;
-      this.max_health = this.health;
+      this.maxHealth = this.health;
       this.mana = 65 + (this.level - 1) * 13;
-      this.max_mana = this.mana;
-      let base_abilities = {
+      this.maxMana = this.mana;
+      let baseAbilities = {
         "Precise Shot": {
           damage: Math.floor(28 * scaling),
-          mana_cost: 15,
+          manaCost: 15,
           description: "Accurate ranged attack",
         },
         "Animal Bond": {
           heal: Math.floor(18 * scaling),
           damage: Math.floor(15 * scaling),
-          mana_cost: 20,
+          manaCost: 20,
           description: "Call animal companion",
         },
       };
       if (this.level >= 3) {
-        base_abilities["Multi Shot"] = {
+        baseAbilities["Multi Shot"] = {
           damage: Math.floor(15 * scaling),
           hits: 3,
-          mana_cost: 25,
+          manaCost: 25,
           description: "Fire multiple arrows",
         };
       }
       if (this.level >= 5) {
-        base_abilities["Hunter's Mark"] = {
+        baseAbilities["Hunter's Mark"] = {
           damage: Math.floor(35 * scaling),
           duration: 3,
-          mana_cost: 30,
+          manaCost: 30,
           description: "Mark target for extra damage",
         };
       }
       if (this.level >= 7) {
-        base_abilities["Arrow Storm"] = {
+        baseAbilities["Arrow Storm"] = {
           damage: Math.floor(15 * scaling),
           hits: 6,
-          area_damage: Math.floor(10 * scaling),
-          mana_cost: 45,
+          areaDamage: Math.floor(10 * scaling),
+          manaCost: 45,
           description: "Rain of arrows",
         };
       }
     } else if (
-      this.class_type.toLowerCase() === "warlock" ||
-      this.class_type === "9"
+      this.classType.toLowerCase() === "warlock" ||
+      this.classType === "9"
     ) {
       this.health = 85 + (this.level - 1) * 14;
-      this.max_health = this.health;
+      this.maxHealth = this.health;
       this.mana = 95 + (this.level - 1) * 19;
-      this.max_mana = this.mana;
-      let base_abilities = {
+      this.maxMana = this.mana;
+      let baseAbilities = {
         "Shadow Bolt": {
           damage: Math.floor(27 * scaling),
-          mana_cost: 15,
+          manaCost: 15,
           description: "Dark energy attack",
         },
         "Soul Drain": {
           damage: Math.floor(20 * scaling),
           heal: Math.floor(10 * scaling),
-          mana_cost: 20,
+          manaCost: 20,
           description: "Drain enemy life force",
         },
       };
       if (this.level >= 3) {
-        base_abilities["Demon Form"] = {
+        baseAbilities["Demon Form"] = {
           damage: Math.floor(25 * scaling),
           duration: 3,
-          mana_cost: 30,
+          manaCost: 30,
           description: "Transform for enhanced damage",
         };
       }
       if (this.level >= 5) {
-        base_abilities["Chaos Blast"] = {
+        baseAbilities["Chaos Blast"] = {
           damage: Math.floor(45 * scaling),
-          mana_cost: 40,
+          manaCost: 40,
           description: "Powerful chaotic explosion",
         };
       }
       if (this.level >= 7) {
-        base_abilities["Soul Fire"] = {
+        baseAbilities["Soul Fire"] = {
           damage: Math.floor(50 * scaling),
           effect: "burn",
           duration: 3,
-          mana_cost: 50,
+          manaCost: 50,
           description: "Massive fire damage with burn",
         };
       }
     } else if (
-      this.class_type.toLowerCase() === "berserker" ||
-      this.class_type === "10"
+      this.classType.toLowerCase() === "berserker" ||
+      this.classType === "10"
     ) {
       this.health = 130 + (this.level - 1) * 22;
-      this.max_health = this.health;
+      this.maxHealth = this.health;
       this.mana = 35 + (this.level - 1) * 7;
-      this.max_mana = this.mana;
-      let base_abilities = {
+      this.maxMana = this.mana;
+      let baseAbilities = {
         Frenzy: {
           damage: Math.floor(35 * scaling),
-          mana_cost: 15,
+          manaCost: 15,
           description: "Powerful rage attack",
         },
         "Battle Cry": {
           damage: Math.floor(20 * scaling),
           duration: 2,
-          mana_cost: 20,
+          manaCost: 20,
           description: "Intimidating shout",
         },
       };
       if (this.level >= 3) {
-        base_abilities["Blood Rage"] = {
+        baseAbilities["Blood Rage"] = {
           damage: Math.floor(30 * scaling),
           heal: Math.floor(15 * scaling),
-          mana_cost: 25,
+          manaCost: 25,
           description: "Damage boost with life drain",
         };
       }
       if (this.level >= 5) {
-        base_abilities["Rampage"] = {
+        baseAbilities["Rampage"] = {
           damage: Math.floor(25 * scaling),
           hits: 4,
-          mana_cost: 35,
+          manaCost: 35,
           description: "Multiple savage attacks",
         };
       }
       if (this.level >= 7) {
-        base_abilities["Unstoppable"] = {
+        baseAbilities["Unstoppable"] = {
           damage: Math.floor(45 * scaling),
           heal: Math.floor(20 * scaling),
           effect: "rage",
           duration: 2,
-          mana_cost: 40,
+          manaCost: 40,
           description: "Powerful attack with healing rage",
         };
       }
     } else if (
-      this.class_type.toLowerCase() === "alchemist" ||
-      this.class_type === "11"
+      this.classType.toLowerCase() === "alchemist" ||
+      this.classType === "11"
     ) {
       this.health = 90 + (this.level - 1) * 15;
-      this.max_health = this.health;
+      this.maxHealth = this.health;
       this.mana = 80 + (this.level - 1) * 16;
-      this.max_mana = this.mana;
-      let base_abilities = {
+      this.maxMana = this.mana;
+      let baseAbilities = {
         "Acid Splash": {
           damage: Math.floor(23 * scaling),
           hits: 2,
-          mana_cost: 15,
+          manaCost: 15,
           description: "Corrosive damage over time",
         },
         "Healing Elixir": {
           heal: Math.floor(30 * scaling),
-          mana_cost: 20,
+          manaCost: 20,
           description: "Powerful healing potion",
         },
       };
       if (this.level >= 3) {
-        base_abilities["Explosive Flask"] = {
+        baseAbilities["Explosive Flask"] = {
           damage: Math.floor(25 * scaling),
-          area_damage: Math.floor(20 * scaling),
-          mana_cost: 25,
+          areaDamage: Math.floor(20 * scaling),
+          manaCost: 25,
           description: "Area damage chemical explosion",
         };
-        base_abilities["Acid Flask"] = {
+        baseAbilities["Acid Flask"] = {
           damage: Math.floor(20 * scaling),
           effect: "acid",
           duration: 3,
-          mana_cost: 25,
+          manaCost: 25,
           description: "Throw corrosive acid that reduces defense",
         };
       }
       if (this.level >= 5) {
-        base_abilities["Transmutation"] = {
+        baseAbilities["Transmutation"] = {
           heal: Math.floor(25 * scaling),
           damage: Math.floor(25 * scaling),
-          mana_cost: 35,
+          manaCost: 35,
           description: "Convert damage to healing",
         };
       }
       if (this.level >= 7) {
-        base_abilities["Chain Reaction"] = {
+        baseAbilities["Chain Reaction"] = {
           damage: Math.floor(30 * scaling),
-          area_damage: Math.floor(25 * scaling),
+          areaDamage: Math.floor(25 * scaling),
           effect: "acid",
           duration: 3,
-          mana_cost: 45,
+          manaCost: 45,
           description: "Explosive chain of reactions",
         };
       }
     } else if (
-      this.class_type.toLowerCase() === "shaman" ||
-      this.class_type === "12"
+      this.classType.toLowerCase() === "shaman" ||
+      this.classType === "12"
     ) {
       this.health = 105 + (this.level - 1) * 17;
-      this.max_health = this.health;
+      this.maxHealth = this.health;
       this.mana = 75 + (this.level - 1) * 15;
-      this.max_mana = this.mana;
-      let base_abilities = {
+      this.maxMana = this.mana;
+      let baseAbilities = {
         "Lightning Chain": {
           damage: Math.floor(22 * scaling),
           hits: 2,
-          mana_cost: 15,
+          manaCost: 15,
           description: "Chain lightning attack",
         },
         "Ancestral Spirit": {
           heal: Math.floor(25 * scaling),
           duration: 2,
-          mana_cost: 20,
+          manaCost: 20,
           description: "Healing over time",
         },
       };
       if (this.level >= 3) {
-        base_abilities["Earthquake"] = {
+        baseAbilities["Earthquake"] = {
           damage: Math.floor(30 * scaling),
-          area_damage: Math.floor(25 * scaling),
+          areaDamage: Math.floor(25 * scaling),
           effect: "stun",
-          mana_cost: 25,
+          manaCost: 25,
           description: "Ground-shaking attack",
         };
       }
       if (this.level >= 5) {
-        base_abilities["Spirit Wolves"] = {
+        baseAbilities["Spirit Wolves"] = {
           damage: Math.floor(20 * scaling),
           hits: 3,
-          mana_cost: 35,
+          manaCost: 35,
           description: "Summon spirit wolves to attack",
         };
       }
       if (this.level >= 7) {
-        base_abilities["Elemental Fury"] = {
+        baseAbilities["Elemental Fury"] = {
           damage: Math.floor(25 * scaling),
           hits: 4,
           effect: "stun",
           duration: 1,
-          mana_cost: 45,
+          manaCost: 45,
           description: "Multiple elemental strikes",
         };
       }
@@ -785,7 +782,7 @@ function levelUpDisplay(player, oldLevel, rewards) {
     });
 
     // Set auto-target to False by default
-    let auto_target = false;
+    let autoTarget = false;
 
     while (enemies.some((enemy) => enemy.health > 0) && player.health > 0) {
       // Process status effects
@@ -798,8 +795,8 @@ function levelUpDisplay(player, oldLevel, rewards) {
 
       // Display battle status
       console.log("\n" + "-".repeat(40));
-      console.log(`Your HP: ${player.health}/${player.max_health}`);
-      console.log(`Your MP: ${player.mana}/${player.max_mana}`);
+      console.log(`Your HP: ${player.health}/${player.maxHealth}`);
+      console.log(`Your MP: ${player.mana}/${player.maxMana}`);
       console.log("\nEnemies:");
       enemies.forEach((enemy, i) => {
         if (enemy.health > 0) {
@@ -813,13 +810,13 @@ function levelUpDisplay(player, oldLevel, rewards) {
       console.log("3. Use Item");
       console.log("4. Use Gadget");
       console.log("5. Run");
-      console.log(`6. Toggle Auto-target (${auto_target ? "ON" : "OFF"})`);
+      console.log(`6. Toggle Auto-target (${autoTarget ? "ON" : "OFF"})`);
 
       const choice = await prompt("> ");
 
       if (choice === "6") {
-        auto_target = !auto_target;
-        console.log(`Auto-targeting turned ${auto_target ? "ON" : "OFF"}`);
+        autoTarget = !autoTarget;
+        console.log(`Auto-targeting turned ${autoTarget ? "ON" : "OFF"}`);
         continue;
       }
 
@@ -829,7 +826,7 @@ function levelUpDisplay(player, oldLevel, rewards) {
         ["1", "2", "4"].includes(choice) &&
         enemies.some((enemy) => enemy.health > 0)
       ) {
-        target = await getTarget(enemies, auto_target);
+        target = await getTarget(enemies, autoTarget);
         if (!target) {
           console.log("Invalid target!");
           continue;
@@ -861,7 +858,7 @@ function levelUpDisplay(player, oldLevel, rewards) {
           if (abilityIdx >= 0 && abilityIdx < abilitiesList.length) {
             const [abilityName, ability] = abilitiesList[abilityIdx];
             if (player.mana >= ability.mana_cost) {
-              target = await getTarget(enemies, auto_target);
+              target = await getTarget(enemies, autoTarget);
               if (target) {
                 const duration = ability.duration || 0;
                 processAbility(player, target, enemies, abilityName, duration);
@@ -893,11 +890,11 @@ function levelUpDisplay(player, oldLevel, rewards) {
         const itemChoice = await prompt("Choose item to use (or 'back'): ");
 
         if (itemChoice === "1" && player.inventory["Health Potion"] > 0) {
-          player.health = Math.min(player.max_health, player.health + 30);
+          player.health = Math.min(player.maxHealth, player.health + 30);
           player.inventory["Health Potion"]--;
           console.log("You drink a health potion and recover 30 HP!");
         } else if (itemChoice === "2" && player.inventory["Mana Potion"] > 0) {
-          player.mana = Math.min(player.max_mana, player.mana + 25);
+          player.mana = Math.min(player.maxMana, player.mana + 25);
           player.inventory["Mana Potion"]--;
           console.log("You drink a mana potion and recover 25 MP!");
         } else if (itemChoice.toLowerCase() === "back") {
@@ -1003,10 +1000,10 @@ function levelUpDisplay(player, oldLevel, rewards) {
         player.exp -= calculateExpRequirement(player.level);
         player.level++;
         const rewards = calculateLevelRewards(player.level);
-        player.max_health += rewards.health;
-        player.health = player.max_health;
-        player.max_mana += rewards.mana;
-        player.mana = player.max_mana;
+        player.maxHealth += rewards.health;
+        player.health = player.maxHealth;
+        player.maxMana += rewards.mana;
+        player.mana = player.maxMana;
 
         // Display level up screen
         levelUpDisplay(player, oldLevel, rewards);
@@ -1018,13 +1015,13 @@ function levelUpDisplay(player, oldLevel, rewards) {
 
       // Victory healing
       const healAmount = Math.floor(
-        player.max_health * (0.15 + player.level * 0.01)
+        player.maxHealth * (0.15 + player.level * 0.01)
       );
       const manaRestore = Math.floor(
-        player.max_mana * (0.1 + player.level * 0.01)
+        player.maxMana * (0.1 + player.level * 0.01)
       );
-      player.health = Math.min(player.max_health, player.health + healAmount);
-      player.mana = Math.min(player.max_mana, player.mana + manaRestore);
+      player.health = Math.min(player.maxHealth, player.health + healAmount);
+      player.mana = Math.min(player.maxMana, player.mana + manaRestore);
       console.log(
         `Victory healing: Recovered ${healAmount} HP and ${manaRestore} MP!`
       );
@@ -1056,10 +1053,7 @@ function levelUpDisplay(player, oldLevel, rewards) {
 
       if (effect.heal) {
         const originalHealth = player.health;
-        player.health = Math.min(
-          player.max_health,
-          player.health + effect.heal
-        );
+        player.health = Math.min(player.maxHealth, player.health + effect.heal);
         const actualHeal = player.health - originalHealth;
         console.log(`Gadget heals you for ${actualHeal} HP!`);
       }
@@ -1085,7 +1079,7 @@ function levelUpDisplay(player, oldLevel, rewards) {
 
     if (effect.revive) {
       if (player.health <= 0) {
-        player.health = Math.floor(player.max_health * effect.health_percent);
+        player.health = Math.floor(player.maxHealth * effect.health_percent);
         console.log("Phoenix Protocol activates! You're revived!");
       }
     }
@@ -1496,9 +1490,9 @@ function levelUpDisplay(player, oldLevel, rewards) {
   }
 
   function processAttack(player, target, enemies) {
-    const weaponStats = player.weapons[player.current_weapon];
+    const weaponStats = player.weapons[player.currentWeapon];
     let totalDamage = 0;
-    const livingEnemies = enemies.filter((e) => e.health > 0);
+    let livingEnemies = enemies.filter((e) => e.health > 0);
     let currentTarget = target.health > 0 ? target : null;
 
     if (!livingEnemies.length) {
@@ -1590,7 +1584,7 @@ function levelUpDisplay(player, oldLevel, rewards) {
 
   function processEnemyAttack(player, enemy) {
     const baseDamage = enemy.damage;
-    const armorValue = player.armor[player.current_armor];
+    const armorValue = player.armor[player.currentArmor];
     const defenseReduction = Math.floor(
       armorValue * (0.3 + player.level * 0.015)
     ); // Reduced scaling
@@ -1625,7 +1619,7 @@ function levelUpDisplay(player, oldLevel, rewards) {
       for (let hit = 0; hit < hits; hit++) {
         const healAmount = baseHeal;
         const originalHealth = player.health;
-        player.health = Math.min(player.max_health, player.health + healAmount);
+        player.health = Math.min(player.maxHealth, player.health + healAmount);
         const actualHeal = player.health - originalHealth;
         totalHealing += actualHeal;
         if (actualHeal > 0) {
@@ -1667,7 +1661,7 @@ function levelUpDisplay(player, oldLevel, rewards) {
             const healFromDamage = Math.floor(baseDamage * 0.5); // 50% of damage dealt
             const originalHealth = player.health;
             player.health = Math.min(
-              player.max_health,
+              player.maxHealth,
               player.health + healFromDamage
             );
             const actualHeal = player.health - originalHealth;
@@ -1741,13 +1735,13 @@ function levelUpDisplay(player, oldLevel, rewards) {
         entity.health -= damage;
         console.log(`${entity.name} takes ${damage} acid damage!`);
         // Apply defense reduction if entity has armor
-        if (entity.armor && entity.current_armor) {
-          const currentDefense = entity.armor[entity.current_armor];
+        if (entity.armor && entity.currentArmor) {
+          const currentDefense = entity.armor[entity.currentArmor];
           const reducedDefense = Math.max(
             0,
             currentDefense - effect.defense_reduction
           );
-          entity.armor[entity.current_armor] = reducedDefense;
+          entity.armor[entity.currentArmor] = reducedDefense;
           console.log(
             `${entity.name}'s armor is corroded! Defense reduced to ${reducedDefense}!`
           );
@@ -1769,7 +1763,7 @@ function levelUpDisplay(player, oldLevel, rewards) {
         );
       } else if (effect.name === "Regeneration") {
         const heal = effect.heal;
-        entity.health = Math.min(entity.max_health, entity.health + heal);
+        entity.health = Math.min(entity.maxHealth, entity.health + heal);
         console.log(`${entity.name} is stunned and skips their turn!`);
       }
 
@@ -1819,19 +1813,19 @@ function levelUpDisplay(player, oldLevel, rewards) {
           }
         }
 
-        console.log(`\nCurrently equipped weapon: ${player.current_weapon}`);
+        console.log(`\nCurrently equipped weapon: ${player.currentWeapon}`);
         console.log("\nArmor:");
         for (const [armor, defense] of Object.entries(player.armor)) {
           console.log(`${armor} (Defense: ${defense})`);
         }
-        console.log(`Currently equipped armor: ${player.current_armor}`);
+        console.log(`Currently equipped armor: ${player.currentArmor}`);
       } else if (choice === "2") {
         console.log("\nAvailable Weapons:");
         const weapons = Object.keys(player.weapons);
         weapons.forEach((weapon, index) => {
           const damage = player.weapons[weapon];
           console.log(`${index + 1}. ${weapon} (Damage: ${damage})`);
-          if (weapon === player.current_weapon) {
+          if (weapon === player.currentWeapon) {
             console.log("   *Currently Equipped*");
           }
         });
@@ -1843,8 +1837,8 @@ function levelUpDisplay(player, oldLevel, rewards) {
           );
           if (weaponChoice > 0 && weaponChoice <= weapons.length) {
             const newWeapon = weapons[weaponChoice - 1];
-            if (newWeapon !== player.current_weapon) {
-              player.current_weapon = newWeapon;
+            if (newWeapon !== player.currentWeapon) {
+              player.currentWeapon = newWeapon;
               console.log(`Equipped ${newWeapon}!`);
             } else {
               console.log("That weapon is already equipped!");
@@ -1861,7 +1855,7 @@ function levelUpDisplay(player, oldLevel, rewards) {
         armors.forEach((armor, index) => {
           const defense = player.armor[armor];
           console.log(`${index + 1}. ${armor} (Defense: ${defense})`);
-          if (armor === player.current_armor) {
+          if (armor === player.currentArmor) {
             console.log("   *Currently Equipped*");
           }
         });
@@ -1873,8 +1867,8 @@ function levelUpDisplay(player, oldLevel, rewards) {
           );
           if (armorChoice > 0 && armorChoice <= armors.length) {
             const newArmor = armors[armorChoice - 1];
-            if (newArmor !== player.current_armor) {
-              player.current_armor = newArmor;
+            if (newArmor !== player.currentArmor) {
+              player.currentArmor = newArmor;
               console.log(`Equipped ${newArmor}!`);
             } else {
               console.log("That armor is already equipped!");
@@ -2056,14 +2050,14 @@ function levelUpDisplay(player, oldLevel, rewards) {
       // Status display
       console.log(`\n${"=".repeat(50)}`);
       console.log(`${player.name} - Level ${player.level}`);
-      console.log(`HP: ${player.health}/${player.max_health}`);
-      console.log(`MP: ${player.mana}/${player.max_mana}`);
+      console.log(`HP: ${player.health}/${player.maxHealth}`);
+      console.log(`MP: ${player.mana}/${player.maxMana}`);
       console.log(
         `EXP: ${player.exp}/${calculateExpRequirement(player.level)}`
       );
       console.log(`Gold: ${player.gold}`);
-      console.log(`Current Weapon: ${player.current_weapon}`);
-      console.log(`Current Armor: ${player.current_armor}`);
+      console.log(`Current Weapon: ${player.currentWeapon}`);
+      console.log(`Current Armor: ${player.currentArmor}`);
       console.log(`${"=".repeat(50)}`);
 
       // Main menu
@@ -2130,13 +2124,13 @@ function levelUpDisplay(player, oldLevel, rewards) {
       } else if (choice === "4") {
         const restCost = 15;
         if (player.gold >= restCost) {
-          const healAmount = Math.floor(player.max_health / 2);
-          const manaAmount = Math.floor(player.max_mana / 2);
+          const healAmount = Math.floor(player.maxHealth / 2);
+          const manaAmount = Math.floor(player.maxMana / 2);
           player.health = Math.min(
-            player.max_health,
+            player.maxHealth,
             player.health + healAmount
           );
-          player.mana = Math.min(player.max_mana, player.mana + manaAmount);
+          player.mana = Math.min(player.maxMana, player.mana + manaAmount);
           player.gold -= restCost;
           console.log(
             `Rested and recovered ${healAmount} HP and ${manaAmount} MP!`

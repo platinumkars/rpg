@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RPG Game</title>
     <style>
+        .hidden {
+            display: none;
+        }
+
         body {
             background-color: #1e1e1e;
             color: #ffffff;
@@ -68,51 +72,68 @@
 
 <body>
     <div id="gameContainer">
-        <div id="playerStats"></div>
-        <div id="gameOutput"></div>
-        <input type="text" id="userInput" placeholder="Enter your command...">
-        <div class="button-container">
-            <button onclick="handleCommand('1')">Fight</button>
-            <button onclick="handleCommand('2')">Shop</button>
-            <button onclick="handleCommand('3')">Inventory</button>
-            <button onclick="handleCommand('4')">Rest</button>
-            <button onclick="handleCommand('5')">Abilities</button>
-            <button onclick="handleCommand('6')">Gadgets</button>
+        <h2>Create Your Character</h2>
+        <input type="text" id="characterName" placeholder="Enter character name">
+        <select id="classChoice" title="Character Class Selection" aria-label="Choose your character class">
+            <option value="1">Warrior - High HP and defense</option>
+            <option value="2">Mage - Powerful spells and high mana</option>
+            <option value="3">Paladin - Balanced stats with healing abilities</option>
+            <option value="4">Necromancer - Dark magic and life drain</option>
+            <option value="5">Assassin - High damage and critical strikes</option>
+            <option value="6">Druid - Nature magic and versatile abilities</option>
+            <option value="7">Monk - Martial arts and meditation</option>
+            <option value="8">Ranger - Skilled archer and animal companion</option>
+            <option value="9">Warlock - Demonic powers and curses</option>
+            <option value="10">Berserker - Rage and powerful attacks</option>
+            <option value="11">Alchemist - Potions and explosives</option>
+            <option value="12">Shaman - Elemental and spiritual magic</option>
+
+        </select>
+        <button type="button" onclick="createCharacter()">Start Game</button>
+        <div id="gameInterface" class="hidden">
+            <button onclick="createCharacter()">Start Game</button>
+        </div>
+        <div id="gameInterface" style="display: none;">
+            <div id="playerStats"></div>
+            <button type="button" onclick="handleCommand('1')">Fight</button>
+            <button type="button" onclick="handleCommand('2')">Shop</button>
+            <button type="button" onclick="handleCommand('3')">Inventory</button>
+            <button type="button" onclick="handleCommand('4')">Rest</button>
+            <button type="button" onclick="handleCommand('5')">Abilities</button>
+            <button type="button" onclick="handleCommand('6')">Gadgets</button>
+            <button type="button" onclick="handleCommand('7')">Exchange</button>
+            <button type="button" onclick="handleCommand('8')">Powers</button>
+            <button type="button" onclick="handleCommand('9')">Quit</button>
             <button onclick="handleCommand('7')">Exchange</button>
             <button onclick="handleCommand('8')">Powers</button>
             <button onclick="handleCommand('9')">Quit</button>
         </div>
     </div>
+    </div>
 
     <script>
-        // Redirect console.log to game output
+        let currentPlayer = null;
         const gameOutput = document.getElementById('gameOutput');
         const userInput = document.getElementById('userInput');
         const playerStats = document.getElementById('playerStats');
+        const characterCreation = document.getElementById('characterCreation');
+        const gameInterface = document.getElementById('gameInterface');
 
-        // Override console.log
-        const originalLog = console.log;
-        console.log = function (message) {
-            originalLog.apply(console, arguments);
-            gameOutput.innerHTML += message + '\n';
-            gameOutput.scrollTop = gameOutput.scrollHeight;
-        };
+        async function createCharacter() {
+            const name = document.getElementById('characterName').value.trim();
+            const classChoice = document.getElementById('classChoice').value;
 
-        // Override prompt
-        window.prompt = function (message) {
-            return new Promise((resolve) => {
-                console.log(message);
-                userInput.focus();
-                userInput.onkeypress = function (e) {
-                    if (e.key === 'Enter') {
-                        const value = userInput.value;
-                        userInput.value = '';
-                        console.log(value);
-                        resolve(value);
-                    }
-                };
-            });
-        };
+            if (!name) {
+                alert('Please enter a character name!');
+                return;
+            }
+
+            currentPlayer = new Character(name, classChoice);
+            characterCreation.style.display = 'none';
+            gameInterface.style.display = 'block';
+            updatePlayerStats(currentPlayer);
+            console.log(`Welcome, ${currentPlayer.name} the ${currentPlayer.classType}!`);
+        }
 
         function updatePlayerStats(player) {
             if (player) {
@@ -126,14 +147,39 @@
             }
         }
 
+        window.prompt = function (message) {
+            return new Promise((resolve) => {
+                console.log(message);
+                userInput.focus();
+                userInput.onkeypress = function (e) {
+                    if (e.key === 'Enter') {
+                        const value = userInput.value;
+                        userInput.value = '';
+                        console.log(`> ${value}`);
+                        resolve(value);
+                    }
+                };
+            });
+        };
+
         async function handleCommand(command) {
-            userInput.value = command;
-            userInput.dispatchEvent(new KeyboardEvent('keypress', { key: 'Enter' }));
+            if (!currentPlayer) return;
+
+            switch (command) {
+                case '1':
+                    await startCombat(currentPlayer);
+                    break;
+                case '2':
+                    await shop(currentPlayer);
+                    break;
+                // ... handle other commands
+            }
+            updatePlayerStats(currentPlayer);
         }
 
-        // Start the game
-        window.onload = function () {
-            main();
+        console.log = function (message) {
+            gameOutput.innerHTML += message + '\n';
+            gameOutput.scrollTop = gameOutput.scrollHeight;
         };
     </script>
     <script src="game_logic.js"></script>
