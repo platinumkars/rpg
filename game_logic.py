@@ -742,31 +742,26 @@ def combat(player, enemies):
             print("You have been defeated...")
             return False
             
-    # Combat victory
+    # Combat victory - remove duplicate rewards
     if player.health > 0:
-        # Calculate rewards from the original enemies list
-        total_tp = sum(player.level * 25 for e in enemies if e.health <= 0)
-        total_exp = sum(e.exp_reward for e in enemies if e.health <= 0)
-        total_gold = sum(e.gold_reward for e in enemies if e.health <= 0)
+        defeated_enemies = [e for e in enemies if e.health <= 0]
+        total_exp = sum(e.exp_reward for e in defeated_enemies)
+        total_gold = sum(e.gold_reward for e in defeated_enemies)
+        total_tp = sum(max(1, int(e.level * 0.5)) for e in defeated_enemies)
         
         # Apply rewards once
         player.exp += total_exp
         player.gold += total_gold
         player.tech_points += total_tp
         
-        # Show rewards
         print(f"\nRewards:")
         print(f"• {total_exp} EXP")
         print(f"• {total_gold} Gold")
         if total_tp > 0:
             print(f"• {total_tp} Tech Points")
-        
-        # Store old level for comparison
+
+        # Remove duplicate exp addition
         old_level = player.level
-        
-        # Add experience
-        player.exp += total_exp
-        print(f"Gained {total_exp} EXP, {total_gold} gold and {total_tp} Tech Points!")
         
         # Check for level up
         while player.exp >= calculate_exp_requirement(player.level):
