@@ -328,6 +328,13 @@ class Character:
                     "mana_cost": 25, 
                     "description": "Area damage chemical explosion"
                 }
+                base_abilities["Acid Flask"] = {
+                    "damage": int(20 * scaling),
+                    "effect": "acid",
+                    "duration": 3,
+                    "mana_cost": 25,
+                    "description": "Throw corrosive acid that reduces defense"
+                }
             if self.level >= 5:
                 base_abilities["Transmutation"] = {
                     "heal": int(25 * scaling), 
@@ -1113,6 +1120,17 @@ def apply_status_effect(target, effect_type, base_damage, duration):
             "duration": duration
         })
         print(f"{target.name} is burned for {duration} turns!")
+        
+    elif effect_type == "acid":
+        # Acid reduces defense and does damage over time
+        target.status_effects.append({
+            "name": "Corroded",
+            "damage": base_damage // 3,
+            "defense_reduction": 5,
+            "duration": duration
+        })
+        print(f"{target.name} is corroded for {duration} turns!")
+        
     elif effect_type == "freeze":
         target.status_effects.append({
             "name": "Frozen",
@@ -1133,8 +1151,18 @@ def process_status_effects(entity):
     is_stunned = False
     damage_multiplier = 1.0
     
-    for effect in entity.status_effects[:]:  # Create a copy to modify during iteration
-        if effect["name"] == "Poison":
+    for effect in entity.status_effects[:]:
+        if effect["name"] == "Corroded":
+            damage = effect["damage"]
+            entity.health -= damage
+            print(f"{entity.name} takes {damage} acid damage!")
+            # Apply defense reduction if entity has armor
+            if hasattr(entity, 'armor') and entity.current_armor:
+                current_defense = entity.armor[entity.current_armor]
+                reduced_defense = max(0, current_defense - effect["defense_reduction"])
+                entity.armor[entity.current_armor] = reduced_defense
+                print(f"{entity.name}'s armor is corroded! Defense reduced to {reduced_defense}!")
+        elif effect["name"] == "Poison":
             damage = effect["damage"]
             entity.health -= damage
             print(f"{entity.name} takes {damage} poison damage!")
