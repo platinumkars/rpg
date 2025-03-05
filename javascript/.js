@@ -118,361 +118,361 @@ class Character {
             }
         }
 
-            if (this.class_type.toLowerCase() === "paladin" || this.class_type === "3") {
-                this.health = 120 + (this.level - 1) * 20; // Balanced health scaling
-                this.max_health = this.health;
-                this.mana = 60 + (this.level - 1) * 12; // Balanced mana scaling
-                this.max_mana = this.mana;
-                let base_abilities = {
-                    "Holy Strike": { "damage": Math.floor(20 * scaling), "heal": Math.floor(10 * scaling), "mana_cost": 15, "description": "Holy damage with healing" },
-                    "Divine Shield": { "defense": Math.floor(20 * scaling), "duration": 3, "mana_cost": 20, "description": "Strong defensive barrier" }
+        if (this.class_type.toLowerCase() === "paladin" || this.class_type === "3") {
+            this.health = 120 + (this.level - 1) * 20; // Balanced health scaling
+            this.max_health = this.health;
+            this.mana = 60 + (this.level - 1) * 12; // Balanced mana scaling
+            this.max_mana = this.mana;
+            let base_abilities = {
+                "Holy Strike": { "damage": Math.floor(20 * scaling), "heal": Math.floor(10 * scaling), "mana_cost": 15, "description": "Holy damage with healing" },
+                "Divine Shield": { "defense": Math.floor(20 * scaling), "duration": 3, "mana_cost": 20, "description": "Strong defensive barrier" }
+            };
+            if (this.level >= 3) {
+                base_abilities["Consecration"] = {
+                    "damage": Math.floor(15 * scaling),
+                    "area_damage": Math.floor(12 * scaling),
+                    "heal": Math.floor(15 * scaling),
+                    "mana_cost": 25,
+                    "description": "Holy area damage and healing"
                 };
-                if (this.level >= 3) {
-                    base_abilities["Consecration"] = {
-                        "damage": Math.floor(15 * scaling),
-                        "area_damage": Math.floor(12 * scaling),
-                        "heal": Math.floor(15 * scaling),
-                        "mana_cost": 25,
-                        "description": "Holy area damage and healing"
-                    };
-                }
-                if (this.level >= 5) {
-                    base_abilities["Divine Storm"] = {
-                        "damage": Math.floor(35 * scaling),
-                        "heal": Math.floor(20 * scaling),
-                        "mana_cost": 35,
-                        "description": "Powerful holy attack with healing"
-                    };
-                }
-                if (this.level >= 7) {
-                    base_abilities["Holy Nova"] = {
-                        "damage": Math.floor(30 * scaling),
-                        "area_damage": Math.floor(20 * scaling),
-                        "heal": Math.floor(25 * scaling),
-                        "mana_cost": 40,
-                        "description": "Area damage and group healing"
-                    };
-                }
-            } else if (this.class_type.toLowerCase() === "necromancer" || this.class_type === "4") {
-                this.health = 90 + (this.level - 1) * 15; // Low health scaling
-                this.max_health = this.health;
-                this.mana = 90 + (this.level - 1) * 18; // High mana scaling
-                this.max_mana = this.mana;
-                let base_abilities = {
-                    "Death Bolt": { "damage": Math.floor(22 * scaling), "mana_cost": 15, "description": "Dark magic damage" },
-                    "Life Drain": { "damage": Math.floor(18 * scaling), "heal": Math.floor(15 * scaling), "mana_cost": 20, "description": "Drain life from enemy" }
-                };
-                if (this.level >= 3) {
-                    base_abilities["Curse"] = {
-                        "damage": Math.floor(12 * scaling),
-                        "duration": 4,
-                        "mana_cost": 25,
-                        "description": "Strong damage over time"
-                    };
-                }
-                if (this.level >= 5) {
-                    base_abilities["Death Nova"] = {
-                        "damage": Math.floor(30 * scaling),
-                        "area_damage": Math.floor(20 * scaling),
-                        "mana_cost": 35,
-                        "description": "Explosion of dark energy"
-                    };
-                }
-                if (this.level >= 7) {
-                    base_abilities["Soul Harvest"] = {
-                        "damage": Math.floor(25 * scaling),
-                        "heal": Math.floor(15 * scaling),
-                        "hits": 3,
-                        "mana_cost": 45,
-                        "description": "Multiple life drains"
-                    };
-                }
-            } else if (this.class_type.toLowerCase() === "assassin" || this.class_type === "5") {
-                this.health = 95 + (this.level - 1) * 14; // Medium-low health scaling
-                this.max_health = this.health;
-                this.mana = 50 + (this.level - 1) * 10; // Medium mana scaling
-                this.max_mana = this.mana;
-                let base_abilities = {
-                    "Backstab": { "damage": Math.floor(30 * scaling), "mana_cost": 15, "description": "High damage from stealth" },
-                    "Poison Strike": { "damage": Math.floor(15 * scaling), "duration": 3, "mana_cost": 20, "description": "Poisoned weapon attack" }
-                };
-                if (this.level >= 3) {
-                    base_abilities["Shadow Step"] = {
-                        "damage": Math.floor(25 * scaling),
-                        "mana_cost": 25,
-                        "description": "Teleport behind enemy and strike"
-                    };
-                }
-                if (this.level >= 5) {
-                    base_abilities["Death Mark"] = {
-                        "damage": Math.floor(45 * scaling),
-                        "duration": 2,
-                        "mana_cost": 35,
-                        "description": "Mark target for death"
-                    };
-                }
-                if (this.level >= 7) {
-                    base_abilities["Shadow Dance"] = {
-                        "damage": Math.floor(20 * scaling),
-                        "hits": 5,
-                        "mana_cost": 40,
-                        "description": "Rapid strikes from shadows"
-                    };
-                }
-            } else if (this.class_type.toLowerCase() === "druid" || this.class_type === "6") {
-                this.health = 110 + (this.level - 1) * 18; // Medium-high health scaling
-                this.max_health = this.health;
-                this.mana = 70 + (this.level - 1) * 15; // Medium-high mana scaling
-                this.max_mana = this.mana;
-                let base_abilities = {
-                    "Nature's Wrath": { "damage": Math.floor(20 * scaling), "mana_cost": 15, "description": "Nature damage" },
-                    "Regrowth": { "heal": Math.floor(25 * scaling), "duration": 3, "mana_cost": 20, "description": "Strong healing over time" }
-                };
-                if (this.level >= 3) {
-                    base_abilities["Entangling Roots"] = {
-                        "damage": Math.floor(18 * scaling),
-                        "duration": 2,
-                        "mana_cost": 25,
-                        "description": "Root and damage over time",
-                        "effect": "root"
-                    };
-                }
-                if (this.level >= 5) {
-                    base_abilities["Hurricane"] = {
-                        "damage": Math.floor(25 * scaling),
-                        "area_damage": Math.floor(18 * scaling),
-                        "hits": 3,
-                        "mana_cost": 35,
-                        "description": "Multiple nature damage hits in area",
-                        "effect": "wind"
-                    };
-                }
-                if (this.level >= 7) {
-                    base_abilities["Nature's Fury"] = {
-                        "damage": Math.floor(35 * scaling),
-                        "area_damage": Math.floor(20 * scaling),
-                        "effect": "root",
-                        "duration": 2,
-                        "mana_cost": 45,
-                        "description": "Massive nature damage and root"
-                    };
-                }
-            } else if (this.class_type.toLowerCase() === "monk" || this.class_type === "7") {
-                this.health = 100 + (this.level - 1) * 16;
-                this.max_health = this.health;
-                this.mana = 60 + (this.level - 1) * 12;
-                this.max_mana = this.mana;
-                let base_abilities = {
-                    "Chi Strike": { "damage": Math.floor(25 * scaling), "mana_cost": 15, "description": "Powerful martial arts attack" },
-                    "Meditation": { "heal": Math.floor(20 * scaling), "duration": 2, "mana_cost": 20, "description": "Restore health over time" }
-                };
-                if (this.level >= 3) {
-                    base_abilities["Flying Kick"] = {
-                        "damage": Math.floor(30 * scaling),
-                        "effect": "stun",
-                        "duration": 1,
-                        "mana_cost": 25,
-                        "description": "High damage leap attack with stun"
-                    };
-                }
-                if (this.level >= 5) {
-                    base_abilities["Spirit Burst"] = {
-                        "damage": Math.floor(35 * scaling),
-                        "heal": Math.floor(20 * scaling),
-                        "mana_cost": 35,
-                        "description": "Damage and healing combo"
-                    };
-                }
-                if (this.level >= 7) {
-                    base_abilities["Chakra Burst"] = {
-                        "damage": Math.floor(40 * scaling),
-                        "hits": 3,
-                        "heal": Math.floor(15 * scaling),
-                        "mana_cost": 35,
-                        "description": "Energy strikes with healing"
-                    };
-                }
-            } else if (this.class_type.toLowerCase() === "ranger" || this.class_type === "8") {
-                this.health = 95 + (this.level - 1) * 15;
-                this.max_health = this.health;
-                this.mana = 65 + (this.level - 1) * 13;
-                this.max_mana = this.mana;
-                let base_abilities = {
-                    "Precise Shot": { "damage": Math.floor(28 * scaling), "mana_cost": 15, "description": "Accurate ranged attack" },
-                    "Animal Bond": { "heal": Math.floor(18 * scaling), "damage": Math.floor(15 * scaling), "mana_cost": 20, "description": "Call animal companion" }
-                };
-                if (this.level >= 3) {
-                    base_abilities["Multi Shot"] = {
-                        "damage": Math.floor(15 * scaling),
-                        "hits": 3,
-                        "mana_cost": 25,
-                        "description": "Fire multiple arrows"
-                    };
-                }
-                if (this.level >= 5) {
-                    base_abilities["Hunter's Mark"] = {
-                        "damage": Math.floor(35 * scaling),
-                        "duration": 3,
-                        "mana_cost": 30,
-                        "description": "Mark target for extra damage"
-                    };
-                }
-                if (this.level >= 7) {
-                    base_abilities["Arrow Storm"] = {
-                        "damage": Math.floor(15 * scaling),
-                        "hits": 6,
-                        "area_damage": Math.floor(10 * scaling),
-                        "mana_cost": 45,
-                        "description": "Rain of arrows"
-                    };
-                }
-            } else if (this.class_type.toLowerCase() === "warlock" || this.class_type === "9") {
-                this.health = 85 + (this.level - 1) * 14;
-                this.max_health = this.health;
-                this.mana = 95 + (this.level - 1) * 19;
-                this.max_mana = this.mana;
-                let base_abilities = {
-                    "Shadow Bolt": { "damage": Math.floor(27 * scaling), "mana_cost": 15, "description": "Dark energy attack" },
-                    "Soul Drain": { "damage": Math.floor(20 * scaling), "heal": Math.floor(10 * scaling), "mana_cost": 20, "description": "Drain enemy life force" }
-                };
-                if (this.level >= 3) {
-                    base_abilities["Demon Form"] = {
-                        "damage": Math.floor(25 * scaling),
-                        "duration": 3,
-                        "mana_cost": 30,
-                        "description": "Transform for enhanced damage"
-                    };
-                }
-                if (this.level >= 5) {
-                    base_abilities["Chaos Blast"] = {
-                        "damage": Math.floor(45 * scaling),
-                        "mana_cost": 40,
-                        "description": "Powerful chaotic explosion"
-                    };
-                }
-                if (this.level >= 7) {
-                    base_abilities["Soul Fire"] = {
-                        "damage": Math.floor(50 * scaling),
-                        "effect": "burn",
-                        "duration": 3,
-                        "mana_cost": 50,
-                        "description": "Massive fire damage with burn"
-                    };
-                }
-            } else if (this.class_type.toLowerCase() === "berserker" || this.class_type === "10") {
-                this.health = 130 + (this.level - 1) * 22;
-                this.max_health = this.health;
-                this.mana = 35 + (this.level - 1) * 7;
-                this.max_mana = this.mana;
-                let base_abilities = {
-                    "Frenzy": { "damage": Math.floor(35 * scaling), "mana_cost": 15, "description": "Powerful rage attack" },
-                    "Battle Cry": { "damage": Math.floor(20 * scaling), "duration": 2, "mana_cost": 20, "description": "Intimidating shout" }
-                };
-                if (this.level >= 3) {
-                    base_abilities["Blood Rage"] = {
-                        "damage": Math.floor(30 * scaling),
-                        "heal": Math.floor(15 * scaling),
-                        "mana_cost": 25,
-                        "description": "Damage boost with life drain"
-                    };
-                }
-                if (this.level >= 5) {
-                    base_abilities["Rampage"] = {
-                        "damage": Math.floor(25 * scaling),
-                        "hits": 4,
-                        "mana_cost": 35,
-                        "description": "Multiple savage attacks"
-                    };
-                }
-                if (this.level >= 7) {
-                    base_abilities["Unstoppable"] = {
-                        "damage": Math.floor(45 * scaling),
-                        "heal": Math.floor(20 * scaling),
-                        "effect": "rage",
-                        "duration": 2,
-                        "mana_cost": 40,
-                        "description": "Powerful attack with healing rage"
-                    };
-                }
-            } else if (this.class_type.toLowerCase() === "alchemist" || this.class_type === "11") {
-                this.health = 90 + (this.level - 1) * 15;
-                this.max_health = this.health;
-                this.mana = 80 + (this.level - 1) * 16;
-                this.max_mana = this.mana;
-                let base_abilities = {
-                    "Acid Splash": { "damage": Math.floor(23 * scaling), "hits": 2, "mana_cost": 15, "description": "Corrosive damage over time" },
-                    "Healing Elixir": { "heal": Math.floor(30 * scaling), "mana_cost": 20, "description": "Powerful healing potion" }
-                };
-                if (this.level >= 3) {
-                    base_abilities["Explosive Flask"] = {
-                        "damage": Math.floor(25 * scaling),
-                        "area_damage": Math.floor(20 * scaling),
-                        "mana_cost": 25,
-                        "description": "Area damage chemical explosion"
-                    };
-                    base_abilities["Acid Flask"] = {
-                        "damage": Math.floor(20 * scaling),
-                        "effect": "acid",
-                        "duration": 3,
-                        "mana_cost": 25,
-                        "description": "Throw corrosive acid that reduces defense"
-                    };
-                }
-                if (this.level >= 5) {
-                    base_abilities["Transmutation"] = {
-                        "heal": Math.floor(25 * scaling),
-                        "damage": Math.floor(25 * scaling),
-                        "mana_cost": 35,
-                        "description": "Convert damage to healing"
-                    };
-                }
-                if (this.level >= 7) {
-                    base_abilities["Chain Reaction"] = {
-                        "damage": Math.floor(30 * scaling),
-                        "area_damage": Math.floor(25 * scaling),
-                        "effect": "acid",
-                        "duration": 3,
-                        "mana_cost": 45,
-                        "description": "Explosive chain of reactions"
-                    };
-                }
-            } else if (this.class_type.toLowerCase() === "shaman" || this.class_type === "12") {
-                this.health = 105 + (this.level - 1) * 17;
-                this.max_health = this.health;
-                this.mana = 75 + (this.level - 1) * 15;
-                this.max_mana = this.mana;
-                let base_abilities = {
-                    "Lightning Chain": { "damage": Math.floor(22 * scaling), "hits": 2, "mana_cost": 15, "description": "Chain lightning attack" },
-                    "Ancestral Spirit": { "heal": Math.floor(25 * scaling), "duration": 2, "mana_cost": 20, "description": "Healing over time" }
-                };
-                if (this.level >= 3) {
-                    base_abilities["Earthquake"] = {
-                        "damage": Math.floor(30 * scaling),
-                        "area_damage": Math.floor(25 * scaling),
-                        "effect": "stun",
-                        "mana_cost": 25,
-                        "description": "Ground-shaking attack"
-                    };
-                }
-                if (this.level >= 5) {
-                    base_abilities["Spirit Wolves"] = {
-                        "damage": Math.floor(20 * scaling),
-                        "hits": 3,
-                        "mana_cost": 35,
-                        "description": "Summon spirit wolves to attack"
-                    };
-                }
-                if (this.level >= 7) {
-                    base_abilities["Elemental Fury"] = {
-                        "damage": Math.floor(25 * scaling),
-                        "hits": 4,
-                        "effect": "stun",
-                        "duration": 1,
-                        "mana_cost": 45,
-                        "description": "Multiple elemental strikes"
-                    };
-                }
             }
+            if (this.level >= 5) {
+                base_abilities["Divine Storm"] = {
+                    "damage": Math.floor(35 * scaling),
+                    "heal": Math.floor(20 * scaling),
+                    "mana_cost": 35,
+                    "description": "Powerful holy attack with healing"
+                };
+            }
+            if (this.level >= 7) {
+                base_abilities["Holy Nova"] = {
+                    "damage": Math.floor(30 * scaling),
+                    "area_damage": Math.floor(20 * scaling),
+                    "heal": Math.floor(25 * scaling),
+                    "mana_cost": 40,
+                    "description": "Area damage and group healing"
+                };
+            }
+        } else if (this.class_type.toLowerCase() === "necromancer" || this.class_type === "4") {
+            this.health = 90 + (this.level - 1) * 15; // Low health scaling
+            this.max_health = this.health;
+            this.mana = 90 + (this.level - 1) * 18; // High mana scaling
+            this.max_mana = this.mana;
+            let base_abilities = {
+                "Death Bolt": { "damage": Math.floor(22 * scaling), "mana_cost": 15, "description": "Dark magic damage" },
+                "Life Drain": { "damage": Math.floor(18 * scaling), "heal": Math.floor(15 * scaling), "mana_cost": 20, "description": "Drain life from enemy" }
+            };
+            if (this.level >= 3) {
+                base_abilities["Curse"] = {
+                    "damage": Math.floor(12 * scaling),
+                    "duration": 4,
+                    "mana_cost": 25,
+                    "description": "Strong damage over time"
+                };
+            }
+            if (this.level >= 5) {
+                base_abilities["Death Nova"] = {
+                    "damage": Math.floor(30 * scaling),
+                    "area_damage": Math.floor(20 * scaling),
+                    "mana_cost": 35,
+                    "description": "Explosion of dark energy"
+                };
+            }
+            if (this.level >= 7) {
+                base_abilities["Soul Harvest"] = {
+                    "damage": Math.floor(25 * scaling),
+                    "heal": Math.floor(15 * scaling),
+                    "hits": 3,
+                    "mana_cost": 45,
+                    "description": "Multiple life drains"
+                };
+            }
+        } else if (this.class_type.toLowerCase() === "assassin" || this.class_type === "5") {
+            this.health = 95 + (this.level - 1) * 14; // Medium-low health scaling
+            this.max_health = this.health;
+            this.mana = 50 + (this.level - 1) * 10; // Medium mana scaling
+            this.max_mana = this.mana;
+            let base_abilities = {
+                "Backstab": { "damage": Math.floor(30 * scaling), "mana_cost": 15, "description": "High damage from stealth" },
+                "Poison Strike": { "damage": Math.floor(15 * scaling), "duration": 3, "mana_cost": 20, "description": "Poisoned weapon attack" }
+            };
+            if (this.level >= 3) {
+                base_abilities["Shadow Step"] = {
+                    "damage": Math.floor(25 * scaling),
+                    "mana_cost": 25,
+                    "description": "Teleport behind enemy and strike"
+                };
+            }
+            if (this.level >= 5) {
+                base_abilities["Death Mark"] = {
+                    "damage": Math.floor(45 * scaling),
+                    "duration": 2,
+                    "mana_cost": 35,
+                    "description": "Mark target for death"
+                };
+            }
+            if (this.level >= 7) {
+                base_abilities["Shadow Dance"] = {
+                    "damage": Math.floor(20 * scaling),
+                    "hits": 5,
+                    "mana_cost": 40,
+                    "description": "Rapid strikes from shadows"
+                };
+            }
+        } else if (this.class_type.toLowerCase() === "druid" || this.class_type === "6") {
+            this.health = 110 + (this.level - 1) * 18; // Medium-high health scaling
+            this.max_health = this.health;
+            this.mana = 70 + (this.level - 1) * 15; // Medium-high mana scaling
+            this.max_mana = this.mana;
+            let base_abilities = {
+                "Nature's Wrath": { "damage": Math.floor(20 * scaling), "mana_cost": 15, "description": "Nature damage" },
+                "Regrowth": { "heal": Math.floor(25 * scaling), "duration": 3, "mana_cost": 20, "description": "Strong healing over time" }
+            };
+            if (this.level >= 3) {
+                base_abilities["Entangling Roots"] = {
+                    "damage": Math.floor(18 * scaling),
+                    "duration": 2,
+                    "mana_cost": 25,
+                    "description": "Root and damage over time",
+                    "effect": "root"
+                };
+            }
+            if (this.level >= 5) {
+                base_abilities["Hurricane"] = {
+                    "damage": Math.floor(25 * scaling),
+                    "area_damage": Math.floor(18 * scaling),
+                    "hits": 3,
+                    "mana_cost": 35,
+                    "description": "Multiple nature damage hits in area",
+                    "effect": "wind"
+                };
+            }
+            if (this.level >= 7) {
+                base_abilities["Nature's Fury"] = {
+                    "damage": Math.floor(35 * scaling),
+                    "area_damage": Math.floor(20 * scaling),
+                    "effect": "root",
+                    "duration": 2,
+                    "mana_cost": 45,
+                    "description": "Massive nature damage and root"
+                };
+            }
+        } else if (this.class_type.toLowerCase() === "monk" || this.class_type === "7") {
+            this.health = 100 + (this.level - 1) * 16;
+            this.max_health = this.health;
+            this.mana = 60 + (this.level - 1) * 12;
+            this.max_mana = this.mana;
+            let base_abilities = {
+                "Chi Strike": { "damage": Math.floor(25 * scaling), "mana_cost": 15, "description": "Powerful martial arts attack" },
+                "Meditation": { "heal": Math.floor(20 * scaling), "duration": 2, "mana_cost": 20, "description": "Restore health over time" }
+            };
+            if (this.level >= 3) {
+                base_abilities["Flying Kick"] = {
+                    "damage": Math.floor(30 * scaling),
+                    "effect": "stun",
+                    "duration": 1,
+                    "mana_cost": 25,
+                    "description": "High damage leap attack with stun"
+                };
+            }
+            if (this.level >= 5) {
+                base_abilities["Spirit Burst"] = {
+                    "damage": Math.floor(35 * scaling),
+                    "heal": Math.floor(20 * scaling),
+                    "mana_cost": 35,
+                    "description": "Damage and healing combo"
+                };
+            }
+            if (this.level >= 7) {
+                base_abilities["Chakra Burst"] = {
+                    "damage": Math.floor(40 * scaling),
+                    "hits": 3,
+                    "heal": Math.floor(15 * scaling),
+                    "mana_cost": 35,
+                    "description": "Energy strikes with healing"
+                };
+            }
+        } else if (this.class_type.toLowerCase() === "ranger" || this.class_type === "8") {
+            this.health = 95 + (this.level - 1) * 15;
+            this.max_health = this.health;
+            this.mana = 65 + (this.level - 1) * 13;
+            this.max_mana = this.mana;
+            let base_abilities = {
+                "Precise Shot": { "damage": Math.floor(28 * scaling), "mana_cost": 15, "description": "Accurate ranged attack" },
+                "Animal Bond": { "heal": Math.floor(18 * scaling), "damage": Math.floor(15 * scaling), "mana_cost": 20, "description": "Call animal companion" }
+            };
+            if (this.level >= 3) {
+                base_abilities["Multi Shot"] = {
+                    "damage": Math.floor(15 * scaling),
+                    "hits": 3,
+                    "mana_cost": 25,
+                    "description": "Fire multiple arrows"
+                };
+            }
+            if (this.level >= 5) {
+                base_abilities["Hunter's Mark"] = {
+                    "damage": Math.floor(35 * scaling),
+                    "duration": 3,
+                    "mana_cost": 30,
+                    "description": "Mark target for extra damage"
+                };
+            }
+            if (this.level >= 7) {
+                base_abilities["Arrow Storm"] = {
+                    "damage": Math.floor(15 * scaling),
+                    "hits": 6,
+                    "area_damage": Math.floor(10 * scaling),
+                    "mana_cost": 45,
+                    "description": "Rain of arrows"
+                };
+            }
+        } else if (this.class_type.toLowerCase() === "warlock" || this.class_type === "9") {
+            this.health = 85 + (this.level - 1) * 14;
+            this.max_health = this.health;
+            this.mana = 95 + (this.level - 1) * 19;
+            this.max_mana = this.mana;
+            let base_abilities = {
+                "Shadow Bolt": { "damage": Math.floor(27 * scaling), "mana_cost": 15, "description": "Dark energy attack" },
+                "Soul Drain": { "damage": Math.floor(20 * scaling), "heal": Math.floor(10 * scaling), "mana_cost": 20, "description": "Drain enemy life force" }
+            };
+            if (this.level >= 3) {
+                base_abilities["Demon Form"] = {
+                    "damage": Math.floor(25 * scaling),
+                    "duration": 3,
+                    "mana_cost": 30,
+                    "description": "Transform for enhanced damage"
+                };
+            }
+            if (this.level >= 5) {
+                base_abilities["Chaos Blast"] = {
+                    "damage": Math.floor(45 * scaling),
+                    "mana_cost": 40,
+                    "description": "Powerful chaotic explosion"
+                };
+            }
+            if (this.level >= 7) {
+                base_abilities["Soul Fire"] = {
+                    "damage": Math.floor(50 * scaling),
+                    "effect": "burn",
+                    "duration": 3,
+                    "mana_cost": 50,
+                    "description": "Massive fire damage with burn"
+                };
+            }
+        } else if (this.class_type.toLowerCase() === "berserker" || this.class_type === "10") {
+            this.health = 130 + (this.level - 1) * 22;
+            this.max_health = this.health;
+            this.mana = 35 + (this.level - 1) * 7;
+            this.max_mana = this.mana;
+            let base_abilities = {
+                "Frenzy": { "damage": Math.floor(35 * scaling), "mana_cost": 15, "description": "Powerful rage attack" },
+                "Battle Cry": { "damage": Math.floor(20 * scaling), "duration": 2, "mana_cost": 20, "description": "Intimidating shout" }
+            };
+            if (this.level >= 3) {
+                base_abilities["Blood Rage"] = {
+                    "damage": Math.floor(30 * scaling),
+                    "heal": Math.floor(15 * scaling),
+                    "mana_cost": 25,
+                    "description": "Damage boost with life drain"
+                };
+            }
+            if (this.level >= 5) {
+                base_abilities["Rampage"] = {
+                    "damage": Math.floor(25 * scaling),
+                    "hits": 4,
+                    "mana_cost": 35,
+                    "description": "Multiple savage attacks"
+                };
+            }
+            if (this.level >= 7) {
+                base_abilities["Unstoppable"] = {
+                    "damage": Math.floor(45 * scaling),
+                    "heal": Math.floor(20 * scaling),
+                    "effect": "rage",
+                    "duration": 2,
+                    "mana_cost": 40,
+                    "description": "Powerful attack with healing rage"
+                };
+            }
+        } else if (this.class_type.toLowerCase() === "alchemist" || this.class_type === "11") {
+            this.health = 90 + (this.level - 1) * 15;
+            this.max_health = this.health;
+            this.mana = 80 + (this.level - 1) * 16;
+            this.max_mana = this.mana;
+            let base_abilities = {
+                "Acid Splash": { "damage": Math.floor(23 * scaling), "hits": 2, "mana_cost": 15, "description": "Corrosive damage over time" },
+                "Healing Elixir": { "heal": Math.floor(30 * scaling), "mana_cost": 20, "description": "Powerful healing potion" }
+            };
+            if (this.level >= 3) {
+                base_abilities["Explosive Flask"] = {
+                    "damage": Math.floor(25 * scaling),
+                    "area_damage": Math.floor(20 * scaling),
+                    "mana_cost": 25,
+                    "description": "Area damage chemical explosion"
+                };
+                base_abilities["Acid Flask"] = {
+                    "damage": Math.floor(20 * scaling),
+                    "effect": "acid",
+                    "duration": 3,
+                    "mana_cost": 25,
+                    "description": "Throw corrosive acid that reduces defense"
+                };
+            }
+            if (this.level >= 5) {
+                base_abilities["Transmutation"] = {
+                    "heal": Math.floor(25 * scaling),
+                    "damage": Math.floor(25 * scaling),
+                    "mana_cost": 35,
+                    "description": "Convert damage to healing"
+                };
+            }
+            if (this.level >= 7) {
+                base_abilities["Chain Reaction"] = {
+                    "damage": Math.floor(30 * scaling),
+                    "area_damage": Math.floor(25 * scaling),
+                    "effect": "acid",
+                    "duration": 3,
+                    "mana_cost": 45,
+                    "description": "Explosive chain of reactions"
+                };
+            }
+        } else if (this.class_type.toLowerCase() === "shaman" || this.class_type === "12") {
+            this.health = 105 + (this.level - 1) * 17;
+            this.max_health = this.health;
+            this.mana = 75 + (this.level - 1) * 15;
+            this.max_mana = this.mana;
+            let base_abilities = {
+                "Lightning Chain": { "damage": Math.floor(22 * scaling), "hits": 2, "mana_cost": 15, "description": "Chain lightning attack" },
+                "Ancestral Spirit": { "heal": Math.floor(25 * scaling), "duration": 2, "mana_cost": 20, "description": "Healing over time" }
+            };
+            if (this.level >= 3) {
+                base_abilities["Earthquake"] = {
+                    "damage": Math.floor(30 * scaling),
+                    "area_damage": Math.floor(25 * scaling),
+                    "effect": "stun",
+                    "mana_cost": 25,
+                    "description": "Ground-shaking attack"
+                };
+            }
+            if (this.level >= 5) {
+                base_abilities["Spirit Wolves"] = {
+                    "damage": Math.floor(20 * scaling),
+                    "hits": 3,
+                    "mana_cost": 35,
+                    "description": "Summon spirit wolves to attack"
+                };
+            }
+            if (this.level >= 7) {
+                base_abilities["Elemental Fury"] = {
+                    "damage": Math.floor(25 * scaling),
+                    "hits": 4,
+                    "effect": "stun",
+                    "duration": 1,
+                    "mana_cost": 45,
+                    "description": "Multiple elemental strikes"
+                };
+            }
+        }
 
 
         this.abilities = baseAbilities;
