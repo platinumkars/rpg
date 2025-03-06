@@ -1,0 +1,85 @@
+{
+  "name": "Karthik",
+  "class_type": "11",
+  "health": 165,
+  "max_health": 165,
+  "mana": 160,
+  "max_mana": 160,
+  "level": 6,
+  "exp": 463,
+  "gold": 809,
+  "inventory": {
+    "Health Potion": 2,
+    "Mana Potion": 2
+  },
+  "weapons": {
+    "Basic Sword": 8,
+    "Twin Daggers": {
+      "cost": 200,
+      "damage": 15,
+      "hits": 2,
+      "type": "melee",
+      "min_level": 2,
+      "description": "Strike twice per attack"
+    },
+    "Triple Shot Bow": {
+      "cost": 300,
+      "damage": 12,
+      "hits": 3,
+      "type": "ranged",
+      "min_level": 3,
+      "description": "Fire three arrows"
+    },
+    "Whirlwind Blade": {
+      "cost": 800,
+      "damage": 30,
+      "hits": 3,
+      "area_damage": 15,
+      "type": "melee",
+      "min_level": 6,
+      "description": "Multiple hits with area damage"
+    }
+  },
+  "current_weapon": "Whirlwind Blade",
+  "armor": {
+    "Basic Leather": 5,
+    "Plate Armor": 25
+  },
+  "current_armor": "Plate Armor",
+  "tech_points": 3045,
+  "gadgets": {},
+  "powers": [],
+  "abilities": {
+    "Acid Splash": {
+      "damage": 40,
+      "hits": 2,
+      "mana_cost": 15,
+      "description": "Corrosive damage over time"
+    },
+    "Healing Elixir": {
+      "heal": 52,
+      "mana_cost": 20,
+      "description": "Powerful healing potion"
+    },
+    "Explosive Flask": {
+      "damage": 43,
+      "area_damage": 35,
+      "mana_cost": 25,
+      "description": "Area damage chemical explosion"
+    },
+    "Acid Flask": {
+      "damage": 35,
+      "effect": "acid",
+      "duration": 3,
+      "mana_cost": 25,
+      "description": "Throw corrosive acid that reduces defense"
+    },
+    "Transmutation": {
+      "heal": 43,
+      "damage": 43,
+      "mana_cost": 35,
+      "description": "Convert damage to healing"
+    }
+  },
+  "timestamp": "2025-03-06 20:14:19"
+}
