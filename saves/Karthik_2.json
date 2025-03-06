@@ -1,0 +1,48 @@
+{
+  "name": "Karthik",
+  "class_type": "11",
+  "health": 105,
+  "max_health": 105,
+  "mana": 96,
+  "max_mana": 96,
+  "level": 2,
+  "exp": 12,
+  "gold": 95,
+  "inventory": {
+    "Health Potion": 2,
+    "Mana Potion": 2
+  },
+  "weapons": {
+    "Basic Sword": 8,
+    "Twin Daggers": {
+      "cost": 200,
+      "damage": 15,
+      "hits": 2,
+      "type": "melee",
+      "min_level": 2,
+      "description": "Strike twice per attack"
+    }
+  },
+  "current_weapon": "Basic Sword",
+  "armor": {
+    "Basic Leather": 5
+  },
+  "current_armor": "Basic Leather",
+  "tech_points": 105,
+  "gadgets": {},
+  "powers": [],
+  "abilities": {
+    "Acid Splash": {
+      "damage": 26,
+      "hits": 2,
+      "mana_cost": 15,
+      "description": "Corrosive damage over time"
+    },
+    "Healing Elixir": {
+      "heal": 34,
+      "mana_cost": 20,
+      "description": "Powerful healing potion"
+    }
+  },
+  "timestamp": "2025-03-06 19:31:49"
+}
