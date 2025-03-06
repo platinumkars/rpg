@@ -860,6 +860,7 @@ def calculate_level_rewards(level):
 
 # Update shop function's item handling
 def shop(player):
+    """Improved shop with level-based filtering and numbered items"""
     items = {
         # Basic items (adjusted prices)
         "Health Potion": {"cost": 20, "effect": "Restore 40 HP", "min_level": 1},
@@ -936,57 +937,106 @@ def shop(player):
     }
     
     while True:
-        print("\nWelcome to the shop!")
-        print(f"Your gold: {player.gold}")
-        print("\nAvailable items:")
-        for item, details in items.items():
-            desc = details.get('effect', 'Equipment')
-            if 'damage' in details:
-                desc = f"Damage: {details['damage']}"
-            if 'defense' in details:
-                desc = f"Defense: {details['defense']}"
-            if 'mana_bonus' in details:
-                desc += f", Mana Bonus: {details['mana_bonus']}"
-            print(f"{item}: {details['cost']} gold - {desc}")
-        print("\nEnter item name to buy (or 'exit' to leave):")
+        print("\n=== Shop ===")
+        print(f"Gold: {player.gold}")
+        print(f"Level: {player.level}")
         
-        choice = input("> ").title()
-        if choice.lower() == "exit":
+        # Filter and categorize items by type
+        available_items = {
+            "Potions": [],
+            "Weapons": [],
+            "Armor": []
+        }
+        
+        # Sort and filter items based on player level
+        for item_name, details in items.items():
+            if details.get('min_level', 1) <= player.level:
+                if 'Potion' in item_name:
+                    available_items["Potions"].append((item_name, details))
+                elif 'damage' in details:
+                    available_items["Weapons"].append((item_name, details))
+                elif 'defense' in details:
+                    available_items["Armor"].append((item_name, details))
+        
+        # Display items by category with numbers
+        item_number = 1
+        numbered_items = {}  # Store item numbers for purchase reference
+        
+        for category, items_list in available_items.items():
+            if items_list:
+                print(f"\n{category}:")
+                for item_name, details in sorted(items_list, key=lambda x: x[1]['cost']):
+                    cost = details['cost']
+                    desc = []
+                    
+                    if 'damage' in details:
+                        desc.append(f"DMG: {details['damage']}")
+                    if 'defense' in details:
+                        desc.append(f"DEF: {details['defense']}")
+                    if 'hits' in details:
+                        desc.append(f"Hits: {details['hits']}x")
+                    if 'area_damage' in details:
+                        desc.append(f"Area DMG: {details['area_damage']}")
+                    if 'effect' in details:
+                        desc.append(details['effect'])
+                    if 'description' in details:
+                        desc.append(details['description'])
+                    
+                    # Color code based on affordability
+                    if player.gold >= cost:
+                        status = "✓"  # Can afford
+                    else:
+                        status = "✗"  # Cannot afford
+                        
+                    print(f"{item_number}. {status} {item_name}")
+                    print(f"   Cost: {cost} gold | {' | '.join(desc)}")
+                    
+                    numbered_items[item_number] = item_name
+                    item_number += 1
+        
+        print("\nEnter item number to buy (or 'exit' to leave):")
+        choice = input("> ").lower()
+        
+        if choice == "exit":
             break
-        
-        if choice in items:
-            if player.level >= items[choice]["min_level"]:  # Check level requirement
-                if player.gold >= items[choice]["cost"]:
+            
+        try:
+            item_number = int(choice)
+            if item_number in numbered_items:
+                item_name = numbered_items[item_number]
+                item_details = items[item_name]
+                
+                if player.gold >= item_details['cost']:
                     # Store old gold for verification
                     old_gold = player.gold
-                    player.gold -= items[choice]["cost"]
+                    player.gold -= item_details['cost']
                     
-                    # Verify transaction
-                    if player.gold >= 0:
-                        if "damage" in items[choice]:
-                            if "area_damage" in items[choice]:
-                                player.weapons[choice] = {
-                                    "damage": items[choice]["damage"],
-                                    "area_damage": items[choice]["area_damage"],
-                                    "type": items[choice]["type"]
-                                }
-                            else:
-                                player.weapons[choice] = items[choice]
-                        elif "defense" in items[choice]:
-                            player.armor[choice] = items[choice]["defense"]
-                        else:
-                            player.inventory[choice] = player.inventory.get(choice, 0) + 1
-                        print(f"Bought {choice}!")
-                        print(f"Remaining gold: {player.gold}")
+                    # Process purchase based on item type
+                    if 'damage' in item_details:
+                        player.weapons[item_name] = item_details
+                        print(f"\nBought {item_name}!")
+                        print(f"Damage: {item_details['damage']}")
+                        if 'hits' in item_details:
+                            print(f"Hits: {item_details['hits']}x")
+                        if 'area_damage' in item_details:
+                            print(f"Area Damage: {item_details['area_damage']}")
+                    elif 'defense' in item_details:
+                        player.armor[item_name] = item_details['defense']
+                        print(f"\nBought {item_name}!")
+                        print(f"Defense: {item_details['defense']}")
                     else:
-                        player.gold = old_gold  # Revert if something went wrong
-                        print("Transaction failed!")
+                        player.inventory[item_name] = player.inventory.get(item_name, 0) + 1
+                        print(f"\nBought {item_name}!")
+                    
+                    print(f"Remaining gold: {player.gold}")
                 else:
-                    print("Not enough gold!")
+                    print("\nNot enough gold!")
             else:
-                print(f"Required level: {items[choice]['min_level']}")
-        else:
-            print("Invalid item!")
+                print("\nInvalid item number!")
+        except ValueError:
+            print("\nInvalid input!")
+            
+        input("\nPress Enter to continue...")
 
 # Add Gadget Shop function
 def gadget_shop(player):
@@ -1151,7 +1201,7 @@ def show_gadgets(player):
     return gadget_list
 
 def process_attack(player, target, enemies):
-    """Process attack with multi-hit and area damage support"""
+    """Process attack with fixed hybrid weapon support"""
     weapon_stats = player.weapons[player.current_weapon]
     total_damage = 0
     living_enemies = [e for e in enemies if e.health > 0]
@@ -1164,55 +1214,47 @@ def process_attack(player, target, enemies):
     if isinstance(weapon_stats, dict):
         base_damage = weapon_stats["damage"]
         level_bonus = int(player.level * 1.5)
+        enemy_index = living_enemies.index(target)
         
-        # Handle multi-hit weapons
-        if "hits" in weapon_stats:
-            hits = weapon_stats["hits"]
-            enemy_index = living_enemies.index(target)
-            
-            for hit in range(hits):
-                if not living_enemies:  # Stop if no more targets
-                    break
-                    
-                # Get current target, cycling through living enemies
-                current_target = living_enemies[enemy_index % len(living_enemies)]
+        # Handle multi-hit attacks
+        hits = weapon_stats.get("hits", 1)
+        for hit in range(hits):
+            if not living_enemies:  # Stop if no more targets
+                break
                 
-                # Add slight damage variation
-                variation = random.randint(-2, 2)
-                hit_damage = max(1, base_damage + level_bonus + variation)
-                
-                current_target.health -= hit_damage
-                total_damage += hit_damage
-                print(f"Hit {hit + 1}: {hit_damage} damage to {current_target.name}!")
-                
-                # Check if current target died
-                if current_target.health <= 0:
-                    print(f"{current_target.name} has been defeated!")
-                    living_enemies = [e for e in enemies if e.health > 0]
-                    if living_enemies:
-                        enemy_index = (enemy_index + 1) % len(living_enemies)
-                    else:
-                        break
-                else:
-                    enemy_index += 1
+            # Get current target, cycling through living enemies
+            current_target = living_enemies[enemy_index % len(living_enemies)]
             
-            print(f"Total damage dealt: {total_damage}")
-            
-        else:  # Single hit processing
+            # Add slight damage variation
             variation = random.randint(-2, 2)
-            main_damage = max(1, base_damage + level_bonus + variation)
-            target.health -= main_damage
-            total_damage = main_damage
-            print(f"You deal {main_damage} damage to {target.name}!")
+            hit_damage = max(1, base_damage + level_bonus + variation)
+            
+            # Apply damage
+            current_target.health -= hit_damage
+            total_damage += hit_damage
+            print(f"Hit {hit + 1}: {hit_damage} damage to {current_target.name}!")
+            
+            # Check if current target died
+            if current_target.health <= 0:
+                print(f"{current_target.name} has been defeated!")
+                living_enemies = [e for e in enemies if e.health > 0]
+                if living_enemies:
+                    enemy_index = (enemy_index + 1) % len(living_enemies)
+                else:
+                    break
+            else:
+                enemy_index += 1
         
-        # Process area damage if weapon has it
+        # Process area damage after all hits
         if "area_damage" in weapon_stats and living_enemies:
+            splash_damage = max(1, weapon_stats["area_damage"] + int(level_bonus * 0.5))
             for other in living_enemies:
                 if other != target and other.health > 0:
-                    splash_damage = max(1, weapon_stats["area_damage"] + int(level_bonus * 0.5))
                     other.health -= splash_damage
                     total_damage += splash_damage
                     print(f"{other.name} takes {splash_damage} splash damage!")
+        
+        print(f"Total damage dealt: {total_damage}")
                     
     else:  # Legacy weapon handling
         variation = random.randint(-2, 2)
