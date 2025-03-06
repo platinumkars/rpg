@@ -6,6 +6,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Combat - RPG Game</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .combat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .combat-status {
+            background-color: #333;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .enemy-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .enemy-card {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .enemy-card.selected {
+            border-color: #f66;
+            transform: scale(1.02);
+        }
+
+        .combat-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .combat-button {
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .combat-button:hover:not(:disabled) {
+            background-color: #666;
+        }
+
+        .combat-button:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .combat-button:disabled {
+            background-color: #333;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 5px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -23,43 +110,128 @@
     </div>
     <script src="game_logic.js"></script>
     <script>
-        function returnToMain() {
-            window.location.href = 'index.html';
+        let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer'));
+        let currentEnemy = null;
+        const buttons = document.querySelectorAll('.combat-button');
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
         }
 
         async function handleCombatAction(action) {
-            const player = JSON.parse(localStorage.getItem('currentPlayer'));
-            if (!player) return;
+            try {
+                if (!currentPlayer || !currentEnemy) {
+                    throw new Error('Combat not properly initialized');
+                }
 
-            switch (action) {
-                case 'attack':
-                    await processAttack(player);
-                    break;
-                case 'ability':
-                    await processAbility(player);
-                    break;
-                case 'item':
-                    await processItem(player);
-                    break;
-                case 'gadget':
-                    await processGadget(player);
-                    break;
-                case 'flee':
-                    if (Math.random() < 0.5) {
-                        alert('Successfully fled from combat!');
-                        returnToMain();
-                    } else {
-                        alert('Failed to flee!');
-                    }
-                    break;
+                // Disable all buttons during action
+                buttons.forEach(btn => btn.disabled = true);
+
+                switch (action) {
+                    case 'attack':
+                        await processAttack();
+                        break;
+                    case 'ability':
+                        await processAbility();
+                        break;
+                    case 'item':
+                        await processItem();
+                        break;
+                    case 'gadget':
+                        await processGadget();
+                        break;
+                    case 'flee':
+                        await processFlee();
+                        break;
+                }
+
+                // Save state and update display
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+                await updateCombatDisplay();
+
+            } catch (error) {
+                showNotification(error.message);
+            } finally {
+                buttons.forEach(btn => btn.disabled = false);
             }
-            localStorage.setItem('currentPlayer', JSON.stringify(player));
-            updateCombatDisplay();
         }
 
-        function updateCombatDisplay() {
-            // Update combat status and enemy list
+        async function processAttack() {
+            const damage = calculateDamage(currentPlayer);
+            currentEnemy.health -= damage;
+            showNotification(`Dealt ${damage} damage to ${currentEnemy.name}!`);
+
+            if (currentEnemy.health <= 0) {
+                await handleVictory();
+            } else {
+                await enemyTurn();
+            }
         }
+
+        async function updateCombatDisplay() {
+            const statusEl = document.getElementById('combatStatus');
+            statusEl.innerHTML = `
+                ${currentPlayer.name} - HP: ${currentPlayer.health}/${currentPlayer.maxHealth} | MP: ${currentPlayer.mana}/${currentPlayer.maxMana}
+                <br>
+                ${currentEnemy ? `${currentEnemy.name} - HP: ${currentEnemy.health}/${currentEnemy.maxHealth}` : 'No enemy'}
+            `;
+        }
+
+        function generateEnemy() {
+            const enemies = [
+                { name: "Goblin", health: 50, maxHealth: 50, damage: 10 },
+                { name: "Orc", health: 80, maxHealth: 80, damage: 15 },
+                { name: "Dragon", health: 200, maxHealth: 200, damage: 25 }
+            ];
+            return enemies[Math.floor(Math.random() * enemies.length)];
+        }
+
+        function returnToMenu() {
+            window.location.href = 'menu.html';
+        }
+
+        // Initialize combat
+        window.onload = function () {
+            if (!currentPlayer) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Add button click handlers
+            document.querySelectorAll('[data-action]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    handleCombatAction(e.target.dataset.action);
+                });
+            });
+
+            // Add button click feedback
+            buttons.forEach(button => {
+                button.addEventListener('click', function () {
+                    if (!this.disabled) {
+                        this.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            this.style.transform = 'scale(1)';
+                        }, 100);
+                    }
+                });
+            });
+
+            // Start combat
+            currentEnemy = generateEnemy();
+            updateCombatDisplay();
+        };
+
+        // Handle ESC key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                returnToMenu();
+            }
+        });
     </script>
 </body>
 

@@ -88,6 +88,53 @@
             margin-bottom: 20px;
             border-radius: 3px;
         }
+
+        .ability-button {
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-top: 10px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .ability-button:hover:not(:disabled) {
+            background-color: #666;
+        }
+
+        .ability-button:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .ability-button:disabled {
+            background-color: #333;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            background-color: #4a4a4a;
+            border-radius: 5px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 
@@ -101,16 +148,32 @@
         </div>
     </div>
 
+    <div id="notification"></div>
+
     <script src="game_logic.js"></script>
     <script>
         let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer'));
+        const buttons = document.querySelectorAll('.ability-button, .return-button');
 
-        function updateAbilitiesDisplay() {
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        async function updateAbilitiesDisplay() {
             if (!currentPlayer) return;
 
+            // Initialize abilities if they don't exist
+            if (!currentPlayer.abilities) {
+                currentPlayer.abilities = getDefaultAbilities(currentPlayer.classType);
+            }
+
             // Update player stats
-            const playerStats = document.getElementById('playerStats');
-            playerStats.innerHTML = `
+            document.getElementById('playerStats').innerHTML = `
                 ${currentPlayer.name} - Level ${currentPlayer.level}<br>
                 HP: ${currentPlayer.health}/${currentPlayer.maxHealth} | 
                 MP: ${currentPlayer.mana}/${currentPlayer.maxMana}
@@ -129,8 +192,72 @@
                             Mana Cost: ${ability.manaCost}
                         </div>
                         <div class="ability-description">${ability.description}</div>
+                        <button class="ability-button" 
+                            data-ability="${name}"
+                            ${currentPlayer.mana < ability.manaCost ? 'disabled' : ''}>
+                            Use Ability (${ability.manaCost} MP)
+                        </button>
                     </div>
                 `).join('');
+
+            // Add click handlers for newly created buttons
+            addButtonHandlers();
+        }
+
+        function addButtonHandlers() {
+            document.querySelectorAll('[data-ability]').forEach(button => {
+                button.addEventListener('click', () => useAbility(button.dataset.ability));
+            });
+        }
+
+        async function useAbility(abilityName) {
+            try {
+                const ability = currentPlayer.abilities[abilityName];
+                if (!ability) throw new Error('Ability not found');
+
+                if (currentPlayer.mana < ability.manaCost) {
+                    throw new Error('Not enough mana!');
+                }
+
+                // Disable all buttons during ability use
+                buttons.forEach(btn => btn.disabled = true);
+
+                // Apply ability effects
+                currentPlayer.mana -= ability.manaCost;
+
+                if (ability.heal) {
+                    currentPlayer.health = Math.min(
+                        currentPlayer.maxHealth,
+                        currentPlayer.health + ability.heal
+                    );
+                    showNotification(`Used ${abilityName}! Healed for ${ability.heal} HP`);
+                } else if (ability.damage) {
+                    showNotification(`Used ${abilityName}! Ready to deal ${ability.damage} damage`);
+                }
+
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+                await updateAbilitiesDisplay();
+
+            } catch (error) {
+                showNotification(error.message);
+            } finally {
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+
+        function getDefaultAbilities(classType) {
+            const defaultAbilities = {
+                "Warrior": {
+                    "Slash": { damage: 30, manaCost: 20, description: "A powerful sword strike" },
+                    "Battle Cry": { damage: 0, manaCost: 35, description: "Increase damage for 3 turns" }
+                },
+                "Mage": {
+                    "Fireball": { damage: 45, manaCost: 30, description: "Launch a ball of fire" },
+                    "Heal": { heal: 40, manaCost: 35, description: "Restore health" }
+                }
+                // Add more class abilities here
+            };
+            return defaultAbilities[classType] || {};
         }
 
         function returnToMenu() {
@@ -143,6 +270,19 @@
                 window.location.href = 'index.html';
                 return;
             }
+
+            // Add button click feedback
+            buttons.forEach(button => {
+                button.addEventListener('click', function () {
+                    if (!this.disabled) {
+                        this.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            this.style.transform = 'scale(1)';
+                        }, 100);
+                    }
+                });
+            });
+
             updateAbilitiesDisplay();
         };
 

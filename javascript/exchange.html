@@ -71,6 +71,16 @@
             border-radius: 3px;
         }
 
+        .exchange-input:invalid {
+            border-color: #f66;
+        }
+
+        .exchange-input:focus {
+            outline: none;
+            border-color: #66f;
+            box-shadow: 0 0 5px rgba(102, 102, 255, 0.3);
+        }
+
         .exchange-button {
             background-color: #4a4a4a;
             color: white;
@@ -86,7 +96,12 @@
             background-color: #666;
         }
 
+        .exchange-button:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
         .exchange-button:disabled {
+            opacity: 0.6;
             background-color: #333;
             cursor: not-allowed;
         }
@@ -157,6 +172,29 @@
     <script src="game_logic.js"></script>
     <script>
         let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer'));
+        const buttons = document.querySelectorAll('.exchange-button, .return-button');
+
+        function updateButtonStates() {
+            const goldInput = document.getElementById('goldInput');
+            const tpInput = document.getElementById('tpInput');
+            const goldButton = document.querySelector('button[onclick="exchangeGoldToTP()"]');
+            const tpButton = document.querySelector('button[onclick="exchangeTPToGold()"]');
+
+            if (goldInput && goldButton) {
+                const goldAmount = parseInt(goldInput.value);
+                goldButton.disabled = isNaN(goldAmount) ||
+                    goldAmount < 100 ||
+                    currentPlayer.gold < goldAmount;
+            }
+
+            if (tpInput && tpButton) {
+                const tpAmount = parseInt(tpInput.value);
+                tpButton.disabled = isNaN(tpAmount) ||
+                    tpAmount < 1 ||
+                    !currentPlayer.techPoints ||
+                    currentPlayer.techPoints < tpAmount;
+            }
+        }
 
         function updateDisplay() {
             if (!currentPlayer) return;
@@ -166,6 +204,8 @@
                 Gold: ${currentPlayer.gold}<br>
                 Tech Points: ${currentPlayer.techPoints || 0}
             `;
+
+            updateButtonStates();
         }
 
         function showNotification(message) {
@@ -177,48 +217,62 @@
             }, 3000);
         }
 
-        function exchangeGoldToTP() {
-            const goldAmount = parseInt(document.getElementById('goldInput').value);
-            if (isNaN(goldAmount) || goldAmount < 100) {
-                showNotification('Please enter a valid amount (minimum 100 gold)');
-                return;
+        async function exchangeGoldToTP() {
+            try {
+                buttons.forEach(btn => btn.disabled = true);
+
+                const goldAmount = parseInt(document.getElementById('goldInput').value);
+                if (isNaN(goldAmount) || goldAmount < 100) {
+                    throw new Error('Please enter a valid amount (minimum 100 gold)');
+                }
+
+                if (currentPlayer.gold < goldAmount) {
+                    throw new Error('Not enough gold!');
+                }
+
+                const tpGained = Math.floor(goldAmount / 100);
+                currentPlayer.gold -= goldAmount;
+                currentPlayer.techPoints = (currentPlayer.techPoints || 0) + tpGained;
+
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+                showNotification(`Exchanged ${goldAmount} gold for ${tpGained} TP`);
+                document.getElementById('goldInput').value = '';
+
+            } catch (error) {
+                showNotification(error.message);
+            } finally {
+                buttons.forEach(btn => btn.disabled = false);
+                updateDisplay();
             }
-
-            if (currentPlayer.gold < goldAmount) {
-                showNotification('Not enough gold!');
-                return;
-            }
-
-            const tpGained = Math.floor(goldAmount / 100);
-            currentPlayer.gold -= goldAmount;
-            currentPlayer.techPoints = (currentPlayer.techPoints || 0) + tpGained;
-
-            localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
-            showNotification(`Exchanged ${goldAmount} gold for ${tpGained} TP`);
-            updateDisplay();
-            document.getElementById('goldInput').value = '';
         }
 
-        function exchangeTPToGold() {
-            const tpAmount = parseInt(document.getElementById('tpInput').value);
-            if (isNaN(tpAmount) || tpAmount < 1) {
-                showNotification('Please enter a valid amount');
-                return;
+        async function exchangeTPToGold() {
+            try {
+                buttons.forEach(btn => btn.disabled = true);
+
+                const tpAmount = parseInt(document.getElementById('tpInput').value);
+                if (isNaN(tpAmount) || tpAmount < 1) {
+                    throw new Error('Please enter a valid amount');
+                }
+
+                if (!currentPlayer.techPoints || currentPlayer.techPoints < tpAmount) {
+                    throw new Error('Not enough Tech Points!');
+                }
+
+                const goldGained = tpAmount * 80;
+                currentPlayer.techPoints -= tpAmount;
+                currentPlayer.gold += goldGained;
+
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+                showNotification(`Exchanged ${tpAmount} TP for ${goldGained} gold`);
+                document.getElementById('tpInput').value = '';
+
+            } catch (error) {
+                showNotification(error.message);
+            } finally {
+                buttons.forEach(btn => btn.disabled = false);
+                updateDisplay();
             }
-
-            if (!currentPlayer.techPoints || currentPlayer.techPoints < tpAmount) {
-                showNotification('Not enough Tech Points!');
-                return;
-            }
-
-            const goldGained = tpAmount * 80;
-            currentPlayer.techPoints -= tpAmount;
-            currentPlayer.gold += goldGained;
-
-            localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
-            showNotification(`Exchanged ${tpAmount} TP for ${goldGained} gold`);
-            updateDisplay();
-            document.getElementById('tpInput').value = '';
         }
 
         function returnToMenu() {
@@ -231,6 +285,25 @@
                 window.location.href = 'index.html';
                 return;
             }
+
+            // Add input event listeners
+            const inputs = document.querySelectorAll('.exchange-input');
+            inputs.forEach(input => {
+                input.addEventListener('input', updateButtonStates);
+            });
+
+            // Add button click feedback
+            buttons.forEach(button => {
+                button.addEventListener('click', function () {
+                    if (!this.disabled) {
+                        this.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            this.style.transform = 'scale(1)';
+                        }, 100);
+                    }
+                });
+            });
+
             updateDisplay();
         };
 

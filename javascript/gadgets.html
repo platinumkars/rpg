@@ -125,6 +125,25 @@
             cursor: not-allowed;
         }
 
+        .tech-button:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .tech-button:disabled {
+            opacity: 0.6;
+            background-color: #333;
+            cursor: not-allowed;
+        }
+
+        .tech-button[data-owned="true"] {
+            background-color: #2a2;
+            cursor: default;
+        }
+
+        .gadget-card[data-owned="true"] {
+            border-color: #2a2;
+        }
+
         .player-stats {
             text-align: left;
             padding: 15px;
@@ -162,7 +181,7 @@
             <h1 class="tech-title">Tech Laboratory</h1>
             <div id="playerStats" class="player-stats"></div>
             <div id="gadgetGrid" class="gadget-grid"></div>
-            <button class="tech-button" onclick="returnToMenu()">Return to Menu</button>
+            <button class="tech-button return-button" onclick="returnToMenu()">Return to Menu</button>
         </div>
     </div>
     <div id="notification"></div>
@@ -191,7 +210,33 @@
             }
         };
 
-        function updateDisplay() {
+        const buttons = document.querySelectorAll('.tech-button');
+
+        async function updateButtonStates() {
+            const purchaseButtons = document.querySelectorAll('.tech-button:not(.return-button)');
+            purchaseButtons.forEach(button => {
+                if (!button.hasAttribute('data-gadget-name')) return;
+
+                const gadgetName = button.getAttribute('data-gadget-name');
+                const owned = currentPlayer.gadgets && currentPlayer.gadgets[gadgetName];
+                let gadgetInfo;
+
+                for (const [rarity, gadgets] of Object.entries(gadgetData)) {
+                    if (gadgets[gadgetName]) {
+                        gadgetInfo = gadgets[gadgetName];
+                        break;
+                    }
+                }
+
+                if (gadgetInfo) {
+                    const canAfford = (currentPlayer.techPoints || 0) >= gadgetInfo.cost;
+                    button.disabled = owned;
+                    button.textContent = owned ? 'Owned' : (canAfford ? 'Purchase' : 'Not enough TP');
+                }
+            });
+        }
+
+        async function updateDisplay() {
             if (!currentPlayer) return;
 
             // Update player stats
@@ -211,11 +256,12 @@
                     const canAfford = (currentPlayer.techPoints || 0) >= data.cost;
 
                     grid.innerHTML += `
-                        <div class="gadget-card ${rarity}">
+                        <div class="gadget-card ${rarity}" data-gadget-name="${name}">
                             <div class="gadget-name ${rarity}">${name}</div>
                             <div class="gadget-stats">Cost: ${data.cost} TP</div>
                             <div class="gadget-description">${data.description}</div>
                             <button class="tech-button" 
+                                data-gadget-name="${name}"
                                 onclick="purchaseGadget('${name}')"
                                 ${owned ? 'disabled' : ''}>
                                 ${owned ? 'Owned' : canAfford ? 'Purchase' : 'Not enough TP'}
@@ -224,6 +270,44 @@
                     `;
                 });
             });
+
+            await updateButtonStates();
+        }
+
+        async function purchaseGadget(name) {
+            try {
+                // Disable all buttons during purchase
+                buttons.forEach(btn => btn.disabled = true);
+
+                let gadgetInfo;
+                for (const [rarity, gadgets] of Object.entries(gadgetData)) {
+                    if (gadgets[name]) {
+                        gadgetInfo = gadgets[name];
+                        break;
+                    }
+                }
+
+                if (!gadgetInfo) throw new Error('Invalid gadget');
+
+                if (!currentPlayer.techPoints || currentPlayer.techPoints < gadgetInfo.cost) {
+                    throw new Error('Not enough Tech Points!');
+                }
+
+                if (!currentPlayer.gadgets) currentPlayer.gadgets = {};
+                currentPlayer.gadgets[name] = true;
+                currentPlayer.techPoints -= gadgetInfo.cost;
+
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+                showNotification(`Acquired ${name}!`);
+                await updateDisplay();
+
+            } catch (error) {
+                showNotification(error.message);
+            } finally {
+                // Re-enable buttons and update their states
+                buttons.forEach(btn => btn.disabled = false);
+                await updateButtonStates();
+            }
         }
 
         function showNotification(message) {
@@ -233,34 +317,6 @@
             setTimeout(() => {
                 notification.style.display = 'none';
             }, 3000);
-        }
-
-        function purchaseGadget(name) {
-            let gadgetInfo;
-            let gadgetRarity;
-
-            for (const [rarity, gadgets] of Object.entries(gadgetData)) {
-                if (gadgets[name]) {
-                    gadgetInfo = gadgets[name];
-                    gadgetRarity = rarity;
-                    break;
-                }
-            }
-
-            if (!gadgetInfo) return;
-
-            if (!currentPlayer.techPoints || currentPlayer.techPoints < gadgetInfo.cost) {
-                showNotification('Not enough Tech Points!');
-                return;
-            }
-
-            if (!currentPlayer.gadgets) currentPlayer.gadgets = {};
-            currentPlayer.gadgets[name] = true;
-            currentPlayer.techPoints -= gadgetInfo.cost;
-
-            localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
-            showNotification(`Acquired ${name}!`);
-            updateDisplay();
         }
 
         function returnToMenu() {
@@ -273,6 +329,19 @@
                 window.location.href = 'index.html';
                 return;
             }
+
+            // Add button click feedback
+            buttons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    if (!this.disabled) {
+                        this.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            this.style.transform = 'scale(1)';
+                        }, 100);
+                    }
+                });
+            });
+
             updateDisplay();
         };
 

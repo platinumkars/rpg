@@ -1,9 +1,13 @@
 let currentPlayer = null;
 
 class Character {
-  constructor(name, classType) {
+  constructor(name, classChoice) {
+    if (!name || !classChoice) {
+      throw new Error("Name and class are required");
+    }
+
     this.name = name;
-    this.classType = this.getClassName(classType);
+    this.classType = this.getClassName(classChoice);
     this.level = 1;
     this.exp = 0;
     this.gold = 100;

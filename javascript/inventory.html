@@ -76,6 +76,16 @@
             background-color: #666;
         }
 
+        .use-button:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .use-button:disabled {
+            background-color: #333;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .return-button {
             width: 100%;
             padding: 15px;
@@ -89,6 +99,27 @@
 
         .return-button:hover {
             background-color: #666;
+        }
+
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            background-color: #4a4a4a;
+            border-radius: 5px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
         }
     </style>
 </head>
@@ -122,9 +153,25 @@
     <script src="game_logic.js"></script>
     <script>
         let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer'));
+        const buttons = document.querySelectorAll('.use-button, .return-button');
 
-        function updateInventoryDisplay() {
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        async function updateInventoryDisplay() {
             if (!currentPlayer) return;
+
+            // Initialize properties if they don't exist
+            currentPlayer.inventory = currentPlayer.inventory || {};
+            currentPlayer.weapons = currentPlayer.weapons || {};
+            currentPlayer.gadgets = currentPlayer.gadgets || {};
+            currentPlayer.powers = currentPlayer.powers || {};
 
             // Update Items
             const itemsList = document.getElementById('itemsList');
@@ -132,7 +179,7 @@
                 .map(([item, quantity]) => `
                     <li class="item-entry">
                         <span>${item} (${quantity})</span>
-                        <button class="use-button" onclick="useItem('${item}')">Use</button>
+                        <button class="use-button" data-item="${item}">Use</button>
                     </li>
                 `).join('');
 
@@ -142,57 +189,71 @@
                 .map(([weapon, damage]) => `
                     <li class="item-entry">
                         <span>${weapon} (DMG: ${damage})</span>
-                        <button class="use-button" onclick="equipItem('${weapon}')"
+                        <button class="use-button" 
+                            data-weapon="${weapon}"
                             ${weapon === currentPlayer.currentWeapon ? 'disabled' : ''}>
                             ${weapon === currentPlayer.currentWeapon ? 'Equipped' : 'Equip'}
                         </button>
                     </li>
                 `).join('');
 
-            // Update Gadgets
-            const gadgetsList = document.getElementById('gadgetsList');
-            gadgetsList.innerHTML = Object.entries(currentPlayer.gadgets)
-                .map(([gadget, info]) => `
-                    <li class="item-entry">
-                        <span>${gadget}</span>
-                        <button class="use-button" onclick="useGadget('${gadget}')">Use</button>
-                    </li>
-                `).join('');
-
-            // Update Powers
-            const powersList = document.getElementById('powersList');
-            powersList.innerHTML = Object.entries(currentPlayer.powers)
-                .map(([power, info]) => `
-                    <li class="item-entry">
-                        <span>${power}</span>
-                        <button class="use-button" onclick="usePower('${power}')">Use</button>
-                    </li>
-                `).join('');
+            // Add click handlers for newly created buttons
+            addButtonHandlers();
         }
 
-        function useItem(itemName) {
-            // Handle item usage
-            if (itemName.includes('Potion')) {
-                if (itemName === 'Health Potion') {
-                    currentPlayer.health = Math.min(currentPlayer.maxHealth,
-                        currentPlayer.health + 50);
-                } else if (itemName === 'Mana Potion') {
-                    currentPlayer.mana = Math.min(currentPlayer.maxMana,
-                        currentPlayer.mana + 35);
+        function addButtonHandlers() {
+            // Add handlers for item buttons
+            document.querySelectorAll('[data-item]').forEach(button => {
+                button.addEventListener('click', () => useItem(button.dataset.item));
+            });
+
+            // Add handlers for weapon buttons
+            document.querySelectorAll('[data-weapon]').forEach(button => {
+                button.addEventListener('click', () => equipItem(button.dataset.weapon));
+            });
+        }
+
+        async function useItem(itemName) {
+            try {
+                buttons.forEach(btn => btn.disabled = true);
+
+                if (itemName.includes('Potion')) {
+                    if (itemName === 'Health Potion') {
+                        currentPlayer.health = Math.min(currentPlayer.maxHealth,
+                            currentPlayer.health + 50);
+                        showNotification('Restored 50 HP!');
+                    } else if (itemName === 'Mana Potion') {
+                        currentPlayer.mana = Math.min(currentPlayer.maxMana,
+                            currentPlayer.mana + 35);
+                        showNotification('Restored 35 MP!');
+                    }
+                    currentPlayer.inventory[itemName]--;
+                    if (currentPlayer.inventory[itemName] <= 0) {
+                        delete currentPlayer.inventory[itemName];
+                    }
+                    localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+                    await updateInventoryDisplay();
                 }
-                currentPlayer.inventory[itemName]--;
-                if (currentPlayer.inventory[itemName] <= 0) {
-                    delete currentPlayer.inventory[itemName];
-                }
-                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
-                updateInventoryDisplay();
+            } catch (error) {
+                showNotification(error.message);
+            } finally {
+                buttons.forEach(btn => btn.disabled = false);
             }
         }
 
-        function equipItem(weaponName) {
-            currentPlayer.currentWeapon = weaponName;
-            localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
-            updateInventoryDisplay();
+        async function equipItem(weaponName) {
+            try {
+                buttons.forEach(btn => btn.disabled = true);
+
+                currentPlayer.currentWeapon = weaponName;
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+                showNotification(`Equipped ${weaponName}!`);
+                await updateInventoryDisplay();
+            } catch (error) {
+                showNotification(error.message);
+            } finally {
+                buttons.forEach(btn => btn.disabled = false);
+            }
         }
 
         function returnToMenu() {
@@ -205,6 +266,19 @@
                 window.location.href = 'index.html';
                 return;
             }
+
+            // Add button click feedback
+            buttons.forEach(button => {
+                button.addEventListener('click', function () {
+                    if (!this.disabled) {
+                        this.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            this.style.transform = 'scale(1)';
+                        }, 100);
+                    }
+                });
+            });
+
             updateInventoryDisplay();
         };
 
@@ -215,6 +289,7 @@
             }
         });
     </script>
+    <div id="notification"></div>
 </body>
 
 </html>

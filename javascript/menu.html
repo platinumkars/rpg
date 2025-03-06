@@ -64,6 +64,18 @@
             transform: translateY(1px);
         }
 
+        .menu-button:disabled {
+            background-color: #333;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .menu-button:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
         .player-stats {
             text-align: left;
             padding: 10px;
@@ -85,6 +97,7 @@
             border-radius: 3px;
             text-align: left;
             margin-bottom: 20px;
+            scroll-behavior: smooth;
         }
 
         .menu-footer {
@@ -137,6 +150,7 @@
             `;
         }
 
+        // Replace the existing handleCommand function
         async function handleCommand(command) {
             if (!currentPlayer) {
                 window.location.href = 'index.html';
@@ -144,44 +158,104 @@
             }
 
             try {
+                // Disable all buttons during processing
+                const buttons = document.querySelectorAll('.menu-button');
+                buttons.forEach(btn => btn.disabled = true);
+
                 switch (command) {
                     case '1':
+                        console.log('Entering combat...');
                         window.location.href = 'combat.html';
                         break;
                     case '2':
+                        console.log('Opening shop...');
                         window.location.href = 'shop.html';
                         break;
                     case '3':
+                        console.log('Opening inventory...');
                         window.location.href = 'inventory.html';
                         break;
                     case '4':
+                        console.log('Resting...');
                         await rest(currentPlayer);
+                        updatePlayerStats();
+                        gameOutput.innerHTML += 'You feel refreshed!\n';
                         break;
                     case '5':
+                        console.log('Opening abilities...');
                         window.location.href = 'abilities.html';
                         break;
                     case '6':
+                        console.log('Opening gadgets...');
                         window.location.href = 'gadgets.html';
                         break;
                     case '7':
+                        console.log('Opening exchange...');
                         window.location.href = 'exchange.html';
                         break;
                     case '8':
+                        console.log('Opening powers...');
                         window.location.href = 'powers.html';
                         break;
                     case '9':
                         if (confirm('Are you sure you want to quit?')) {
+                            console.log('Quitting game...');
                             localStorage.removeItem('currentPlayer');
                             window.location.href = 'index.html';
+                        } else {
+                            // Re-enable buttons if user cancels
+                            buttons.forEach(btn => btn.disabled = false);
                         }
                         break;
+                    default:
+                        console.error('Invalid command:', command);
+                        gameOutput.innerHTML += 'Invalid command. Please try again.\n';
                 }
-                updatePlayerStats();
+
+                // Save current state
                 localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+
             } catch (error) {
                 console.error('Error:', error);
-                gameOutput.innerHTML += 'An error occurred. Please try again.\n';
+                gameOutput.innerHTML += `Error: ${error.message}\n`;
+                // Re-enable buttons on error
+                buttons.forEach(btn => btn.disabled = false);
             }
+        }
+
+        // Add this function to handle the rest command
+        async function rest(player) {
+            if (!player) return;
+
+            player.health = player.maxHealth;
+            player.mana = player.maxMana;
+
+            return new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+        // Add button click feedback
+        document.addEventListener('DOMContentLoaded', () => {
+            const buttons = document.querySelectorAll('.menu-button');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', function () {
+                    this.classList.add('active');
+                    setTimeout(() => this.classList.remove('active'), 200);
+                });
+            });
+        });
+
+        // Add scroll to bottom for game output
+        if (gameOutput) {
+            const observer = new MutationObserver(() => {
+                gameOutput.scrollTop = gameOutput.scrollHeight;
+            });
+
+            observer.observe(gameOutput, {
+                childList: true,
+                characterData: true,
+                subtree: true
+            });
         }
 
         // Initialize

@@ -100,6 +100,33 @@
             cursor: not-allowed;
         }
 
+        .power-button:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .power-button:disabled {
+            opacity: 0.6;
+            background-color: #333;
+            cursor: not-allowed;
+        }
+
+        .power-button.unlocked {
+            background-color: #2a2;
+            cursor: default;
+        }
+
+        .power-card[data-owned="true"] {
+            border-color: #2a2;
+        }
+
+        .notification {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+
         .player-stats {
             background-color: #333;
             padding: 15px;
@@ -155,6 +182,7 @@
     <script src="game_logic.js"></script>
     <script>
         let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer'));
+        const buttons = document.querySelectorAll('.power-button, .return-button');
 
         const powerData = {
             "Fire Mastery": {
@@ -195,10 +223,26 @@
             }
         };
 
+        function updateButtonStates() {
+            const powerButtons = document.querySelectorAll('.power-button');
+            powerButtons.forEach(button => {
+                const powerName = button.getAttribute('data-power');
+                if (powerName) {
+                    const power = powerData[powerName];
+                    const owned = currentPlayer.powers[powerName];
+                    const canAfford = currentPlayer.gold >= power.cost;
+
+                    button.disabled = owned;
+                    button.textContent = owned ? 'Unlocked' :
+                        canAfford ? 'Unlock' :
+                            'Not enough gold';
+                }
+            });
+        }
+
         function updateDisplay() {
             if (!currentPlayer) return;
 
-            // Initialize powers if needed
             if (!currentPlayer.powers) {
                 currentPlayer.powers = {};
             }
@@ -225,6 +269,7 @@
                         <div class="power-description">${data.description}</div>
                         <div class="power-stats">${data.stats}</div>
                         <button class="power-button" 
+                            data-power="${name}"{
                             onclick="unlockPower('${name}')"
                             ${owned ? 'disabled' : ''}>
                             ${owned ? 'Unlocked' : canAfford ? 'Unlock' : 'Not enough gold'}
@@ -232,45 +277,59 @@
                     </div>
                 `;
             });
+
+            updateButtonStates();
         }
 
-        function showNotification(message) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
+        async function unlockPower(name) {
+            try {
+                buttons.forEach(btn => btn.disabled = true);
 
-        function unlockPower(name) {
-            const power = powerData[name];
-            if (!power) return;
+                const power = powerData[name];
+                if (!power) throw new Error('Invalid power');
 
-            if (currentPlayer.gold < power.cost) {
-                showNotification('Not enough gold!');
-                return;
+                if (currentPlayer.gold < power.cost) {
+                    throw new Error('Not enough gold!');
+                }
+
+                currentPlayer.gold -= power.cost;
+                currentPlayer.powers[name] = true;
+
+                // Apply passive effects
+                switch (name) {
+                    case "Life Force":
+                        currentPlayer.maxHealth += 100;
+                        currentPlayer.health = currentPlayer.maxHealth;
+                        break;
+                    case "Mana Flow":
+                        currentPlayer.maxMana += 50;
+                        currentPlayer.mana = currentPlayer.maxMana;
+                        break;
+                    // Add other power effects here
+                }
+
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+                showNotification(`Unlocked ${name}!`);
+
+            } catch (error) {
+                showNotification(error.message);
+            } finally {
+                buttons.forEach(btn => btn.disabled = false);
+                updateDisplay();
             }
 
-            currentPlayer.gold -= power.cost;
-            currentPlayer.powers[name] = true;
-
-            // Apply passive effects
-            if (name === "Life Force") {
-                currentPlayer.maxHealth += 100;
-                currentPlayer.health = currentPlayer.maxHealth;
-            } else if (name === "Mana Flow") {
-                currentPlayer.maxMana += 50;
-                currentPlayer.mana = currentPlayer.maxMana;
+            function showNotification(message) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.style.display = 'block';
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
             }
 
-            localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
-            showNotification(`Unlocked ${name}!`);
-            updateDisplay();
-        }
-
-        function returnToMenu() {
-            window.location.href = 'menu.html';
+            function returnToMenu() {
+                window.location.href = 'menu.html';
+            }
         }
 
         // Initialize
@@ -279,6 +338,19 @@
                 window.location.href = 'index.html';
                 return;
             }
+
+            // Add button click feedback
+            buttons.forEach(button => {
+                button.addEventListener('click', function () {
+                    if (!this.disabled) {
+                        this.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            this.style.transform = 'scale(1)';
+                        }, 100);
+                    }
+                });
+            });
+
             updateDisplay();
         };
 

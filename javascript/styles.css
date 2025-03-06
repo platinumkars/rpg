@@ -13,40 +13,64 @@ body {
   background-color: #2d2d2d;
   border: 1px solid #444;
   padding: 15px;
+  border-radius: 5px;
+  animation: fadeIn 0.3s ease-out;
 }
 
 /* Combat styles */
 .combat-status {
-  margin-bottom: 10px;
-  padding: 10px;
-  background-color: #1e1e1e;
+  margin-bottom: 15px;
+  padding: 15px;
+  background-color: #333;
+  border-radius: 5px;
+  border: 1px solid #444;
 }
 
 .enemy-list {
-  margin: 10px 0;
-  padding: 10px;
-  background-color: #1e1e1e;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin: 15px 0;
 }
 
 .combat-actions {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 10px;
   margin-top: 20px;
 }
 
 /* Shop styles */
 .shop-inventory {
-  height: 300px;
-  overflow-y: scroll;
-  margin-bottom: 10px;
-  padding: 10px;
-  background-color: #1e1e1e;
+  height: 400px;
+  overflow-y: auto;
+  margin-bottom: 15px;
+  padding: 15px;
+  background-color: #333;
+  border-radius: 5px;
+  border: 1px solid #444;
+  -webkit-overscroll-behavior: contain;
+  -ms-scroll-chaining: none;
+  overscroll-behavior: contain;
+  -ms-overscroll-behavior: contain;
+}
+
+.shop-inventory::-webkit-scrollbar {
+  width: 8px;
+}
+
+.shop-inventory::-webkit-scrollbar-track {
+  background: #333;
+}
+
+.shop-inventory::-webkit-scrollbar-thumb {
+  background-color: #666;
+  border-radius: 4px;
 }
 
 .shop-actions {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 10px;
 }
 
@@ -55,16 +79,132 @@ button {
   background-color: #4a4a4a;
   color: white;
   border: none;
-  padding: 10px;
+  padding: 10px 20px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+  font-family: "Courier New", monospace;
+  font-size: 1em;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   background-color: #666;
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98) translateY(0);
+}
+
+button:disabled {
+  background-color: #333;
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .return-button {
   width: 100%;
   margin-top: 20px;
+  background-color: #555;
+}
+
+/* Notification styles */
+#notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 5px;
+  display: none;
+  animation: slideIn 0.3s ease-out;
+  z-index: 1000;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Card styles */
+.item-card,
+.enemy-card,
+.ability-card {
+  background-color: #333;
+  padding: 15px;
+  border-radius: 5px;
+  border: 1px solid #444;
+  transition: all 0.2s ease;
+}
+
+.item-card:hover,
+.enemy-card:hover,
+.ability-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Status effects */
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.selected {
+  border-color: #66f;
+  box-shadow: 0 0 10px rgba(102, 102, 255, 0.3);
+}
+
+/* Loading state */
+.loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: inherit;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.game-button {
+  padding: 15px;
+  font-size: 1.1em;
+  transition: all 0.2s ease;
+}
+
+.game-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

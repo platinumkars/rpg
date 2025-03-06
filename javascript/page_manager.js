@@ -2,6 +2,7 @@ class PageManager {
   constructor() {
     this.currentPage = "characterCreation";
     this.setupInterfaces();
+    this.addGlobalEventListeners();
   }
 
   setupInterfaces() {
@@ -30,14 +31,42 @@ class PageManager {
     this.showPage("characterCreation");
   }
 
+  addGlobalEventListeners() {
+    // Handle ESC key for menu return
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && this.currentPage !== "characterCreation") {
+        this.showPage("gameInterface");
+      }
+    });
+
+    // Add button feedback effects
+    document.addEventListener("click", (e) => {
+      if (e.target.matches("button:not(:disabled)")) {
+        this.addButtonFeedback(e.target);
+      }
+    });
+  }
+
+  addButtonFeedback(button) {
+    button.style.transform = "scale(0.95)";
+    setTimeout(() => {
+      button.style.transform = "";
+    }, 100);
+  }
+
   createCharacterCreation() {
     const div = document.createElement("div");
     div.id = "characterCreation";
     div.className = "interface-section";
     div.innerHTML = `
       <h2>Create Your Character</h2>
-      <input type="text" id="characterName" placeholder="Enter character name">
-      <select id="classChoice">
+      <input type="text" 
+        id="characterName" 
+        placeholder="Enter character name"
+        maxlength="20"
+        required>
+      <select id="classChoice" required>
+        <option value="">Select a class...</option>
         <option value="1">Warrior - High HP and defense</option>
         <option value="2">Mage - Powerful spells and high mana</option>
         <option value="3">Paladin - Balanced stats with healing</option>
@@ -51,8 +80,22 @@ class PageManager {
         <option value="11">Alchemist - Potions and explosives</option>
         <option value="12">Shaman - Elemental and spiritual magic</option>
       </select>
-      <button onclick="createCharacter()">Start Game</button>
+      <button id="startButton" onclick="createCharacter()" disabled>Start Game</button>
     `;
+
+    // Add input validation
+    const nameInput = div.querySelector("#characterName");
+    const classSelect = div.querySelector("#classChoice");
+    const startButton = div.querySelector("#startButton");
+
+    const validateForm = () => {
+      const isValid = nameInput.value.trim() && classSelect.value;
+      startButton.disabled = !isValid;
+    };
+
+    nameInput.addEventListener("input", validateForm);
+    classSelect.addEventListener("change", validateForm);
+
     return div;
   }
 
@@ -64,20 +107,29 @@ class PageManager {
       <div id="playerStats"></div>
       <div id="gameOutput"></div>
       <div class="control-section">
-        <input type="text" id="userInput" placeholder="Enter command...">
-        <div class="button-container">
-          <button onclick="handleCommand('1')">Fight</button>
-          <button onclick="handleCommand('2')">Shop</button>
-          <button onclick="handleCommand('3')">Inventory</button>
-          <button onclick="handleCommand('4')">Rest</button>
-          <button onclick="handleCommand('5')">Abilities</button>
-          <button onclick="handleCommand('6')">Gadgets</button>
-          <button onclick="handleCommand('7')">Exchange</button>
-          <button onclick="handleCommand('8')">Powers</button>
-          <button onclick="handleCommand('9')">Quit</button>
+        <div class="button-grid">
+          <button class="game-button" data-command="1">Fight</button>
+          <button class="game-button" data-command="2">Shop</button>
+          <button class="game-button" data-command="3">Inventory</button>
+          <button class="game-button" data-command="4">Rest</button>
+          <button class="game-button" data-command="5">Abilities</button>
+          <button class="game-button" data-command="6">Gadgets</button>
+          <button class="game-button" data-command="7">Exchange</button>
+          <button class="game-button" data-command="8">Powers</button>
+          <button class="game-button" data-command="9">Quit</button>
         </div>
       </div>
     `;
+
+    // Add button event listeners
+    div.querySelectorAll(".game-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (!button.disabled) {
+          handleCommand(button.dataset.command);
+        }
+      });
+    });
+
     return div;
   }
 
@@ -118,6 +170,10 @@ class PageManager {
   showPage(pageName) {
     if (!this.interfaces[pageName]) return false;
 
+    // Disable buttons during transition
+    const buttons = document.querySelectorAll("button");
+    buttons.forEach((btn) => (btn.disabled = true));
+
     // Hide all pages
     Object.values(this.interfaces).forEach((interface) => {
       interface.classList.add("hidden");
@@ -126,6 +182,12 @@ class PageManager {
     // Show requested page
     this.interfaces[pageName].classList.remove("hidden");
     this.currentPage = pageName;
+
+    // Re-enable buttons
+    setTimeout(() => {
+      buttons.forEach((btn) => (btn.disabled = false));
+    }, 100);
+
     return true;
   }
 

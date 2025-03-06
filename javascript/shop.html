@@ -6,43 +6,250 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop - RPG Game</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .shop-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .shop-status {
+            background-color: #333;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .shop-inventory {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .item-card {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #444;
+        }
+
+        .shop-button {
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+
+        .shop-button:hover:not(:disabled) {
+            background-color: #666;
+        }
+
+        .shop-button:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .shop-button:disabled {
+            background-color: #333;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-radius: 5px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <div id="shopContainer" class="interface-section active">
+    <div id="shopContainer" class="shop-container">
         <div class="shop-status" id="shopStatus"></div>
         <div class="shop-inventory" id="shopInventory"></div>
         <div class="shop-actions">
-            <button onclick="handleShopAction('buy')">Buy</button>
-            <button onclick="handleShopAction('sell')">Sell</button>
-            <button onclick="returnToMain()">Exit Shop</button>
+            <button class="shop-button" data-action="buy">Buy Items</button>
+            <button class="shop-button" data-action="sell">Sell Items</button>
+            <button class="shop-button" onclick="returnToMenu()">Exit Shop</button>
         </div>
     </div>
+    <div id="notification"></div>
     <script src="game_logic.js"></script>
     <script>
-        function returnToMain() {
-            window.location.href = 'index.html';
+        let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer'));
+        const buttons = document.querySelectorAll('.shop-button');
+
+        const shopInventory = {
+            "Health Potion": { price: 50, description: "Restores 50 HP" },
+            "Mana Potion": { price: 40, description: "Restores 35 MP" },
+            "Iron Sword": { price: 150, damage: 12, description: "A basic sword" },
+            "Steel Sword": { price: 300, damage: 20, description: "A stronger sword" }
+        };
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
         }
 
         async function handleShopAction(action) {
-            const player = JSON.parse(localStorage.getItem('currentPlayer'));
-            if (!player) return;
+            try {
+                // Disable all buttons during action
+                buttons.forEach(btn => btn.disabled = true);
 
-            switch (action) {
-                case 'buy':
-                    await processPurchase(player);
-                    break;
-                case 'sell':
-                    await processSale(player);
-                    break;
+                if (!currentPlayer) throw new Error('No player data found');
+
+                switch (action) {
+                    case 'buy':
+                        await showBuyMenu();
+                        break;
+                    case 'sell':
+                        await showSellMenu();
+                        break;
+                    default:
+                        throw new Error('Invalid action');
+                }
+
+            } catch (error) {
+                showNotification(error.message);
+            } finally {
+                buttons.forEach(btn => btn.disabled = false);
             }
-            localStorage.setItem('currentPlayer', JSON.stringify(player));
-            updateShopDisplay();
+        }
+
+        async function showBuyMenu() {
+            const inventory = document.getElementById('shopInventory');
+            inventory.innerHTML = Object.entries(shopInventory)
+                .map(([item, info]) => `
+                    <div class="item-card">
+                        <h3>${item}</h3>
+                        <p>${info.description}</p>
+                        <p>Price: ${info.price} gold</p>
+                        <button class="shop-button" 
+                            onclick="purchaseItem('${item}')"
+                            ${currentPlayer.gold < info.price ? 'disabled' : ''}>
+                            Buy
+                        </button>
+                    </div>
+                `).join('');
+        }
+
+        async function showSellMenu() {
+            const inventory = document.getElementById('shopInventory');
+            inventory.innerHTML = Object.entries(currentPlayer.inventory || {})
+                .map(([item, quantity]) => `
+                    <div class="item-card">
+                        <h3>${item} (${quantity})</h3>
+                        <p>Sell price: ${Math.floor(shopInventory[item]?.price * 0.5 || 0)} gold</p>
+                        <button class="shop-button" onclick="sellItem('${item}')">
+                            Sell
+                        </button>
+                    </div>
+                `).join('');
+        }
+
+        async function purchaseItem(itemName) {
+            try {
+                const item = shopInventory[itemName];
+                if (!item) throw new Error('Item not found');
+                if (currentPlayer.gold < item.price) throw new Error('Not enough gold');
+
+                currentPlayer.gold -= item.price;
+                currentPlayer.inventory = currentPlayer.inventory || {};
+                currentPlayer.inventory[itemName] = (currentPlayer.inventory[itemName] || 0) + 1;
+
+                if (item.damage) {
+                    currentPlayer.weapons = currentPlayer.weapons || {};
+                    currentPlayer.weapons[itemName] = item.damage;
+                }
+
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+                showNotification(`Purchased ${itemName}!`);
+                await updateShopDisplay();
+
+            } catch (error) {
+                showNotification(error.message);
+            }
+        }
+
+        async function sellItem(itemName) {
+            try {
+                if (!currentPlayer.inventory[itemName]) throw new Error('Item not found');
+
+                const sellPrice = Math.floor(shopInventory[itemName].price * 0.5);
+                currentPlayer.gold += sellPrice;
+                currentPlayer.inventory[itemName]--;
+
+                if (currentPlayer.inventory[itemName] <= 0) {
+                    delete currentPlayer.inventory[itemName];
+                }
+
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+                showNotification(`Sold ${itemName} for ${sellPrice} gold!`);
+                await updateShopDisplay();
+
+            } catch (error) {
+                showNotification(error.message);
+            }
         }
 
         function updateShopDisplay() {
-            // Update shop inventory and player gold
+            const status = document.getElementById('shopStatus');
+            status.innerHTML = `
+                ${currentPlayer.name}<br>
+                Gold: ${currentPlayer.gold}
+            `;
         }
+
+        function returnToMenu() {
+            window.location.href = 'menu.html';
+        }
+
+        // Initialize
+        window.onload = function () {
+            if (!currentPlayer) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Add button click handlers
+            document.querySelectorAll('[data-action]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    handleShopAction(e.target.dataset.action);
+                });
+            });
+
+            updateShopDisplay();
+            showBuyMenu();
+        };
+
+        // Handle ESC key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                returnToMenu();
+            }
+        });
     </script>
 </body>
 
