@@ -199,7 +199,7 @@
                 <option value="11">Alchemist - Potions and explosives</option>
                 <option value="12">Shaman - Elemental and spiritual magic</option>
             </select>
-            <button type="button" onclick="createCharacter()">Start Game</button>
+            <button type="button" onclick="createCharacter()" disabled>Start Game</button>
         </div>
 
         <div id="gameInterface" class="interface-section">
@@ -253,6 +253,7 @@
         async function createCharacter() {
             const nameInput = document.getElementById('characterName');
             const classSelect = document.getElementById('classChoice');
+            const startButton = document.querySelector('#characterCreation button');
 
             if (!nameInput || !classSelect) {
                 console.error('Required elements not found');
@@ -270,70 +271,75 @@
             }
 
             try {
-                // Add loading state to button
-                const startButton = document.querySelector('#characterCreation button');
-                if (startButton) {
-                    startButton.disabled = true;
-                    startButton.textContent = 'Creating...';
-                }
+                // Disable button and show loading state
+                startButton.disabled = true;
+                startButton.textContent = 'Creating...';
 
                 // Create character
                 currentPlayer = new Character(name, classChoice);
-                if (!currentPlayer) {
-                    throw new Error('Character creation failed');
-                }
 
                 // Initialize additional properties
                 currentPlayer.techPoints = 0;
+                currentPlayer.gold = 100;
                 currentPlayer.inventory = { "Health Potion": 2, "Mana Potion": 2 };
                 currentPlayer.gadgets = {};
                 currentPlayer.powers = {};
+                currentPlayer.abilities = getDefaultAbilities(classChoice);
 
                 // Save to localStorage
                 localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
 
-                // Show success message
                 console.log(`Creating ${name} as ${currentPlayer.classType}...`);
 
-                // Redirect to menu
-                setTimeout(() => {
-                    window.location.href = 'menu.html';
-                }, 500);
+                // Navigate to menu.html
+                window.location.href = 'menu.html';
 
             } catch (error) {
                 console.error('Failed to create character:', error);
                 alert('Error creating character. Please try again.');
 
                 // Reset button state
-                if (startButton) {
-                    startButton.disabled = false;
-                    startButton.textContent = 'Start Game';
-                }
+                startButton.disabled = false;
+                startButton.textContent = 'Start Game';
             }
         }
 
-        // Add event listeners for form elements
-        window.addEventListener('DOMContentLoaded', () => {
+        // Add this helper function to get default abilities
+        function getDefaultAbilities(classChoice) {
+            const defaultAbilities = {
+                "1": { // Warrior
+                    "Slash": { damage: 30, manaCost: 20, description: "A powerful sword strike" },
+                    "Battle Cry": { damage: 0, manaCost: 35, description: "Increase damage for 3 turns" }
+                },
+                "2": { // Mage
+                    "Fireball": { damage: 45, manaCost: 30, description: "Launch a ball of fire" },
+                    "Heal": { heal: 40, manaCost: 35, description: "Restore health" }
+                }
+                // Add more class abilities as needed
+            };
+            return defaultAbilities[classChoice] || {};
+        }
+
+        // Add form validation
+        document.addEventListener('DOMContentLoaded', () => {
             const nameInput = document.getElementById('characterName');
             const classSelect = document.getElementById('classChoice');
             const startButton = document.querySelector('#characterCreation button');
 
-            if (nameInput) {
-                nameInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        createCharacter();
-                    }
-                });
+            function validateForm() {
+                const isValid = nameInput.value.trim() && classSelect.value;
+                startButton.disabled = !isValid;
             }
 
-            if (classSelect) {
-                classSelect.addEventListener('change', () => {
-                    if (nameInput.value.trim()) {
-                        startButton.focus();
-                    }
-                });
-            }
+            nameInput.addEventListener('input', validateForm);
+            classSelect.addEventListener('change', validateForm);
+            nameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !startButton.disabled) {
+                    createCharacter();
+                }
+            });
+
+            validateForm(); // Initial validation
         });
 
         function showGameInterface() {
