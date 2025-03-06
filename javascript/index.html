@@ -223,29 +223,30 @@
     <script src="page_manager.js"></script>
     <script>
         let currentPlayer = null;
-        const gameOutput = document.getElementById('gameOutput');
-        const userInput = document.getElementById('userInput');
-        const playerStats = document.getElementById('playerStats');
-        const characterCreation = document.getElementById('characterCreation');
-        const gameInterface = document.getElementById('gameInterface');
-        let pageManager;
+        let pageManager = null;
 
+        // Initialize game elements
+        const elements = {
+            gameOutput: document.getElementById('gameOutput'),
+            userInput: document.getElementById('userInput'),
+            playerStats: document.getElementById('playerStats'),
+            characterCreation: document.getElementById('characterCreation'),
+            gameInterface: document.getElementById('gameInterface')
+        };
+
+        // Initialize game when page loads
         window.onload = function () {
             pageManager = new PageManager();
             setupEventListeners();
-        };
 
-        function setupEventListeners() {
-            const userInput = document.getElementById('userInput');
-            if (userInput) {
-                userInput.addEventListener('keypress', function (e) {
-                    if (e.key === 'Enter') {
-                        handleUserInput(e.target.value);
-                        e.target.value = '';
-                    }
-                });
+            // Check for existing player
+            const savedPlayer = localStorage.getItem('currentPlayer');
+            if (savedPlayer) {
+                currentPlayer = JSON.parse(savedPlayer);
+                showGameInterface();
+                updatePlayerStats(currentPlayer);
             }
-        }
+        };
 
         async function createCharacter() {
             const name = document.getElementById('characterName').value.trim();
@@ -256,69 +257,85 @@
                 return;
             }
 
-            currentPlayer = new Character(name, classChoice);
-            document.getElementById('characterCreation').classList.remove('active');
-            document.getElementById('gameInterface').classList.add('active');
-            updatePlayerStats(currentPlayer);
-            console.log(`Welcome, ${currentPlayer.name} the ${currentPlayer.classType}!`);
-        }
-
-        function updatePlayerStats(player) {
-            if (player) {
-                playerStats.innerHTML = `
-                    ${player.name} - Level ${player.level}<br>
-                    HP: ${player.health}/${player.maxHealth} | 
-                    MP: ${player.mana}/${player.maxMana}<br>
-                    EXP: ${player.exp}/${calculateExpRequirement(player.level)} | 
-                    Gold: ${player.gold}
-                `;
+            try {
+                currentPlayer = new Character(name, classChoice);
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+                showGameInterface();
+                updatePlayerStats(currentPlayer);
+                elements.gameOutput.innerHTML = `Welcome, ${currentPlayer.name} the ${currentPlayer.classType}!\n`;
+            } catch (error) {
+                console.error('Failed to create character:', error);
+                alert('Error creating character. Please try again.');
             }
         }
 
-        window.prompt = function (message) {
-            return new Promise((resolve) => {
-                console.log(message);
-                userInput.focus();
-                userInput.onkeypress = function (e) {
-                    if (e.key === 'Enter') {
-                        const value = userInput.value;
-                        userInput.value = '';
-                        console.log(`> ${value}`);
-                        resolve(value);
-                    }
-                };
-            });
-        };
+        function showGameInterface() {
+            elements.characterCreation.classList.remove('active');
+            elements.gameInterface.classList.add('active');
+        }
 
         async function handleCommand(command) {
             if (!currentPlayer) return;
 
-            // Store player data before navigation
-            localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
-
-            switch (command) {
-                case '1':
-                    window.location.href = 'combat.html';
-                    break;
-                case '2':
-                    window.location.href = 'shop.html';
-                    break;
-                // ... rest of the cases
+            try {
+                switch (command) {
+                    case '1': // Fight
+                        await startCombat();
+                        break;
+                    case '2': // Shop
+                        await openShop();
+                        break;
+                    case '3': // Inventory
+                        showInventory();
+                        break;
+                    case '4': // Rest
+                        rest();
+                        break;
+                    case '5': // Abilities
+                        showAbilities();
+                        break;
+                    case '6': // Gadgets
+                        await openGadgetShop();
+                        break;
+                    case '7': // Exchange
+                        await openExchange();
+                        break;
+                    case '8': // Powers
+                        await openPowerShop();
+                        break;
+                    case '9': // Quit
+                        if (confirm('Are you sure you want to quit?')) {
+                            localStorage.removeItem('currentPlayer');
+                            location.reload();
+                        }
+                        break;
+                }
+                updatePlayerStats(currentPlayer);
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+            } catch (error) {
+                console.error('Error handling command:', error);
+                elements.gameOutput.innerHTML += 'An error occurred. Please try again.\n';
             }
-            updatePlayerStats(currentPlayer);
         }
 
-        async function handleCombatAction(action) {
-            // Handle combat actions
+        function updatePlayerStats(player) {
+            if (!player || !elements.playerStats) return;
+
+            elements.playerStats.innerHTML = `
+                ${player.name} - Level ${player.level}<br>
+                HP: ${player.health}/${player.maxHealth} | 
+                MP: ${player.mana}/${player.maxMana}<br>
+                EXP: ${player.exp}/${calculateExpRequirement(player.level)} | 
+                Gold: ${player.gold}
+            `;
         }
 
-        async function handleShopAction(action) {
-            // Handle shop actions
-        }
-
+        // Override console.log for game output
         console.log = function (message) {
-            gameOutput.innerHTML += message + '\n';
-            gameOutput.scrollTop = gameOutput.scrollHeight;
+            if (elements.gameOutput) {
+                elements.gameOutput.innerHTML += message + '\n';
+                elements.gameOutput.scrollTop = elements.gameOutput.scrollHeight;
+            }
         };
     </script>
     <script src="game_logic.js"></script>

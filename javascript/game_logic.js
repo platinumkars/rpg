@@ -4,26 +4,39 @@ class Character {
   constructor(name, classType) {
     this.name = name;
     this.classType = classType;
-    this.health = 100;
-    this.maxHealth = 100;
-    this.mana = 50;
-    this.maxMana = 50;
     this.level = 1;
     this.exp = 0;
-    this.gold = 100; // Increased starting gold
+    this.gold = 100;
+
+    // Initialize based on class
+    this.initializeClass();
+
+    // Set up inventory and equipment
     this.inventory = { "Health Potion": 2, "Mana Potion": 2 };
     this.weapons = { "Basic Sword": 8 };
     this.currentWeapon = "Basic Sword";
     this.abilities = {};
     this.statusEffects = [];
-    this.armor = { "Basic Leather": 5 };
-    this.currentArmor = "Basic Leather";
-    this.techPoints = 0;
-    this.gadgets = {};
-    this.powers = {}; // Dictionary to store unlocked powers
 
-    // Initialize base abilities based on class
+    // Update abilities for class
     this.updateAbilities();
+  }
+
+  initializeClass() {
+    switch (this.classType) {
+      case "1": // Warrior
+        this.health = 140;
+        this.maxHealth = 140;
+        this.mana = 40;
+        this.maxMana = 40;
+        break;
+      // Add other classes...
+      default:
+        this.health = 100;
+        this.maxHealth = 100;
+        this.mana = 50;
+        this.maxMana = 50;
+    }
   }
 
   getScalingFactor() {
