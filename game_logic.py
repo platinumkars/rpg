@@ -1442,44 +1442,6 @@ spawn_table = [
     (EnemyType("Giant", 250, 52, 120, 150, 5), 5, 5)         # Base: 250 HP, 52 DMG
 ]
 
-# Define enemy types as a class for better organization
-class EnemyType:
-    def __init__(self, name, max_health, damage, exp_reward, gold_reward, level=1):
-        self.name = name
-        self.max_health = max_health
-        self.damage = damage
-        self.exp_reward = exp_reward
-        self.gold_reward = gold_reward
-        self.level = level
-
-# Replace the existing spawn_table with these balanced enemies
-spawn_table = [
-    # Level 1 enemies (balanced for higher player health)
-    (EnemyType("Goblin", 45, 12, 20, 25, 1), 20, 1),      # HP: 30->45, DMG: 8->12
-    (EnemyType("Wolf", 50, 15, 25, 30, 1), 20, 1),        # HP: 35->50, DMG: 10->15
-    (EnemyType("Slime", 40, 10, 15, 20, 1), 15, 1),       # HP: 25->40, DMG: 6->10
-    
-    # Level 2 enemies
-    (EnemyType("Bandit", 65, 18, 35, 45, 2), 15, 2),      # HP: 45->65, DMG: 12->18
-    (EnemyType("Skeleton", 60, 20, 30, 40, 2), 15, 2),     # HP: 40->60, DMG: 13->20
-    (EnemyType("Giant Spider", 58, 22, 32, 28, 2), 15, 2), # HP: 38->58, DMG: 14->22
-    
-    # Level 3 enemies
-    (EnemyType("Orc", 85, 25, 45, 40, 3), 12, 3),         # HP: 60->85, DMG: 15->25
-    (EnemyType("Dark Elf", 80, 28, 48, 45, 3), 12, 3),    # HP: 55->80, DMG: 18->28
-    (EnemyType("Werewolf", 90, 30, 50, 48, 3), 12, 3),    # HP: 65->90, DMG: 20->30
-    
-    # Level 4 enemies
-    (EnemyType("Troll", 120, 35, 60, 50, 4), 10, 4),      # HP: 80->120, DMG: 20->35
-    (EnemyType("Ogre", 130, 38, 65, 55, 4), 10, 4),       # HP: 85->130, DMG: 22->38
-    (EnemyType("Gargoyle", 110, 40, 70, 60, 4), 10, 4),   # HP: 75->110, DMG: 25->40
-    
-    # Level 5+ special enemies
-    (EnemyType("Dragon Whelp", 180, 45, 100, 100, 5), 5, 5), # HP: 100->180, DMG: 30->45
-    (EnemyType("Necromancer", 150, 50, 110, 110, 5), 5, 5),  # HP: 90->150, DMG: 35->50
-    (EnemyType("Giant", 200, 42, 120, 120, 5), 5, 5)         # HP: 120->200, DMG: 28->42
-]
-
 def currency_exchange(player):
     """More balanced exchange rates"""
     GOLD_TO_TP_RATE = 120  # Increased from 100
