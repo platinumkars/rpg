@@ -1,0 +1,40 @@
+{
+  "name": "Karthik",
+  "class_type": "11",
+  "health": 90,
+  "max_health": 90,
+  "mana": 80,
+  "max_mana": 80,
+  "level": 1,
+  "exp": 0,
+  "gold": 100,
+  "inventory": {
+    "Health Potion": 2,
+    "Mana Potion": 2
+  },
+  "weapons": {
+    "Basic Sword": 8
+  },
+  "current_weapon": "Basic Sword",
+  "armor": {
+    "Basic Leather": 5
+  },
+  "current_armor": "Basic Leather",
+  "tech_points": 0,
+  "gadgets": {},
+  "powers": [],
+  "abilities": {
+    "Acid Splash": {
+      "damage": 23,
+      "hits": 2,
+      "mana_cost": 15,
+      "description": "Corrosive damage over time"
+    },
+    "Healing Elixir": {
+      "heal": 30,
+      "mana_cost": 20,
+      "description": "Powerful healing potion"
+    }
+  },
+  "timestamp": "2025-03-06 19:07:57"
+}
