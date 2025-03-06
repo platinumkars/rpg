@@ -78,7 +78,16 @@ class Character:
         return 1 + (self.level - 1) * 0.15
         
     def update_abilities(self):
-        """Update abilities based on level and class"""
+        """Update abilities while preserving special abilities"""
+        # Store special abilities before update
+        special_abilities = {}
+        if hasattr(self, 'special_type'):
+            special_abilities = {name: ability for name, ability in self.abilities.items() 
+                               if name in ["Dragon's Breath", "Shadow Fusion", "Thunder Strike", 
+                                         "Glacial Storm", "Blood Ritual", "Divine Radiance", 
+                                         "Primal Surge", "Overclock"]}
+        
+        # Regular ability update
         scaling = self.get_scaling_factor()
         
         if self.class_type.lower() in ["warrior", "1"]:
@@ -723,6 +732,9 @@ class Character:
                 }
 
         self.abilities = base_abilities
+        
+        # Restore special abilities
+        self.abilities.update(special_abilities)
 
     def unlock_power(self, power_name):
         """Unlock a new power if player has enough tech points"""
