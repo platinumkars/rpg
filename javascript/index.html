@@ -67,6 +67,45 @@
             color: white;
             margin-bottom: 10px;
         }
+
+        .combat-interface {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .combat-status {
+            margin-bottom: 10px;
+        }
+
+        .enemy-list {
+            margin: 10px 0;
+        }
+
+        .combat-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .shop-interface {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            padding: 15px;
+        }
+
+        .shop-inventory {
+            height: 300px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+
+        .shop-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
     </style>
 </head>
 
@@ -110,6 +149,7 @@
         </div>
     </div>
 
+    <script src="page_manager.js"></script>
     <script>
         let currentPlayer = null;
         const gameOutput = document.getElementById('gameOutput');
@@ -117,6 +157,11 @@
         const playerStats = document.getElementById('playerStats');
         const characterCreation = document.getElementById('characterCreation');
         const gameInterface = document.getElementById('gameInterface');
+        let pageManager;
+
+        window.onload = function () {
+            pageManager = new PageManager();
+        };
 
         async function createCharacter() {
             const name = document.getElementById('characterName').value.trim();
@@ -166,9 +211,11 @@
 
             switch (command) {
                 case '1':
+                    pageManager.showPage('combatInterface');
                     await startCombat(currentPlayer);
                     break;
                 case '2':
+                    pageManager.showPage('shopInterface');
                     await shop(currentPlayer);
                     break;
                 case '3':
@@ -196,6 +243,14 @@
                     break;
             }
             updatePlayerStats(currentPlayer);
+        }
+
+        async function handleCombatAction(action) {
+            // Handle combat actions
+        }
+
+        async function handleShopAction(action) {
+            // Handle shop actions
         }
 
         console.log = function (message) {
