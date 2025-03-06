@@ -1,5 +1,8 @@
 import random
 import time
+import json
+import os
+from datetime import datetime
 
 def level_up_display(player, old_level, rewards):
     """Display level up information with visual effects"""
@@ -1628,7 +1631,9 @@ def main():
         print("6. Visit gadget shop") 
         print("7. Currency Exchange")
         print("8. Visit power shop")
-        print("9. Quit")
+        print("9. Save game")
+        print("10. Load game")
+        print("11. Quit")
         
         choice = input("> ")
         if choice == "1":
@@ -1696,6 +1701,14 @@ def main():
             power_shop(player)
             
         elif choice == "9":
+            save_game(player)
+            
+        elif choice == "10":
+            loaded_player = load_game()
+            if loaded_player:
+                player = loaded_player
+            
+        elif choice == "11":
             confirm = input("Are you sure you want to quit? (y/n): ").lower()
             if confirm == 'y':
                 print("Thanks for playing!")
@@ -1731,6 +1744,103 @@ def handle_player_death(player):
             return False
         else:
             print("Invalid choice!")
+
+# Add save/load functions
+def save_game(player):
+    """Save game progress to a file"""
+    save_dir = "saves"
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+        
+    # Convert player object to dictionary
+    player_data = {
+        "name": player.name,
+        "class_type": player.class_type,
+        "health": player.health,
+        "max_health": player.max_health,
+        "mana": player.mana,
+        "max_mana": player.max_mana,
+        "level": player.level,
+        "exp": player.exp,
+        "gold": player.gold,
+        "inventory": player.inventory,
+        "weapons": player.weapons,
+        "current_weapon": player.current_weapon,
+        "armor": player.armor,
+        "current_armor": player.current_armor,
+        "tech_points": player.tech_points,
+        "gadgets": {name: {"charges": g.charges} for name, g in player.gadgets.items()},
+        "powers": list(player.powers.keys()),
+        "abilities": player.abilities,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    
+    filename = f"saves/{player.name}_{player.level}.json"
+    with open(filename, 'w') as f:
+        json.dump(player_data, f, indent=2)
+    print(f"\nGame saved as: {filename}")
+
+def load_game():
+    """Load a saved game file"""
+    save_dir = "saves"
+    if not os.path.exists(save_dir):
+        print("No saved games found!")
+        return None
+        
+    saves = [f for f in os.listdir(save_dir) if f.endswith('.json')]
+    if not saves:
+        print("No saved games found!")
+        return None
+        
+    print("\nAvailable saves:")
+    for i, save in enumerate(saves, 1):
+        with open(os.path.join(save_dir, save)) as f:
+            data = json.load(f)
+            print(f"{i}. {data['name']} (Level {data['level']}) - {data['timestamp']}")
+            
+    try:
+        choice = int(input("\nChoose save to load (0 to cancel): "))
+        if choice == 0:
+            return None
+        if 1 <= choice <= len(saves):
+            with open(os.path.join(save_dir, saves[choice-1])) as f:
+                data = json.load(f)
+                
+            # Create new character from save data
+            player = Character(data['name'], data['class_type'])
+            player.health = data['health']
+            player.max_health = data['max_health']
+            player.mana = data['mana']
+            player.max_mana = data['max_mana']
+            player.level = data['level']
+            player.exp = data['exp']
+            player.gold = data['gold']
+            player.inventory = data['inventory']
+            player.weapons = data['weapons']
+            player.current_weapon = data['current_weapon']
+            player.armor = data['armor']
+            player.current_armor = data['current_armor']
+            player.tech_points = data['tech_points']
+            
+            # Restore gadgets
+            for name, gdata in data['gadgets'].items():
+                gadget = Gadget(name, "common", {}, 0)  # Temporary gadget
+                gadget.charges = gdata['charges']
+                player.gadgets[name] = gadget
+                
+            # Restore powers
+            for power_name in data['powers']:
+                if power_name in AVAILABLE_POWERS:
+                    player.powers[power_name] = AVAILABLE_POWERS[power_name]
+                    
+            # Restore abilities
+            player.abilities = data['abilities']
+            
+            print(f"\nLoaded save: {player.name} (Level {player.level})")
+            return player
+    except (ValueError, IndexError):
+        print("Invalid choice!")
+    return None
 
 if __name__ == "__main__":
     try:
