@@ -1304,11 +1304,10 @@ def process_enemy_attack(player, enemy):
     return final_damage
 
 def process_ability(player, target, enemies, ability_name, duration=0):
-    """Process ability with improved handling and feedback"""
+    """Process ability with working damage modifiers"""
     try:
         ability = player.abilities[ability_name]
         
-        # Check mana cost first
         if player.mana < ability['mana_cost']:
             print("Not enough mana!")
             return 0
@@ -1318,23 +1317,34 @@ def process_ability(player, target, enemies, ability_name, duration=0):
         total_damage = 0
         total_healing = 0
 
-        # Process ability effects
+        # Calculate damage modifiers
+        level_bonus = int(player.level * 0.5)  # Base level scaling
+        damage_modifier = 1.0
+
+        # Apply class-specific modifiers
+        if player.class_type.lower() in ["mage", "2", "warlock", "9"]:
+            damage_modifier *= 1.3  # Magic users deal 30% more ability damage
+        elif player.class_type.lower() in ["warrior", "1", "berserker", "10"]:
+            damage_modifier *= 0.8  # Physical classes deal less ability damage
+
+        # Process damage effects
         if "damage" in ability:
-            damage = ability["damage"]
+            base_damage = ability["damage"]
+            modified_damage = int(base_damage * damage_modifier) + level_bonus
             
             # Handle area damage abilities
             if "area_damage" in ability:
                 # Main target damage
-                target.health -= damage
-                total_damage += damage
-                print(f"\n💥 {ability_name} hits {target.name} for {damage} damage!")
+                target.health -= modified_damage
+                total_damage += modified_damage
+                print(f"\n💥 {ability_name} hits {target.name} for {modified_damage} damage!")
                 
-                # Area damage to other enemies
+                # Area damage calculation
+                area_damage = int(ability["area_damage"] * damage_modifier) + level_bonus
                 for enemy in [e for e in enemies if e != target and e.health > 0]:
-                    area_dmg = ability["area_damage"]
-                    enemy.health -= area_dmg
-                    total_damage += area_dmg
-                    print(f"⚡ Splash damage: {area_dmg} to {enemy.name}")
+                    enemy.health -= area_damage
+                    total_damage += area_damage
+                    print(f"⚡ Splash damage: {area_damage} to {enemy.name}")
             
             # Handle multi-hit abilities
             elif "hits" in ability:
@@ -1342,30 +1352,48 @@ def process_ability(player, target, enemies, ability_name, duration=0):
                 print(f"\n⚔ {ability_name} strikes {hits} times!")
                 for hit in range(hits):
                     if target.health > 0:
-                        target.health -= damage
-                        total_damage += damage
-                        print(f"Hit {hit+1}: {damage} damage to {target.name}")
+                        hit_variation = random.randint(-2, 2)
+                        hit_damage = max(1, modified_damage + hit_variation)
+                        target.health -= hit_damage
+                        total_damage += hit_damage
+                        print(f"Hit {hit+1}: {hit_damage} damage to {target.name}")
             
             # Single hit damage
             else:
-                target.health -= damage
-                total_damage += damage
-                print(f"\n💥 {ability_name} deals {damage} damage to {target.name}")
+                damage_variation = random.randint(-3, 3)
+                final_damage = max(1, modified_damage + damage_variation)
+                target.health -= final_damage
+                total_damage += final_damage
+                print(f"\n💥 {ability_name} deals {final_damage} damage to {target.name}")
 
-        # Process healing
+        # Process healing with modifiers
         if "heal" in ability:
-            heal_amount = ability["heal"]
+            heal_modifier = 1.0
+            if player.class_type.lower() in ["paladin", "3", "druid", "6"]:
+                heal_modifier *= 1.3  # Healing classes heal 30% more
+            
+            base_heal = ability["heal"]
+            heal_amount = int(base_heal * heal_modifier) + level_bonus
             original_health = player.health
             player.health = min(player.max_health, player.health + heal_amount)
             actual_heal = player.health - original_health
             total_healing += actual_heal
             print(f"💚 Restored {actual_heal} HP!")
 
-        # Apply status effects
+        # Apply status effects with modified duration
         if "effect" in ability:
             effect_type = ability["effect"]
             effect_duration = ability.get("duration", 3)
-            apply_status_effect(target, effect_type, damage if "damage" in ability else 0, effect_duration)
+            # Increase duration for control-focused classes
+            if player.class_type.lower() in ["mage", "2", "warlock", "9", "druid", "6"]:
+                effect_duration += 1
+            
+            apply_status_effect(
+                target, 
+                effect_type, 
+                int(total_damage * 0.3) if total_damage > 0 else 0,  # Scale DOT with ability damage
+                effect_duration
+            )
 
         # Display totals
         if total_damage > 0:
