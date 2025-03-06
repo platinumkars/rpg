@@ -51,6 +51,28 @@ class Character:
         # Initialize base abilities based on class
         self.update_abilities()
         
+        # Add character-specific abilities based on name choice
+        print("\nChoose your character's special ability type:")
+        print("1. Dragon Blood - Fire-based abilities")
+        print("2. Shadow Walker - Stealth and darkness abilities")
+        print("3. Storm Born - Lightning-based abilities")
+        print("4. Frost Heart - Ice-based abilities")
+        print("5. Blood Mage - Blood magic abilities")
+        print("6. Light Bearer - Holy light abilities")
+        print("7. Nature's Child - Nature-based abilities")
+        print("8. Tech Master - Technology-based abilities")
+        
+        while True:
+            try:
+                ability_choice = int(input("\nEnter your choice (1-8): "))
+                if 1 <= ability_choice <= 8:
+                    self.special_type = ability_choice
+                    self.add_special_abilities()
+                    break
+                print("Invalid choice!")
+            except ValueError:
+                print("Please enter a number!")
+        
     def get_scaling_factor(self):
         """Calculate scaling factor based on level"""
         return 1 + (self.level - 1) * 0.15
@@ -713,6 +735,102 @@ class Character:
                 print(f"Effect: {power.description}")
                 return True
         return False
+
+    def add_special_abilities(self):
+        """Add special abilities based on character choice"""
+        scaling = self.get_scaling_factor()
+        
+        special_abilities = {
+            1: {  # Dragon Blood
+                "Dragon's Breath": {
+                    "damage": int(80 * scaling),
+                    "area_damage": int(40 * scaling),
+                    "effect": "burn",
+                    "duration": 3,
+                    "mana_cost": 65,
+                    "description": "Unleash powerful dragon flame"
+                }
+            },
+            2: {  # Shadow Walker
+                "Shadow Fusion": {
+                    "damage": int(70 * scaling),
+                    "hits": 4,
+                    "effect": "blind",
+                    "duration": 2,
+                    "mana_cost": 60,
+                    "description": "Strike from the shadows with multiple hits"
+                }
+            },
+            3: {  # Storm Born
+                "Thunder Strike": {
+                    "damage": int(65 * scaling),
+                    "area_damage": int(35 * scaling),
+                    "effect": "stun",
+                    "duration": 2,
+                    "mana_cost": 70,
+                    "description": "Call down devastating lightning"
+                }
+            },
+            4: {  # Frost Heart
+                "Glacial Storm": {
+                    "damage": int(75 * scaling),
+                    "area_damage": int(38 * scaling),
+                    "effect": "freeze",
+                    "duration": 3,
+                    "mana_cost": 65,
+                    "description": "Unleash a devastating ice storm"
+                }
+            },
+            5: {  # Blood Mage
+                "Blood Ritual": {
+                    "damage": int(60 * scaling),
+                    "heal": int(40 * scaling),
+                    "effect": "lifesteal",
+                    "duration": 2,
+                    "mana_cost": 75,
+                    "description": "Sacrifice health for powerful magic"
+                }
+            },
+            6: {  # Light Bearer
+                "Divine Radiance": {
+                    "damage": int(70 * scaling),
+                    "heal": int(45 * scaling),
+                    "area_damage": int(35 * scaling),
+                    "effect": "holy",
+                    "duration": 2,
+                    "mana_cost": 80,
+                    "description": "Channel pure divine light"
+                }
+            },
+            7: {  # Nature's Child
+                "Primal Surge": {
+                    "damage": int(55 * scaling),
+                    "heal": int(35 * scaling),
+                    "area_damage": int(30 * scaling),
+                    "effect": ["root", "regenerate"],
+                    "duration": 3,
+                    "mana_cost": 70,
+                    "description": "Unleash nature's raw power"
+                }
+            },
+            8: {  # Tech Master
+                "Overclock": {
+                    "damage": int(75 * scaling),
+                    "hits": 5,
+                    "effect": "stun",
+                    "duration": 2,
+                    "mana_cost": 85,
+                    "description": "Supercharge your abilities"
+                }
+            }
+        }
+        
+        # Add special ability to character's abilities
+        if self.special_type in special_abilities:
+            self.abilities.update(special_abilities[self.special_type])
+            ability_name = list(special_abilities[self.special_type].keys())[0]
+            print(f"\n✨ Special Ability Unlocked: {ability_name}")
+            print(f"📜 {special_abilities[self.special_type][ability_name]['description']}")
 
 # Add Gadget class
 class Gadget:
