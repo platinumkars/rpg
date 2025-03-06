@@ -232,7 +232,20 @@
 
         window.onload = function () {
             pageManager = new PageManager();
+            setupEventListeners();
         };
+
+        function setupEventListeners() {
+            const userInput = document.getElementById('userInput');
+            if (userInput) {
+                userInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        handleUserInput(e.target.value);
+                        e.target.value = '';
+                    }
+                });
+            }
+        }
 
         async function createCharacter() {
             const name = document.getElementById('characterName').value.trim();
