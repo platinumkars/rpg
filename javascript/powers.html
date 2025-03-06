@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Game - Powers</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #powersContainer {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .powers-section {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .powers-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 0 0 10px #f66;
+        }
+
+        .power-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .power-card {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            transition: transform 0.2s;
+        }
+
+        .power-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(255, 0, 0, 0.2);
+        }
+
+        .power-name {
+            color: #f88;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+
+        .power-cost {
+            color: #8f8;
+            margin: 5px 0;
+        }
+
+        .power-description {
+            color: #ccc;
+            font-style: italic;
+            margin: 10px 0;
+        }
+
+        .power-stats {
+            color: #88f;
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+
+        .power-button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+
+        .power-button:hover:not(:disabled) {
+            background-color: #666;
+        }
+
+        .power-button:disabled {
+            background-color: #333;
+            cursor: not-allowed;
+        }
+
+        .player-stats {
+            background-color: #333;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 3px;
+        }
+
+        .return-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-top: 20px;
+        }
+
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            background-color: #4a4a4a;
+            border-radius: 5px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="powersContainer">
+        <div class="powers-section">
+            <h1 class="powers-title">Power Nexus</h1>
+            <div id="playerStats" class="player-stats"></div>
+            <div id="powerGrid" class="power-grid"></div>
+            <button class="return-button" onclick="returnToMenu()">Return to Menu</button>
+        </div>
+    </div>
+    <div id="notification"></div>
+
+    <script src="game_logic.js"></script>
+    <script>
+        let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer'));
+
+        const powerData = {
+            "Fire Mastery": {
+                cost: 300,
+                description: "Increase fire damage by 50%",
+                stats: "Fire Damage +50%",
+                type: "passive"
+            },
+            "Ice Armor": {
+                cost: 300,
+                description: "Gain 25% damage reduction",
+                stats: "Defense +25%",
+                type: "passive"
+            },
+            "Life Force": {
+                cost: 500,
+                description: "Increase max HP by 100",
+                stats: "Max HP +100",
+                type: "passive"
+            },
+            "Mana Flow": {
+                cost: 500,
+                description: "Increase max MP by 50",
+                stats: "Max MP +50",
+                type: "passive"
+            },
+            "Critical Strike": {
+                cost: 400,
+                description: "20% chance for double damage",
+                stats: "Crit Chance +20%",
+                type: "passive"
+            },
+            "Quick Recovery": {
+                cost: 400,
+                description: "Heal 5% HP each turn",
+                stats: "HP Regen 5%/turn",
+                type: "passive"
+            }
+        };
+
+        function updateDisplay() {
+            if (!currentPlayer) return;
+
+            // Initialize powers if needed
+            if (!currentPlayer.powers) {
+                currentPlayer.powers = {};
+            }
+
+            // Update player stats
+            document.getElementById('playerStats').innerHTML = `
+                ${currentPlayer.name} - Level ${currentPlayer.level}<br>
+                Gold: ${currentPlayer.gold}<br>
+                Powers Unlocked: ${Object.keys(currentPlayer.powers).length}
+            `;
+
+            // Update power grid
+            const grid = document.getElementById('powerGrid');
+            grid.innerHTML = '';
+
+            Object.entries(powerData).forEach(([name, data]) => {
+                const owned = currentPlayer.powers[name];
+                const canAfford = currentPlayer.gold >= data.cost;
+
+                grid.innerHTML += `
+                    <div class="power-card">
+                        <div class="power-name">${name}</div>
+                        <div class="power-cost">Cost: ${data.cost} Gold</div>
+                        <div class="power-description">${data.description}</div>
+                        <div class="power-stats">${data.stats}</div>
+                        <button class="power-button" 
+                            onclick="unlockPower('${name}')"
+                            ${owned ? 'disabled' : ''}>
+                            ${owned ? 'Unlocked' : canAfford ? 'Unlock' : 'Not enough gold'}
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function unlockPower(name) {
+            const power = powerData[name];
+            if (!power) return;
+
+            if (currentPlayer.gold < power.cost) {
+                showNotification('Not enough gold!');
+                return;
+            }
+
+            currentPlayer.gold -= power.cost;
+            currentPlayer.powers[name] = true;
+
+            // Apply passive effects
+            if (name === "Life Force") {
+                currentPlayer.maxHealth += 100;
+                currentPlayer.health = currentPlayer.maxHealth;
+            } else if (name === "Mana Flow") {
+                currentPlayer.maxMana += 50;
+                currentPlayer.mana = currentPlayer.maxMana;
+            }
+
+            localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+            showNotification(`Unlocked ${name}!`);
+            updateDisplay();
+        }
+
+        function returnToMenu() {
+            window.location.href = 'menu.html';
+        }
+
+        // Initialize
+        window.onload = function () {
+            if (!currentPlayer) {
+                window.location.href = 'index.html';
+                return;
+            }
+            updateDisplay();
+        };
+
+        // Handle ESC key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                returnToMenu();
+            }
+        });
+    </script>
+</body>
+
+</html>
