@@ -98,6 +98,15 @@ class Character:
                     "mana_cost": 65,
                     "description": "Massive area attack that stuns enemies"
                 }
+            if self.level >= 11:
+                base_abilities["Ultimate Warrior"] = {
+                    "damage": int(100 * scaling),
+                    "heal": int(50 * scaling),
+                    "effect": "rage",
+                    "duration": 3,
+                    "mana_cost": 80,
+                    "description": "Unleash ultimate warrior power, massive damage and healing"
+                }
                 
         elif self.class_type.lower() in ["mage", "2"]:
             self.health = 80 + (self.level - 1) * 12     # Reduced health scaling
@@ -154,6 +163,15 @@ class Character:
                     "mana_cost": 70,
                     "description": "Multiple arcane missiles with freeze"
                 }
+            if self.level >= 11:
+                base_abilities["Dimensional Rift"] = {
+                    "damage": int(120 * scaling),
+                    "area_damage": int(60 * scaling),
+                    "effect": ["freeze", "stun"],
+                    "duration": 2,
+                    "mana_cost": 85,
+                    "description": "Open a devastating magical rift"
+                }
 
         elif self.class_type.lower() in ["paladin", "3"]:
             self.health = 120 + (self.level - 1) * 20    # Balanced health scaling
@@ -197,6 +215,15 @@ class Character:
                     "mana_cost": 75,
                     "description": "Holy strike with area healing"
                 }
+            if self.level >= 11:
+                base_abilities["Divine Intervention"] = {
+                    "heal": int(80 * scaling),
+                    "area_damage": int(70 * scaling),
+                    "effect": "holy",
+                    "duration": 3,
+                    "mana_cost": 75,
+                    "description": "Call upon ultimate divine power"
+                }
 
         elif self.class_type.lower() in ["necromancer", "4"]:
             self.health = 90 + (self.level - 1) * 15     # Low health scaling
@@ -239,6 +266,15 @@ class Character:
                     "mana_cost": 70,
                     "description": "Multiple dark strikes with life drain"
                 }
+            if self.level >= 11:
+                base_abilities["Army of Darkness"] = {
+                    "damage": int(40 * scaling),
+                    "hits": 6,
+                    "effect": "curse",
+                    "duration": 3,
+                    "mana_cost": 90,
+                    "description": "Summon multiple dark minions to attack"
+                }
 
         elif self.class_type.lower() in ["assassin", "5"]:
             self.health = 95 + (self.level - 1) * 14     # Medium-low health scaling
@@ -277,6 +313,15 @@ class Character:
                     "duration": 2,
                     "mana_cost": 65,
                     "description": "Rapid deadly strikes causing bleeding"
+                }
+            if self.level >= 11:
+                base_abilities["Death's Dance"] = {
+                    "damage": int(45 * scaling),
+                    "hits": 8,
+                    "effect": "bleed",
+                    "duration": 2,
+                    "mana_cost": 70,
+                    "description": "Execute a deadly series of strikes"
                 }
 
         elif self.class_type.lower() in ["druid", "6"]:
@@ -324,6 +369,16 @@ class Character:
                     "mana_cost": 75,
                     "description": "Unleash nature's fury with healing"
                 }
+            if self.level >= 11:
+                base_abilities["Force of Nature"] = {
+                    "damage": int(90 * scaling),
+                    "area_damage": int(45 * scaling),
+                    "heal": int(45 * scaling),
+                    "effect": ["root", "regenerate"],
+                    "duration": 3,
+                    "mana_cost": 85,
+                    "description": "Channel pure nature's fury"
+                }
 
         elif self.class_type.lower() in ["monk", "7"]:
             self.health = 100 + (self.level - 1) * 16
@@ -367,6 +422,16 @@ class Character:
                     "mana_cost": 60,
                     "description": "Rapid strikes with healing and stun"
                 }
+            if self.level >= 11:
+                base_abilities["Transcendence"] = {
+                    "damage": int(50 * scaling),
+                    "hits": 5,
+                    "heal": int(40 * scaling),
+                    "effect": "enlightened",
+                    "duration": 3,
+                    "mana_cost": 75,
+                    "description": "Achieve perfect harmony of attack and defense"
+                }
 
         elif self.class_type.lower() in ["ranger", "8"]:
             self.health = 95 + (self.level - 1) * 15
@@ -409,6 +474,16 @@ class Character:
                     "mana_cost": 70,
                     "description": "Rain of piercing arrows"
                 }
+            if self.level >= 11:
+                base_abilities["Rain of Arrows"] = {
+                    "damage": int(30 * scaling),
+                    "hits": 10,
+                    "area_damage": int(25 * scaling),
+                    "effect": "pierce",
+                    "duration": 2,
+                    "mana_cost": 80,
+                    "description": "Unleash a devastating arrow barrage"
+                }
 
         elif self.class_type.lower() in ["warlock", "9"]:
             self.health = 85 + (self.level - 1) * 14
@@ -448,6 +523,15 @@ class Character:
                     "duration": 3,
                     "mana_cost": 80,
                     "description": "Unleash demonic destruction"
+                }
+            if self.level >= 11:
+                base_abilities["Apocalypse"] = {
+                    "damage": int(110 * scaling),
+                    "area_damage": int(55 * scaling),
+                    "effect": ["burn", "curse"],
+                    "duration": 3,
+                    "mana_cost": 95,
+                    "description": "Unleash pure demonic destruction"
                 }
 
         elif self.class_type.lower() in ["berserker", "10"]:
@@ -491,6 +575,16 @@ class Character:
                     "duration": 3,
                     "mana_cost": 65,
                     "description": "Frenzied attacks with life drain"
+                }
+            if self.level >= 11:
+                base_abilities["Berserker Fury"] = {
+                    "damage": int(60 * scaling),
+                    "hits": 6,
+                    "heal": int(30 * scaling),
+                    "effect": "berserk",
+                    "duration": 3,
+                    "mana_cost": 85,
+                    "description": "Enter ultimate berserker state"
                 }
 
         elif self.class_type.lower() in ["alchemist", "11"]:
@@ -541,6 +635,16 @@ class Character:
                     "mana_cost": 75,
                     "description": "Explosive chemical reaction"
                 }
+            if self.level >= 11:
+                base_abilities["Grand Synthesis"] = {
+                    "damage": int(85 * scaling),
+                    "area_damage": int(40 * scaling),
+                    "heal": int(40 * scaling),
+                    "effect": ["acid", "regenerate"],
+                    "duration": 3,
+                    "mana_cost": 80,
+                    "description": "Ultimate alchemical reaction"
+                }
 
         elif self.class_type.lower() in ["shaman", "12"]:
             self.health = 105 + (self.level - 1) * 17
@@ -584,6 +688,16 @@ class Character:
                     "duration": 2,
                     "mana_cost": 70,
                     "description": "Chain of elemental strikes"
+                }
+            if self.level >= 11:
+                base_abilities["Spirit Storm"] = {
+                    "damage": int(45 * scaling),
+                    "hits": 7,
+                    "area_damage": int(35 * scaling),
+                    "effect": ["stun", "spirit"],
+                    "duration": 3,
+                    "mana_cost": 90,
+                    "description": "Unleash a storm of spiritual energy"
                 }
 
         self.abilities = base_abilities
