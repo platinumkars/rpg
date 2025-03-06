@@ -3,40 +3,64 @@ let currentPlayer = null;
 class Character {
   constructor(name, classType) {
     this.name = name;
-    this.classType = classType;
+    this.classType = this.getClassName(classType);
     this.level = 1;
     this.exp = 0;
     this.gold = 100;
+    this.techPoints = 0;
 
-    // Initialize based on class
-    this.initializeClass();
+    // Initialize class-specific stats
+    this.initializeClassStats();
 
-    // Set up inventory and equipment
+    // Set up basic inventory
     this.inventory = { "Health Potion": 2, "Mana Potion": 2 };
     this.weapons = { "Basic Sword": 8 };
     this.currentWeapon = "Basic Sword";
     this.abilities = {};
     this.statusEffects = [];
-
-    // Update abilities for class
-    this.updateAbilities();
+    this.gadgets = {};
+    this.powers = {};
   }
 
-  initializeClass() {
-    switch (this.classType) {
-      case "1": // Warrior
-        this.health = 140;
-        this.maxHealth = 140;
-        this.mana = 40;
-        this.maxMana = 40;
-        break;
-      // Add other classes...
-      default:
-        this.health = 100;
-        this.maxHealth = 100;
-        this.mana = 50;
-        this.maxMana = 50;
-    }
+  getClassName(classChoice) {
+    const classNames = {
+      1: "Warrior",
+      2: "Mage",
+      3: "Paladin",
+      4: "Necromancer",
+      5: "Assassin",
+      6: "Druid",
+      7: "Monk",
+      8: "Ranger",
+      9: "Warlock",
+      10: "Berserker",
+      11: "Alchemist",
+      12: "Shaman",
+    };
+    return classNames[classChoice] || "Unknown";
+  }
+
+  initializeClassStats() {
+    const baseStats = {
+      Warrior: { health: 140, mana: 40 },
+      Mage: { health: 80, mana: 120 },
+      Paladin: { health: 120, mana: 60 },
+      Necromancer: { health: 90, mana: 100 },
+      Assassin: { health: 95, mana: 50 },
+      Druid: { health: 110, mana: 70 },
+      Monk: { health: 100, mana: 80 },
+      Ranger: { health: 95, mana: 65 },
+      Warlock: { health: 85, mana: 95 },
+      Berserker: { health: 130, mana: 45 },
+      Alchemist: { health: 90, mana: 80 },
+      Shaman: { health: 100, mana: 90 },
+    };
+
+    const stats = baseStats[this.classType] || { health: 100, mana: 50 };
+    this.health = stats.health;
+    this.maxHealth = stats.health;
+    this.mana = stats.mana;
+    this.maxMana = stats.mana;
   }
 
   getScalingFactor() {
@@ -1100,7 +1124,7 @@ function levelUpDisplay(player, oldLevel, rewards) {
 
   // Update experience and level scaling
   function calculateExpRequirement(level) {
-    return Math.floor(75 * (1 + level * 0.4)); // Reduced from 0.5 to 0.4
+    return Math.floor(100 * Math.pow(1.5, level - 1));
   }
 
   function calculateLevelRewards(level) {

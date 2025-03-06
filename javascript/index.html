@@ -220,6 +220,7 @@
         </div>
     </div>
 
+    <script src="game_logic.js"></script>
     <script src="page_manager.js"></script>
     <script>
         let currentPlayer = null;
@@ -259,6 +260,11 @@
 
             try {
                 currentPlayer = new Character(name, classChoice);
+                if (!currentPlayer) {
+                    throw new Error('Character creation failed');
+                }
+
+                console.log(`Creating ${name} as ${currentPlayer.classType}...`);
                 localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
                 showGameInterface();
                 updatePlayerStats(currentPlayer);
@@ -338,7 +344,6 @@
             }
         };
     </script>
-    <script src="game_logic.js"></script>
 </body>
 
 </html>
