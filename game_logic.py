@@ -578,25 +578,31 @@ class Enemy:
         return amount
 
 def get_target(enemies, auto=False):
-    """Helper function to handle target selection"""
-    if len(enemies) == 1 or auto:
-        # Auto-target the first living enemy
-        for enemy in enemies:
-            if enemy.health > 0:
-                return enemy
-    else:
+    """Improved target selection with better validation"""
+    living_enemies = [e for e in enemies if e.health > 0]
+    
+    if not living_enemies:
+        return None
+        
+    if auto or len(living_enemies) == 1:
+        return living_enemies[0]
+    
+    while True:
         print("\nChoose your target:")
-        valid_targets = [(i, enemy) for i, enemy in enumerate(enemies, 1) if enemy.health > 0]
-        for i, enemy in valid_targets:
-            print(f"{i}. {enemy.name} - HP: {enemy.health}")
+        for i, enemy in enumerate(living_enemies, 1):
+            print(f"{i}. {enemy.name} - HP: {enemy.health}/{enemy.max_health}")
         
         try:
-            target_idx = int(input("> ")) - 1
-            if 0 <= target_idx < len(valid_targets):
-                return enemies[target_idx]
+            choice = input("> ")
+            if choice.lower() == 'back':
+                return None
+                
+            index = int(choice) - 1
+            if 0 <= index < len(living_enemies):
+                return living_enemies[index]
+            print("Invalid target number!")
         except ValueError:
-            pass
-    return None
+            print("Please enter a valid number!")
 
 # In the combat function, update the auto-target initialization
 def combat(player, enemies):
@@ -1201,7 +1207,7 @@ def show_gadgets(player):
     return gadget_list
 
 def process_attack(player, target, enemies):
-    """Process attack with fixed hybrid weapon support"""
+    """Process attack with improved target validation"""
     weapon_stats = player.weapons[player.current_weapon]
     total_damage = 0
     living_enemies = [e for e in enemies if e.health > 0]
@@ -1210,49 +1216,61 @@ def process_attack(player, target, enemies):
         print("No valid targets remaining!")
         return total_damage
 
-    # Handle dictionary-based weapon stats
+    # Validate target exists in living enemies
+    if target not in living_enemies:
+        if living_enemies:
+            target = living_enemies[0]
+        else:
+            return total_damage
+
+    # Get target index from living enemies
+    enemy_index = living_enemies.index(target)
+
     if isinstance(weapon_stats, dict):
         base_damage = weapon_stats["damage"]
         level_bonus = int(player.level * 1.5)
-        enemy_index = living_enemies.index(target)
         
         # Handle multi-hit attacks
         hits = weapon_stats.get("hits", 1)
         for hit in range(hits):
-            if not living_enemies:  # Stop if no more targets
+            # Update living enemies list
+            living_enemies = [e for e in enemies if e.health > 0]
+            if not living_enemies:
                 break
                 
-            # Get current target, cycling through living enemies
+            # Get current target
             current_target = living_enemies[enemy_index % len(living_enemies)]
             
-            # Add slight damage variation
+            # Calculate and apply damage
             variation = random.randint(-2, 2)
             hit_damage = max(1, base_damage + level_bonus + variation)
-            
-            # Apply damage
             current_target.health -= hit_damage
             total_damage += hit_damage
+            
             print(f"Hit {hit + 1}: {hit_damage} damage to {current_target.name}!")
             
-            # Check if current target died
+            # Handle target death
             if current_target.health <= 0:
                 print(f"{current_target.name} has been defeated!")
+                # Update living enemies and index
                 living_enemies = [e for e in enemies if e.health > 0]
                 if living_enemies:
-                    enemy_index = (enemy_index + 1) % len(living_enemies)
+                    enemy_index = enemy_index % len(living_enemies)
                 else:
                     break
             else:
-                enemy_index += 1
+                enemy_index = (enemy_index + 1) % len(living_enemies)
         
-        # Process area damage after all hits
-        if "area_damage" in weapon_stats and living_enemies:
-            splash_damage = max(1, weapon_stats["area_damage"] + int(level_bonus * 0.5))
-            for other in living_enemies:
-                if other != target and other.health > 0:
-                    other.health -= splash_damage
-                    total_damage += splash_damage
-                    print(f"{other.name} takes {splash_damage} splash damage!")
+        # Process area damage after hits
+        if "area_damage" in weapon_stats:
+            living_enemies = [e for e in enemies if e.health > 0]
+            if living_enemies:
+                splash_damage = max(1, weapon_stats["area_damage"] + int(level_bonus * 0.5))
+                for other in living_enemies:
+                    if other != target and other.health > 0:
+                        other.health -= splash_damage
+                        total_damage += splash_damage
+                        print(f"{other.name} takes {splash_damage} splash damage!")
         
         print(f"Total damage dealt: {total_damage}")
                     
