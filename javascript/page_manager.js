@@ -1,5 +1,6 @@
 class PageManager {
   constructor() {
+    this.currentPage = "characterCreation";
     this.pages = {
       characterCreation: document.getElementById("characterCreation"),
       gameInterface: document.getElementById("gameInterface"),
@@ -47,6 +48,8 @@ class PageManager {
   }
 
   showPage(pageName) {
+    if (!Object.keys(this.pages).includes(pageName)) return false;
+
     // Hide all pages
     Object.values(this.pages).forEach((page) => {
       if (page) page.classList.add("hidden");
@@ -56,8 +59,13 @@ class PageManager {
     const page = this.pages[pageName];
     if (page) {
       page.classList.remove("hidden");
+      this.currentPage = pageName;
       return true;
     }
     return false;
+  }
+
+  getCurrentPage() {
+    return this.currentPage;
   }
 }

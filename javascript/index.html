@@ -106,12 +106,83 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
         }
+
+        .interface-section {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .creation-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .creation-form input,
+        .creation-form select {
+            padding: 10px;
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            color: white;
+        }
+
+        .stats-section {
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .output-section {
+            min-height: 300px;
+        }
+
+        .control-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #characterCreation {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #characterCreation input,
+        #characterCreation select {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 10px auto;
+            padding: 8px;
+            background-color: #1e1e1e;
+            color: white;
+            border: 1px solid #444;
+        }
+
+        #characterCreation button {
+            margin-top: 20px;
+            width: 200px;
+        }
+
+        .interface-section {
+            display: none;
+        }
+
+        .interface-section.active {
+            display: block;
+        }
     </style>
 </head>
 
 <body>
     <div id="gameContainer">
-        <div id="characterCreation">
+        <div id="characterCreation" class="interface-section active">
             <h2>Create Your Character</h2>
             <input type="text" id="characterName" placeholder="Enter character name">
             <select id="classChoice" title="Character Class Selection" aria-label="Choose your character class">
@@ -131,7 +202,7 @@
             <button type="button" onclick="createCharacter()">Start Game</button>
         </div>
 
-        <div id="gameInterface" class="hidden">
+        <div id="gameInterface" class="interface-section">
             <div id="playerStats"></div>
             <div id="gameOutput"></div>
             <input type="text" id="userInput" placeholder="Enter command...">
@@ -173,8 +244,8 @@
             }
 
             currentPlayer = new Character(name, classChoice);
-            characterCreation.style.display = 'none';
-            gameInterface.classList.remove('hidden');
+            document.getElementById('characterCreation').classList.remove('active');
+            document.getElementById('gameInterface').classList.add('active');
             updatePlayerStats(currentPlayer);
             console.log(`Welcome, ${currentPlayer.name} the ${currentPlayer.classType}!`);
         }
