@@ -1106,13 +1106,38 @@ def power_shop(player):
             print("Invalid power name!")
 
 def show_abilities(player):
-    """Display available abilities with numbers"""
-    print("\nAvailable Abilities:")
-    abilities_list = list(player.abilities.items())
-    for i, (ability, details) in enumerate(abilities_list, 1):
-        desc = details['description']
-        mana = details['mana_cost']
-        print(f"{i}. {ability} - {desc} (Mana: {mana})")
+    """Improved ability display with better formatting"""
+    print("\n=== Available Abilities ===")
+    abilities_list = []
+    
+    for name, ability in player.abilities.items():
+        abilities_list.append((name, ability))
+        index = len(abilities_list)
+        
+        # Build ability description
+        desc = [ability['description']]
+        stats = []
+        
+        if 'damage' in ability:
+            stats.append(f"DMG: {ability['damage']}")
+        if 'area_damage' in ability:
+            stats.append(f"Area DMG: {ability['area_damage']}")
+        if 'heal' in ability:
+            stats.append(f"Heal: {ability['heal']}")
+        if 'hits' in ability:
+            stats.append(f"Hits: {ability['hits']}x")
+        if 'effect' in ability:
+            stats.append(f"Effect: {ability['effect'].title()}")
+        if 'duration' in ability:
+            stats.append(f"Duration: {ability['duration']} turns")
+            
+        stats.append(f"Mana: {ability['mana_cost']}")
+        
+        # Print formatted ability info
+        print(f"\n{index}. {name}")
+        print(f"   {' | '.join(stats)}")
+        print(f"   {desc[0]}")
+        
     return abilities_list
 
 def show_gadgets(player):
@@ -1207,119 +1232,117 @@ def process_enemy_attack(player, enemy):
     return final_damage
 
 def process_ability(player, target, enemies, ability_name, duration=0):
-    """Process ability with multi-target and healing support"""
-    ability = player.abilities[ability_name]
-    player.mana -= ability["mana_cost"]
-    total_damage = 0
-    total_healing = 0
-    
-    # Get ability parameters
-    base_damage = ability.get("damage", 0)
-    base_heal = ability.get("heal", 0)
-    hits = ability.get("hits", 1)
-    effect_type = ability.get("effect", None)
-    duration = ability.get("duration", duration)
-    
-    # Process healing over time
-    if base_heal > 0 and duration > 0:
-        player.status_effects.append({
-            "name": "Regeneration",
-            "heal": base_heal,
-            "duration": duration
-        })
-        print(f"Regeneration effect: {base_heal} HP per turn for {duration} turns!")
-    
-    # Process immediate healing with hits
-    elif base_heal > 0:
-        for hit in range(hits):
-            heal_amount = base_heal
+    """Process ability with improved handling and feedback"""
+    try:
+        ability = player.abilities[ability_name]
+        
+        # Check mana cost first
+        if player.mana < ability['mana_cost']:
+            print("Not enough mana!")
+            return 0
+
+        # Deduct mana cost
+        player.mana -= ability['mana_cost']
+        total_damage = 0
+        total_healing = 0
+
+        # Process ability effects
+        if "damage" in ability:
+            damage = ability["damage"]
+            
+            # Handle area damage abilities
+            if "area_damage" in ability:
+                # Main target damage
+                target.health -= damage
+                total_damage += damage
+                print(f"\n💥 {ability_name} hits {target.name} for {damage} damage!")
+                
+                # Area damage to other enemies
+                for enemy in [e for e in enemies if e != target and e.health > 0]:
+                    area_dmg = ability["area_damage"]
+                    enemy.health -= area_dmg
+                    total_damage += area_dmg
+                    print(f"⚡ Splash damage: {area_dmg} to {enemy.name}")
+            
+            # Handle multi-hit abilities
+            elif "hits" in ability:
+                hits = ability["hits"]
+                print(f"\n⚔ {ability_name} strikes {hits} times!")
+                for hit in range(hits):
+                    if target.health > 0:
+                        target.health -= damage
+                        total_damage += damage
+                        print(f"Hit {hit+1}: {damage} damage to {target.name}")
+            
+            # Single hit damage
+            else:
+                target.health -= damage
+                total_damage += damage
+                print(f"\n💥 {ability_name} deals {damage} damage to {target.name}")
+
+        # Process healing
+        if "heal" in ability:
+            heal_amount = ability["heal"]
             original_health = player.health
             player.health = min(player.max_health, player.health + heal_amount)
             actual_heal = player.health - original_health
             total_healing += actual_heal
-            if actual_heal > 0:
-                print(f"Heal {hit + 1}: Restored {actual_heal} HP!")
-    
-    # Process damage
-    if "area_damage" in ability:
-        # Area damage to all enemies
-        main_damage = base_damage
-        area_damage = ability["area_damage"]
-        
-        # Apply main damage to target
-        target.health -= main_damage
-        total_damage += main_damage
-        print(f"Main damage: {main_damage} to {target.name}")
-        
-        # Apply area damage to other enemies
-        for enemy in enemies:
-            if enemy != target and enemy.health > 0:
-                enemy.health -= area_damage
-                total_damage += area_damage
-                print(f"Area damage: {area_damage} to {enemy.name}")
-                
-    elif "hits" in ability:
-        for hit in range(hits):
-            if target.health > 0:
-                target.health -= base_damage
-                total_damage += base_damage
-                print(f"Hit {hit + 1}: {base_damage} damage to {target.name}!")
-                
-                # Process healing from damage if ability has both
-                if base_heal > 0:
-                    heal_from_damage = int(base_damage * 0.5)  # 50% of damage dealt
-                    original_health = player.health
-                    player.health = min(player.max_health, player.health + heal_from_damage)
-                    actual_heal = player.health - original_health
-                    total_healing += actual_heal
-                    if actual_heal > 0:
-                        print(f"Life drain from hit {hit + 1}: Restored {actual_heal} HP!")
-    
-    if total_healing > 0:
-        print(f"Total healing done: {total_healing}")
-    if total_damage > 0:
-        print(f"Total damage dealt: {total_damage}")
-    
-    # Apply status effect if present
-    if effect_type:
-        apply_status_effect(target, effect_type, base_damage, duration)
-    
-    return total_damage
+            print(f"💚 Restored {actual_heal} HP!")
+
+        # Apply status effects
+        if "effect" in ability:
+            effect_type = ability["effect"]
+            effect_duration = ability.get("duration", 3)
+            apply_status_effect(target, effect_type, damage if "damage" in ability else 0, effect_duration)
+
+        # Display totals
+        if total_damage > 0:
+            print(f"\nTotal damage dealt: {total_damage}")
+        if total_healing > 0:
+            print(f"Total healing done: {total_healing}")
+
+        return total_damage
+
+    except KeyError as e:
+        print(f"Error: Invalid ability configuration - {e}")
+        return 0
+    except Exception as e:
+        print(f"Error processing ability: {e}")
+        return 0
 
 def apply_status_effect(target, effect_type, base_damage, duration):
-    """Helper function to apply status effects"""
-    if effect_type == "burn":
-        target.status_effects.append({
+    """Enhanced status effect application"""
+    effect = {
+        "burn": {
             "name": "Burned",
-            "damage": base_damage // 2,
-            "duration": duration
-        })
-        print(f"{target.name} is burned for {duration} turns!")
-        
-    elif effect_type == "acid":
-        # Acid reduces defense and does damage over time
-        target.status_effects.append({
-            "name": "Corroded",
-            "damage": base_damage // 3,
-            "defense_reduction": 5,
-            "duration": duration
-        })
-        print(f"{target.name} is corroded for {duration} turns!")
-        
-    elif effect_type == "freeze":
-        target.status_effects.append({
-            "name": "Frozen",
-            "damage": base_damage // 2,
+            "damage": max(1, base_damage // 3),
             "duration": duration,
-            "damage_reduction": 0.5
-        })
-        print(f"{target.name} is frozen for {duration} turns!")
-    elif effect_type == "stun":
-        target.status_effects.append({
+            "message": "🔥 {} is burning!"
+        },
+        "freeze": {
+            "name": "Frozen",
+            "damage": max(1, base_damage // 4),
+            "duration": duration,
+            "damage_reduction": 0.5,
+            "message": "❄️ {} is frozen!"
+        },
+        "stun": {
             "name": "Stunned",
-            "duration": duration
-        })
-        print(f"{target.name} is stunned for {duration} turns!")
+            "duration": duration,
+            "message": "⚡ {} is stunned!"
+        },
+        "poison": {
+            "name": "Poisoned",
+            "damage": max(1, base_damage // 3),
+            "duration": duration,
+            "message": "☠️ {} is poisoned!"
+        }
+    }
+
+    if effect_type in effect:
+        status = effect[effect_type].copy()
+        target.status_effects.append(status)
+        print(status["message"].format(target.name))
 
 def process_status_effects(entity):
     """Process status effects at the start of turn"""
