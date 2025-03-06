@@ -1569,15 +1569,9 @@ def main():
                     if player.level >= min_level:
                         cumulative += chance
                         if roll <= cumulative:
-                            new_enemy = Enemy(
-                                enemy_type.name,
-                                enemy_type.max_health,
-                                enemy_type.damage,
-                                enemy_type.exp_reward,
-                                enemy_type.gold_reward,
-                                enemy_type.level
-                            )
-                            enemies.append(new_enemy)
+                            # Use scale_to_level to create properly scaled enemy
+                            scaled_enemy = enemy_type.scale_to_level(player.level)
+                            enemies.append(scaled_enemy)
                             break
 
             # Remove duplicate combat call and time.sleep
