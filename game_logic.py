@@ -662,26 +662,38 @@ def combat(player, enemies):
             
         elif choice == "2":  # Use ability
             abilities_list = show_abilities(player)
-            ability_choice = input("Choose ability number (or 'back'): ")
-            
-            if ability_choice.lower() == 'back':
+            if not abilities_list:
+                print("No abilities available or not enough mana!")
                 continue
+                
+            print("\nChoose ability number or 'back' to return")
+            ability_choice = input("> ").lower()
             
+            if ability_choice == 'back':
+                continue
+                
             try:
                 ability_idx = int(ability_choice) - 1
                 if 0 <= ability_idx < len(abilities_list):
                     ability_name, ability = abilities_list[ability_idx]
-                    if player.mana >= ability["mana_cost"]:
+                    
+                    # Get target for ability
+                    if "area_damage" in ability:
+                        print("\nThis ability will hit all enemies!")
+                        target = get_target(enemies, auto=True)
+                    else:
+                        print("\nChoose your target:")
                         target = get_target(enemies, auto_target)
-                        if target:
-                            # Get duration from ability if it exists, otherwise default to 0
-                            duration = ability.get("duration", 0)
-                            process_ability(player, target, enemies, ability_name, duration)
-                        else:
-                            print("No valid target!")
+                    
+                    if target:
+                        # Process the ability
+                        duration = ability.get("duration", 0)
+                        damage = process_ability(player, target, enemies, ability_name, duration)
+                        
+                        if damage == 0:  # Ability failed
                             continue
                     else:
-                        print("Not enough mana!")
+                        print("No valid target!")
                         continue
                 else:
                     print("Invalid ability number!")
@@ -1162,38 +1174,38 @@ def power_shop(player):
             print("Invalid power name!")
 
 def show_abilities(player):
-    """Improved ability display with better formatting"""
+    """Improved ability display and selection"""
     print("\n=== Available Abilities ===")
+    print(f"Mana: {player.mana}/{player.max_mana}")
     abilities_list = []
-    
+
+    # Only show abilities player can afford
     for name, ability in player.abilities.items():
-        abilities_list.append((name, ability))
-        index = len(abilities_list)
-        
-        # Build ability description
-        desc = [ability['description']]
-        stats = []
-        
-        if 'damage' in ability:
-            stats.append(f"DMG: {ability['damage']}")
-        if 'area_damage' in ability:
-            stats.append(f"Area DMG: {ability['area_damage']}")
-        if 'heal' in ability:
-            stats.append(f"Heal: {ability['heal']}")
-        if 'hits' in ability:
-            stats.append(f"Hits: {ability['hits']}x")
-        if 'effect' in ability:
-            stats.append(f"Effect: {ability['effect'].title()}")
-        if 'duration' in ability:
-            stats.append(f"Duration: {ability['duration']} turns")
+        if ability['mana_cost'] <= player.mana:
+            abilities_list.append((name, ability))
+            index = len(abilities_list)
             
-        stats.append(f"Mana: {ability['mana_cost']}")
-        
-        # Print formatted ability info
-        print(f"\n{index}. {name}")
-        print(f"   {' | '.join(stats)}")
-        print(f"   {desc[0]}")
-        
+            # Build ability description
+            stats = []
+            if 'damage' in ability:
+                stats.append(f"💥 DMG: {ability['damage']}")
+            if 'area_damage' in ability:
+                stats.append(f"⚡ Area: {ability['area_damage']}")
+            if 'heal' in ability:
+                stats.append(f"💚 Heal: {ability['heal']}")
+            if 'hits' in ability:
+                stats.append(f"⚔️ Hits: {ability['hits']}x")
+            if 'effect' in ability:
+                stats.append(f"✨ {ability['effect'].title()}")
+            if 'duration' in ability:
+                stats.append(f"⏱️ {ability['duration']} turns")
+            stats.append(f"💫 MP: {ability['mana_cost']}")
+            
+            # Print formatted ability info
+            print(f"\n{index}. {name}")
+            print(f"   {' | '.join(stats)}")
+            print(f"   📜 {ability['description']}")
+    
     return abilities_list
 
 def show_gadgets(player):
