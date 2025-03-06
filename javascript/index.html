@@ -237,16 +237,16 @@
 
         // Initialize game when page loads
         window.onload = function () {
-            pageManager = new PageManager();
-            setupEventListeners();
-
-            // Check for existing player
+            // Check if player exists and redirect to menu if they do
             const savedPlayer = localStorage.getItem('currentPlayer');
             if (savedPlayer) {
-                currentPlayer = JSON.parse(savedPlayer);
-                showGameInterface();
-                updatePlayerStats(currentPlayer);
+                window.location.href = 'menu.html';
+                return;
             }
+
+            // Otherwise initialize character creation
+            pageManager = new PageManager();
+            setupEventListeners();
         };
 
         async function createCharacter() {
@@ -266,9 +266,8 @@
 
                 console.log(`Creating ${name} as ${currentPlayer.classType}...`);
                 localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
-                showGameInterface();
-                updatePlayerStats(currentPlayer);
-                elements.gameOutput.innerHTML = `Welcome, ${currentPlayer.name} the ${currentPlayer.classType}!\n`;
+                // Redirect to menu.html instead of showing game interface
+                window.location.href = 'menu.html';
             } catch (error) {
                 console.error('Failed to create character:', error);
                 alert('Error creating character. Please try again.');

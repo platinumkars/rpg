@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Game - Main Menu</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #menuContainer {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .menu-section {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .menu-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 0 0 10px #66f;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .menu-button {
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            border-radius: 3px;
+        }
+
+        .menu-button:hover {
+            background-color: #666;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-button.active {
+            background-color: #555;
+            transform: translateY(1px);
+        }
+
+        .player-stats {
+            text-align: left;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 3px;
+            margin-bottom: 20px;
+        }
+
+        .status-effect {
+            color: #ff9;
+            font-style: italic;
+        }
+
+        #gameOutput {
+            height: 200px;
+            overflow-y: scroll;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 3px;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .menu-footer {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="menuContainer">
+        <div class="menu-section">
+            <h1 class="menu-title">RPG Game Menu</h1>
+            <div id="playerStats" class="player-stats"></div>
+            <div id="gameOutput"></div>
+            <div class="button-grid">
+                <button class="menu-button" onclick="handleCommand('1')">Fight</button>
+                <button class="menu-button" onclick="handleCommand('2')">Shop</button>
+                <button class="menu-button" onclick="handleCommand('3')">Inventory</button>
+                <button class="menu-button" onclick="handleCommand('4')">Rest</button>
+                <button class="menu-button" onclick="handleCommand('5')">Abilities</button>
+                <button class="menu-button" onclick="handleCommand('6')">Gadgets</button>
+                <button class="menu-button" onclick="handleCommand('7')">Exchange</button>
+                <button class="menu-button" onclick="handleCommand('8')">Powers</button>
+            </div>
+            <button class="menu-button" style="width: 100%" onclick="handleCommand('9')">Quit Game</button>
+        </div>
+        <div class="menu-footer">
+            Press ESC to return to this menu from any screen
+        </div>
+    </div>
+
+    <script src="game_logic.js"></script>
+    <script>
+        let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer'));
+        const gameOutput = document.getElementById('gameOutput');
+        const playerStats = document.getElementById('playerStats');
+
+        function updatePlayerStats() {
+            if (!currentPlayer) return;
+
+            playerStats.innerHTML = `
+                ${currentPlayer.name} - Level ${currentPlayer.level}<br>
+                HP: ${currentPlayer.health}/${currentPlayer.maxHealth} | 
+                MP: ${currentPlayer.mana}/${currentPlayer.maxMana}<br>
+                EXP: ${currentPlayer.exp}/${calculateExpRequirement(currentPlayer.level)} | 
+                Gold: ${currentPlayer.gold}<br>
+                Tech Points: ${currentPlayer.techPoints}
+            `;
+        }
+
+        async function handleCommand(command) {
+            if (!currentPlayer) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                switch (command) {
+                    case '1':
+                        window.location.href = 'combat.html';
+                        break;
+                    case '2':
+                        window.location.href = 'shop.html';
+                        break;
+                    case '3':
+                        window.location.href = 'inventory.html';
+                        break;
+                    case '4':
+                        await rest(currentPlayer);
+                        break;
+                    case '5':
+                        window.location.href = 'abilities.html';
+                        break;
+                    case '6':
+                        window.location.href = 'gadgets.html';
+                        break;
+                    case '7':
+                        window.location.href = 'exchange.html';
+                        break;
+                    case '8':
+                        window.location.href = 'powers.html';
+                        break;
+                    case '9':
+                        if (confirm('Are you sure you want to quit?')) {
+                            localStorage.removeItem('currentPlayer');
+                            window.location.href = 'index.html';
+                        }
+                        break;
+                }
+                updatePlayerStats();
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+            } catch (error) {
+                console.error('Error:', error);
+                gameOutput.innerHTML += 'An error occurred. Please try again.\n';
+            }
+        }
+
+        // Initialize
+        window.onload = function () {
+            if (!currentPlayer) {
+                window.location.href = 'index.html';
+                return;
+            }
+            updatePlayerStats();
+            gameOutput.innerHTML = 'Welcome back, ' + currentPlayer.name + '!\n';
+        };
+
+        // Handle ESC key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                window.location.href = 'menu.html';
+            }
+        });
+    </script>
+</body>
+
+</html>
