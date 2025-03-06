@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Game - Currency Exchange</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #exchangeContainer {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .exchange-section {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .exchange-title {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 0 0 10px #66f;
+        }
+
+        .player-stats {
+            background-color: #333;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 3px;
+        }
+
+        .exchange-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .exchange-card {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .exchange-rate {
+            color: #8f8;
+            margin: 10px 0;
+            font-size: 1.2em;
+        }
+
+        .exchange-input {
+            background-color: #1e1e1e;
+            color: white;
+            border: 1px solid #444;
+            padding: 10px;
+            width: 80%;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
+
+        .exchange-button {
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+            width: 80%;
+        }
+
+        .exchange-button:hover:not(:disabled) {
+            background-color: #666;
+        }
+
+        .exchange-button:disabled {
+            background-color: #333;
+            cursor: not-allowed;
+        }
+
+        .return-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-top: 20px;
+        }
+
+        .return-button:hover {
+            background-color: #666;
+        }
+
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            background-color: #4a4a4a;
+            border-radius: 5px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="exchangeContainer">
+        <div class="exchange-section">
+            <h1 class="exchange-title">Currency Exchange</h1>
+            <div id="playerStats" class="player-stats"></div>
+            <div class="exchange-grid">
+                <div class="exchange-card">
+                    <h2>Gold to Tech Points</h2>
+                    <div class="exchange-rate">Rate: 100 Gold = 1 TP</div>
+                    <input type="number" id="goldInput" class="exchange-input" placeholder="Enter gold amount" min="100"
+                        step="100">
+                    <button class="exchange-button" onclick="exchangeGoldToTP()">Convert Gold</button>
+                </div>
+                <div class="exchange-card">
+                    <h2>Tech Points to Gold</h2>
+                    <div class="exchange-rate">Rate: 1 TP = 80 Gold</div>
+                    <input type="number" id="tpInput" class="exchange-input" placeholder="Enter TP amount" min="1">
+                    <button class="exchange-button" onclick="exchangeTPToGold()">Convert TP</button>
+                </div>
+            </div>
+            <button class="return-button" onclick="returnToMenu()">Return to Menu</button>
+        </div>
+    </div>
+    <div id="notification"></div>
+
+    <script src="game_logic.js"></script>
+    <script>
+        let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer'));
+
+        function updateDisplay() {
+            if (!currentPlayer) return;
+
+            document.getElementById('playerStats').innerHTML = `
+                ${currentPlayer.name} - Level ${currentPlayer.level}<br>
+                Gold: ${currentPlayer.gold}<br>
+                Tech Points: ${currentPlayer.techPoints || 0}
+            `;
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function exchangeGoldToTP() {
+            const goldAmount = parseInt(document.getElementById('goldInput').value);
+            if (isNaN(goldAmount) || goldAmount < 100) {
+                showNotification('Please enter a valid amount (minimum 100 gold)');
+                return;
+            }
+
+            if (currentPlayer.gold < goldAmount) {
+                showNotification('Not enough gold!');
+                return;
+            }
+
+            const tpGained = Math.floor(goldAmount / 100);
+            currentPlayer.gold -= goldAmount;
+            currentPlayer.techPoints = (currentPlayer.techPoints || 0) + tpGained;
+
+            localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+            showNotification(`Exchanged ${goldAmount} gold for ${tpGained} TP`);
+            updateDisplay();
+            document.getElementById('goldInput').value = '';
+        }
+
+        function exchangeTPToGold() {
+            const tpAmount = parseInt(document.getElementById('tpInput').value);
+            if (isNaN(tpAmount) || tpAmount < 1) {
+                showNotification('Please enter a valid amount');
+                return;
+            }
+
+            if (!currentPlayer.techPoints || currentPlayer.techPoints < tpAmount) {
+                showNotification('Not enough Tech Points!');
+                return;
+            }
+
+            const goldGained = tpAmount * 80;
+            currentPlayer.techPoints -= tpAmount;
+            currentPlayer.gold += goldGained;
+
+            localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+            showNotification(`Exchanged ${tpAmount} TP for ${goldGained} gold`);
+            updateDisplay();
+            document.getElementById('tpInput').value = '';
+        }
+
+        function returnToMenu() {
+            window.location.href = 'menu.html';
+        }
+
+        // Initialize
+        window.onload = function () {
+            if (!currentPlayer) {
+                window.location.href = 'index.html';
+                return;
+            }
+            updateDisplay();
+        };
+
+        // Handle ESC key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                returnToMenu();
+            }
+        });
+    </script>
+</body>
+
+</html>

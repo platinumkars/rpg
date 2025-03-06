@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Game - Abilities</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #abilitiesContainer {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .abilities-section {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .ability-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .ability-card {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 3px;
+            border: 1px solid #444;
+            transition: transform 0.2s;
+        }
+
+        .ability-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .ability-name {
+            color: #aaf;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+
+        .ability-stats {
+            font-size: 0.9em;
+            color: #ccc;
+            margin: 10px 0;
+        }
+
+        .ability-description {
+            font-style: italic;
+            color: #999;
+            margin: 10px 0;
+        }
+
+        .return-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-top: 20px;
+        }
+
+        .return-button:hover {
+            background-color: #666;
+        }
+
+        .player-stats {
+            background-color: #333;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="abilitiesContainer">
+        <div class="abilities-section">
+            <h1>Abilities</h1>
+            <div id="playerStats" class="player-stats"></div>
+            <div id="abilitiesList" class="ability-grid"></div>
+            <button class="return-button" onclick="returnToMenu()">Return to Menu</button>
+        </div>
+    </div>
+
+    <script src="game_logic.js"></script>
+    <script>
+        let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer'));
+
+        function updateAbilitiesDisplay() {
+            if (!currentPlayer) return;
+
+            // Update player stats
+            const playerStats = document.getElementById('playerStats');
+            playerStats.innerHTML = `
+                ${currentPlayer.name} - Level ${currentPlayer.level}<br>
+                HP: ${currentPlayer.health}/${currentPlayer.maxHealth} | 
+                MP: ${currentPlayer.mana}/${currentPlayer.maxMana}
+            `;
+
+            // Update abilities list
+            const abilitiesList = document.getElementById('abilitiesList');
+            abilitiesList.innerHTML = Object.entries(currentPlayer.abilities)
+                .map(([name, ability]) => `
+                    <div class="ability-card">
+                        <div class="ability-name">${name}</div>
+                        <div class="ability-stats">
+                            ${ability.damage ? `Damage: ${ability.damage}<br>` : ''}
+                            ${ability.heal ? `Healing: ${ability.heal}<br>` : ''}
+                            ${ability.duration ? `Duration: ${ability.duration} turns<br>` : ''}
+                            Mana Cost: ${ability.manaCost}
+                        </div>
+                        <div class="ability-description">${ability.description}</div>
+                    </div>
+                `).join('');
+        }
+
+        function returnToMenu() {
+            window.location.href = 'menu.html';
+        }
+
+        // Initialize
+        window.onload = function () {
+            if (!currentPlayer) {
+                window.location.href = 'index.html';
+                return;
+            }
+            updateAbilitiesDisplay();
+        };
+
+        // Handle ESC key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                returnToMenu();
+            }
+        });
+    </script>
+</body>
+
+</html>

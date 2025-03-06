@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Game - Inventory</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #inventoryContainer {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .inventory-section {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .inventory-category {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 3px;
+        }
+
+        .inventory-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #aaf;
+        }
+
+        .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .item-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            border-bottom: 1px solid #444;
+        }
+
+        .item-entry:hover {
+            background-color: #3a3a3a;
+        }
+
+        .use-button {
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .use-button:hover {
+            background-color: #666;
+        }
+
+        .return-button {
+            width: 100%;
+            padding: 15px;
+            background-color: #4a4a4a;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-top: 20px;
+        }
+
+        .return-button:hover {
+            background-color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="inventoryContainer">
+        <div class="inventory-section">
+            <h1>Inventory</h1>
+            <div class="inventory-grid">
+                <div class="inventory-category">
+                    <div class="inventory-title">Items</div>
+                    <ul id="itemsList" class="item-list"></ul>
+                </div>
+                <div class="inventory-category">
+                    <div class="inventory-title">Equipment</div>
+                    <ul id="equipmentList" class="item-list"></ul>
+                </div>
+                <div class="inventory-category">
+                    <div class="inventory-title">Gadgets</div>
+                    <ul id="gadgetsList" class="item-list"></ul>
+                </div>
+                <div class="inventory-category">
+                    <div class="inventory-title">Powers</div>
+                    <ul id="powersList" class="item-list"></ul>
+                </div>
+            </div>
+            <button class="return-button" onclick="returnToMenu()">Return to Menu</button>
+        </div>
+    </div>
+
+    <script src="game_logic.js"></script>
+    <script>
+        let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer'));
+
+        function updateInventoryDisplay() {
+            if (!currentPlayer) return;
+
+            // Update Items
+            const itemsList = document.getElementById('itemsList');
+            itemsList.innerHTML = Object.entries(currentPlayer.inventory)
+                .map(([item, quantity]) => `
+                    <li class="item-entry">
+                        <span>${item} (${quantity})</span>
+                        <button class="use-button" onclick="useItem('${item}')">Use</button>
+                    </li>
+                `).join('');
+
+            // Update Equipment
+            const equipmentList = document.getElementById('equipmentList');
+            equipmentList.innerHTML = Object.entries(currentPlayer.weapons)
+                .map(([weapon, damage]) => `
+                    <li class="item-entry">
+                        <span>${weapon} (DMG: ${damage})</span>
+                        <button class="use-button" onclick="equipItem('${weapon}')"
+                            ${weapon === currentPlayer.currentWeapon ? 'disabled' : ''}>
+                            ${weapon === currentPlayer.currentWeapon ? 'Equipped' : 'Equip'}
+                        </button>
+                    </li>
+                `).join('');
+
+            // Update Gadgets
+            const gadgetsList = document.getElementById('gadgetsList');
+            gadgetsList.innerHTML = Object.entries(currentPlayer.gadgets)
+                .map(([gadget, info]) => `
+                    <li class="item-entry">
+                        <span>${gadget}</span>
+                        <button class="use-button" onclick="useGadget('${gadget}')">Use</button>
+                    </li>
+                `).join('');
+
+            // Update Powers
+            const powersList = document.getElementById('powersList');
+            powersList.innerHTML = Object.entries(currentPlayer.powers)
+                .map(([power, info]) => `
+                    <li class="item-entry">
+                        <span>${power}</span>
+                        <button class="use-button" onclick="usePower('${power}')">Use</button>
+                    </li>
+                `).join('');
+        }
+
+        function useItem(itemName) {
+            // Handle item usage
+            if (itemName.includes('Potion')) {
+                if (itemName === 'Health Potion') {
+                    currentPlayer.health = Math.min(currentPlayer.maxHealth,
+                        currentPlayer.health + 50);
+                } else if (itemName === 'Mana Potion') {
+                    currentPlayer.mana = Math.min(currentPlayer.maxMana,
+                        currentPlayer.mana + 35);
+                }
+                currentPlayer.inventory[itemName]--;
+                if (currentPlayer.inventory[itemName] <= 0) {
+                    delete currentPlayer.inventory[itemName];
+                }
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+                updateInventoryDisplay();
+            }
+        }
+
+        function equipItem(weaponName) {
+            currentPlayer.currentWeapon = weaponName;
+            localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+            updateInventoryDisplay();
+        }
+
+        function returnToMenu() {
+            window.location.href = 'menu.html';
+        }
+
+        // Initialize
+        window.onload = function () {
+            if (!currentPlayer) {
+                window.location.href = 'index.html';
+                return;
+            }
+            updateInventoryDisplay();
+        };
+
+        // Handle ESC key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                returnToMenu();
+            }
+        });
+    </script>
+</body>
+
+</html>
