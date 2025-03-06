@@ -546,16 +546,24 @@ AVAILABLE_POWERS = {
 class Enemy:
     def __init__(self, name, health, damage, exp_reward, gold_reward, level=1):
         self.name = name
+        self.max_health = health  # Add max_health attribute
+        self.health = health
         self.level = level
-        level_multiplier = 1 + (level - 1) * 0.2
-        self.health = int(health * level_multiplier)
-        self.max_health = self.health
-        self.damage = int(damage * level_multiplier)
-        self.exp_reward = int(exp_reward * level_multiplier)
-        self.gold_reward = int(gold_reward * level_multiplier)
+        self.damage = damage
+        self.exp_reward = exp_reward
+        self.gold_reward = gold_reward
         self.status_effects = []
-        self.abilities = {}
-        self.is_boss = False
+
+    def scale_stats(self, player_level):
+        """Scale enemy stats based on player level"""
+        level_diff = max(0, player_level - self.level)
+        scaling = 1 + (level_diff * 0.15)  # Reduced from 0.2 for smoother scaling
+        
+        self.max_health = int(self.max_health * scaling)
+        self.health = self.max_health
+        self.damage = int(self.damage * scaling)
+        self.exp_reward = int(self.exp_reward * scaling)
+        self.gold_reward = int(self.gold_reward * scaling)
 
     def is_alive(self):
         """Check if enemy is still alive"""
@@ -741,8 +749,7 @@ def combat(player, enemies):
         
         # Check player death
         if player.health <= 0:
-            print("You have been defeated...")
-            return False
+            return handle_player_death(player)
             
     # Combat victory - remove duplicate rewards
     if player.health > 0:
@@ -866,7 +873,63 @@ def shop(player):
         # Armor (adjusted defense)
         "Leather Armor": {"cost": 60, "defense": 8, "min_level": 1},
         "Chain Mail": {"cost": 140, "defense": 15, "min_level": 3},
-        "Plate Armor": {"cost": 300, "defense": 25, "min_level": 5}
+        "Plate Armor": {"cost": 300, "defense": 25, "min_level": 5},
+
+        # Multi-hit weapons
+        "Twin Daggers": {
+            "cost": 200, 
+            "damage": 15, 
+            "hits": 2, 
+            "type": "melee", 
+            "min_level": 2,
+            "description": "Strike twice per attack"
+        },
+        "Triple Shot Bow": {
+            "cost": 300, 
+            "damage": 12, 
+            "hits": 3, 
+            "type": "ranged", 
+            "min_level": 3,
+            "description": "Fire three arrows"
+        },
+
+        # Area damage weapons
+        "Flame Sword": {
+            "cost": 400, 
+            "damage": 25, 
+            "area_damage": 12, 
+            "type": "melee", 
+            "min_level": 4,
+            "description": "Deals splash damage"
+        },
+        "Bomb Launcher": {
+            "cost": 500, 
+            "damage": 20, 
+            "area_damage": 15, 
+            "type": "ranged", 
+            "min_level": 4,
+            "description": "Explosive area damage"
+        },
+
+        # High-tier weapons
+        "Whirlwind Blade": {
+            "cost": 800,
+            "damage": 30,
+            "hits": 3,
+            "area_damage": 15,
+            "type": "melee",
+            "min_level": 6,
+            "description": "Multiple hits with area damage"
+        },
+        "Storm Bow": {
+            "cost": 1000,
+            "damage": 25,
+            "hits": 4,
+            "area_damage": 12,
+            "type": "ranged",
+            "min_level": 7,
+            "description": "Rain of explosive arrows"
+        }
     }
     
     while True:
@@ -1060,20 +1123,16 @@ def show_gadgets(player):
     return gadget_list
 
 def process_attack(player, target, enemies):
-    """Process attack with multi-hit and area damage"""
+    """Process attack with multi-hit and area damage support"""
     weapon_stats = player.weapons[player.current_weapon]
     total_damage = 0
     living_enemies = [e for e in enemies if e.health > 0]
-    current_target = target if target.health > 0 else None
-
+    
     if not living_enemies:
         print("No valid targets remaining!")
         return total_damage
 
-    if not current_target and living_enemies:
-        current_target = living_enemies[0]
-    
-    # Calculate base damage
+    # Handle dictionary-based weapon stats
     if isinstance(weapon_stats, dict):
         base_damage = weapon_stats["damage"]
         level_bonus = int(player.level * 1.5)
@@ -1081,15 +1140,16 @@ def process_attack(player, target, enemies):
         # Handle multi-hit weapons
         if "hits" in weapon_stats:
             hits = weapon_stats["hits"]
-            enemy_index = living_enemies.index(current_target)
+            enemy_index = living_enemies.index(target)
             
             for hit in range(hits):
                 if not living_enemies:  # Stop if no more targets
                     break
-                
-                # Get current target, cycle through living enemies
+                    
+                # Get current target, cycling through living enemies
                 current_target = living_enemies[enemy_index % len(living_enemies)]
                 
+                # Add slight damage variation
                 variation = random.randint(-2, 2)
                 hit_damage = max(1, base_damage + level_bonus + variation)
                 
@@ -1110,15 +1170,14 @@ def process_attack(player, target, enemies):
             
             print(f"Total damage dealt: {total_damage}")
             
-        else:
-            # Single hit processing
+        else:  # Single hit processing
             variation = random.randint(-2, 2)
             main_damage = max(1, base_damage + level_bonus + variation)
             target.health -= main_damage
             total_damage = main_damage
             print(f"You deal {main_damage} damage to {target.name}!")
-            
-        # Process area damage
+        
+        # Process area damage if weapon has it
         if "area_damage" in weapon_stats and living_enemies:
             for other in living_enemies:
                 if other != target and other.health > 0:
@@ -1126,8 +1185,8 @@ def process_attack(player, target, enemies):
                     other.health -= splash_damage
                     total_damage += splash_damage
                     print(f"{other.name} takes {splash_damage} splash damage!")
-    else:
-        # Simple weapon damage
+                    
+    else:  # Legacy weapon handling
         variation = random.randint(-2, 2)
         main_damage = max(1, weapon_stats + int(player.level * 1.5) + variation)
         target.health -= main_damage
@@ -1416,31 +1475,50 @@ class EnemyType:
 
 # Update spawn table with base stats
 spawn_table = [
-    # Level 1 enemies
-    (EnemyType("Goblin", 65, 15, 20, 25, 1), 20, 1),      # Base: 65 HP, 15 DMG
-    (EnemyType("Wolf", 75, 18, 25, 30, 1), 20, 1),        # Base: 75 HP, 18 DMG
-    (EnemyType("Slime", 55, 12, 15, 20, 1), 15, 1),       # Base: 55 HP, 12 DMG
+    # Level 1 enemies - Reduced base stats for better early game
+    (EnemyType("Goblin", 45, 8, 20, 25, 1), 20, 1),      
+    (EnemyType("Wolf", 50, 10, 25, 30, 1), 20, 1),        
+    (EnemyType("Slime", 40, 6, 15, 20, 1), 15, 1),       
     
-    # Level 2 enemies
-    (EnemyType("Bandit", 85, 22, 35, 45, 2), 15, 2),      # Base: 85 HP, 22 DMG
-    (EnemyType("Skeleton", 80, 25, 30, 40, 2), 15, 2),     # Base: 80 HP, 25 DMG
-    (EnemyType("Giant Spider", 78, 28, 32, 38, 2), 15, 2), # Base: 78 HP, 28 DMG
+    # Level 2 enemies - Smoother progression
+    (EnemyType("Bandit", 65, 12, 35, 45, 2), 15, 2),      
+    (EnemyType("Skeleton", 60, 13, 30, 40, 2), 15, 2),     
+    (EnemyType("Giant Spider", 58, 14, 32, 38, 2), 15, 2), 
     
-    # Level 3 enemies
-    (EnemyType("Orc", 110, 32, 45, 50, 3), 12, 3),        # Base: 110 HP, 32 DMG
-    (EnemyType("Dark Elf", 95, 35, 48, 55, 3), 12, 3),    # Base: 95 HP, 35 DMG
-    (EnemyType("Werewolf", 120, 38, 50, 58, 3), 12, 3),   # Base: 120 HP, 38 DMG
-    
-    # Level 4 enemies
-    (EnemyType("Troll", 150, 42, 60, 65, 4), 10, 4),      # Base: 150 HP, 42 DMG
-    (EnemyType("Ogre", 165, 45, 65, 70, 4), 10, 4),       # Base: 165 HP, 45 DMG
-    (EnemyType("Gargoyle", 140, 48, 70, 75, 4), 10, 4),   # Base: 140 HP, 48 DMG
-    
-    # Level 5+ special enemies
-    (EnemyType("Dragon Whelp", 200, 55, 100, 120, 5), 5, 5), # Base: 200 HP, 55 DMG
-    (EnemyType("Necromancer", 180, 58, 110, 130, 5), 5, 5),  # Base: 180 HP, 58 DMG
-    (EnemyType("Giant", 250, 52, 120, 150, 5), 5, 5)         # Base: 250 HP, 52 DMG
+    # Level 3-5 enemies - Balanced for mid-game
+    # ...existing level 3-5 enemies...
 ]
+
+def spawn_enemies(player, num_enemies):
+    """Spawn enemies with proper scaling"""
+    enemies = []
+    for _ in range(num_enemies):
+        try:
+            roll = random.uniform(0, 100)
+            cumulative = 0
+            
+            # Filter eligible enemies based on player level
+            eligible_enemies = [
+                (enemy, chance, min_level) 
+                for enemy, chance, min_level in spawn_table 
+                if player.level >= min_level
+            ]
+            
+            if not eligible_enemies:
+                continue
+                
+            for enemy_type, chance, _ in eligible_enemies:
+                cumulative += chance
+                if roll <= cumulative:
+                    enemy = enemy_type.scale_to_level(player.level)
+                    enemies.append(enemy)
+                    break
+                    
+        except Exception as e:
+            print(f"Error spawning enemy: {e}")
+            continue
+            
+    return enemies
 
 def currency_exchange(player):
     """More balanced exchange rates"""
@@ -1577,10 +1655,11 @@ def main():
             # Remove duplicate combat call and time.sleep
             if enemies:
                 result = combat(player, enemies)
-                if not result:
+                if result == False:  # Player died and chose not to continue
                     print(f"\nGame Over! Final Level: {player.level}")
                     print(f"Gold collected: {player.gold}")
                     break
+                # If result is True, player was revived and continues playing
             else:
                 print("\nNo suitable enemies found in this area!")
                 print("Try exploring a different area or coming back later.")
@@ -1622,6 +1701,37 @@ def main():
                 print("Thanks for playing!")
                 break
 
+def handle_player_death(player):
+    """Handle player death with retry options"""
+    print("\n" + "="*50)
+    print("💀 You have been defeated! 💀")
+    print(f"Level reached: {player.level}")
+    print(f"Gold collected: {player.gold}")
+    print("="*50)
+    
+    while True:
+        print("\nOptions:")
+        print("1. Rest and try again (Cost: 100 gold)")
+        print("2. Give up and start new game")
+        
+        choice = input("> ")
+        
+        if choice == "1":
+            if player.gold >= 100:
+                player.gold -= 100
+                player.health = player.max_health
+                player.mana = player.max_mana
+                print("\nYou have been revived!")
+                print(f"Remaining gold: {player.gold}")
+                return True
+            else:
+                print("Not enough gold to rest!")
+                return False
+        elif choice == "2":
+            return False
+        else:
+            print("Invalid choice!")
+
 if __name__ == "__main__":
     try:
         main()
@@ -1631,28 +1741,3 @@ if __name__ == "__main__":
         print(f"\nAn error occurred: {e}")
         print("Game terminated.")
 
-def calculate_combat_rewards(player, enemies):
-    base_exp = sum(e.exp_reward for e in enemies)
-    base_gold = sum(e.gold_reward for e in enemies)
-    base_tp = sum((player.level * 10) for e in enemies)  # Reduced from 15
-    
-    # Add scaling based on enemy count
-    enemy_count_bonus = len(enemies) * 0.15
-    
-    return {
-        "exp": int(base_exp * (1 + enemy_count_bonus)),
-        "gold": int(base_gold * (1 + enemy_count_bonus)),
-        "tech_points": int(base_tp * (1 + enemy_count_bonus))
-    }
-
-def rest(player):
-    """More balanced resting mechanic"""
-    rest_cost = 20 + (player.level * 5)  # Scales with level
-    if player.gold >= rest_cost:
-        heal_amount = player.max_health * 0.4  # Reduced from 0.5
-        mana_amount = player.max_mana * 0.4    # Reduced from 0.5
-        player.health = min(player.max_health, player.health + int(heal_amount))
-        player.mana = min(player.max_mana, player.mana + int(mana_amount))
-        player.gold -= rest_cost
-        return True
-    return False
