@@ -1459,6 +1459,58 @@ def show_inventory_menu(player):
         elif choice == "4":
             break
 
+# Update the EnemyType class with better scaling
+class EnemyType:
+    def __init__(self, name, base_health, base_damage, exp_reward, gold_reward, min_level=1):
+        self.name = name
+        self.base_health = base_health
+        self.base_damage = base_damage
+        self.base_exp = exp_reward
+        self.base_gold = gold_reward
+        self.min_level = min_level
+
+    def scale_to_level(self, player_level):
+        """Scale enemy stats based on player level"""
+        level_diff = max(0, player_level - self.min_level)
+        scaling = 1 + (level_diff * 0.2)  # 20% increase per level difference
+        
+        return Enemy(
+            self.name,
+            int(self.base_health * scaling),
+            int(self.base_damage * scaling),
+            int(self.base_exp * scaling),
+            int(self.base_gold * scaling),
+            min(player_level, self.min_level + 2)  # Cap enemy level
+        )
+
+# Update spawn table with base stats
+spawn_table = [
+    # Level 1 enemies
+    (EnemyType("Goblin", 65, 15, 20, 25, 1), 20, 1),      # Base: 65 HP, 15 DMG
+    (EnemyType("Wolf", 75, 18, 25, 30, 1), 20, 1),        # Base: 75 HP, 18 DMG
+    (EnemyType("Slime", 55, 12, 15, 20, 1), 15, 1),       # Base: 55 HP, 12 DMG
+    
+    # Level 2 enemies
+    (EnemyType("Bandit", 85, 22, 35, 45, 2), 15, 2),      # Base: 85 HP, 22 DMG
+    (EnemyType("Skeleton", 80, 25, 30, 40, 2), 15, 2),     # Base: 80 HP, 25 DMG
+    (EnemyType("Giant Spider", 78, 28, 32, 38, 2), 15, 2), # Base: 78 HP, 28 DMG
+    
+    # Level 3 enemies
+    (EnemyType("Orc", 110, 32, 45, 50, 3), 12, 3),        # Base: 110 HP, 32 DMG
+    (EnemyType("Dark Elf", 95, 35, 48, 55, 3), 12, 3),    # Base: 95 HP, 35 DMG
+    (EnemyType("Werewolf", 120, 38, 50, 58, 3), 12, 3),   # Base: 120 HP, 38 DMG
+    
+    # Level 4 enemies
+    (EnemyType("Troll", 150, 42, 60, 65, 4), 10, 4),      # Base: 150 HP, 42 DMG
+    (EnemyType("Ogre", 165, 45, 65, 70, 4), 10, 4),       # Base: 165 HP, 45 DMG
+    (EnemyType("Gargoyle", 140, 48, 70, 75, 4), 10, 4),   # Base: 140 HP, 48 DMG
+    
+    # Level 5+ special enemies
+    (EnemyType("Dragon Whelp", 200, 55, 100, 120, 5), 5, 5), # Base: 200 HP, 55 DMG
+    (EnemyType("Necromancer", 180, 58, 110, 130, 5), 5, 5),  # Base: 180 HP, 58 DMG
+    (EnemyType("Giant", 250, 52, 120, 150, 5), 5, 5)         # Base: 250 HP, 52 DMG
+]
+
 # Define enemy types as a class for better organization
 class EnemyType:
     def __init__(self, name, max_health, damage, exp_reward, gold_reward, level=1):
@@ -1469,32 +1521,32 @@ class EnemyType:
         self.gold_reward = gold_reward
         self.level = level
 
-# Define spawn table with enemy types and their spawn chances
+# Replace the existing spawn_table with these balanced enemies
 spawn_table = [
-    # Level 1 enemies (increased rewards)
-    (EnemyType("Goblin", 30, 8, 20, 25, 1), 20, 1),    # Increased from 15 to 25 gold
-    (EnemyType("Wolf", 35, 10, 25, 30, 1), 20, 1),     # Increased from 20 to 30 gold
-    (EnemyType("Slime", 25, 6, 15, 20, 1), 15, 1),     # Increased from 10 to 20 gold
+    # Level 1 enemies (balanced for higher player health)
+    (EnemyType("Goblin", 45, 12, 20, 25, 1), 20, 1),      # HP: 30->45, DMG: 8->12
+    (EnemyType("Wolf", 50, 15, 25, 30, 1), 20, 1),        # HP: 35->50, DMG: 10->15
+    (EnemyType("Slime", 40, 10, 15, 20, 1), 15, 1),       # HP: 25->40, DMG: 6->10
     
     # Level 2 enemies
-    (EnemyType("Bandit", 45, 12, 35, 45, 2), 15, 2),
-    (EnemyType("Skeleton", 40, 13, 30, 40, 2), 15, 2),
-    (EnemyType("Giant Spider", 38, 14, 32, 28, 2), 15, 2),
+    (EnemyType("Bandit", 65, 18, 35, 45, 2), 15, 2),      # HP: 45->65, DMG: 12->18
+    (EnemyType("Skeleton", 60, 20, 30, 40, 2), 15, 2),     # HP: 40->60, DMG: 13->20
+    (EnemyType("Giant Spider", 58, 22, 32, 28, 2), 15, 2), # HP: 38->58, DMG: 14->22
     
     # Level 3 enemies
-    (EnemyType("Orc", 60, 15, 45, 40, 3), 12, 3),
-    (EnemyType("Dark Elf", 55, 18, 48, 45, 3), 12, 3),
-    (EnemyType("Werewolf", 65, 20, 50, 48, 3), 12, 3),
+    (EnemyType("Orc", 85, 25, 45, 40, 3), 12, 3),         # HP: 60->85, DMG: 15->25
+    (EnemyType("Dark Elf", 80, 28, 48, 45, 3), 12, 3),    # HP: 55->80, DMG: 18->28
+    (EnemyType("Werewolf", 90, 30, 50, 48, 3), 12, 3),    # HP: 65->90, DMG: 20->30
     
     # Level 4 enemies
-    (EnemyType("Troll", 80, 20, 60, 50, 4), 10, 4),
-    (EnemyType("Ogre", 85, 22, 65, 55, 4), 10, 4),
-    (EnemyType("Gargoyle", 75, 25, 70, 60, 4), 10, 4),
+    (EnemyType("Troll", 120, 35, 60, 50, 4), 10, 4),      # HP: 80->120, DMG: 20->35
+    (EnemyType("Ogre", 130, 38, 65, 55, 4), 10, 4),       # HP: 85->130, DMG: 22->38
+    (EnemyType("Gargoyle", 110, 40, 70, 60, 4), 10, 4),   # HP: 75->110, DMG: 25->40
     
     # Level 5+ special enemies
-    (EnemyType("Dragon Whelp", 100, 30, 100, 100, 5), 5, 5),
-    (EnemyType("Necromancer", 90, 35, 110, 110, 5), 5, 5),
-    (EnemyType("Giant", 120, 28, 120, 120, 5), 5, 5)
+    (EnemyType("Dragon Whelp", 180, 45, 100, 100, 5), 5, 5), # HP: 100->180, DMG: 30->45
+    (EnemyType("Necromancer", 150, 50, 110, 110, 5), 5, 5),  # HP: 90->150, DMG: 35->50
+    (EnemyType("Giant", 200, 42, 120, 120, 5), 5, 5)         # HP: 120->200, DMG: 28->42
 ]
 
 def currency_exchange(player):
@@ -1609,10 +1661,12 @@ def main():
         
         choice = input("> ")
         if choice == "1":
-            enemies = []
             num_enemies = 1
             if player.level >= 5:
                 num_enemies = random.randint(2, 3)
+            
+            # Initialize empty enemies list
+            enemies = []
             
             # Fix the enemy spawn loop
             for _ in range(num_enemies):
