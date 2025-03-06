@@ -1770,8 +1770,8 @@ def process_ability(player, target, enemies, ability_name, duration=0):
         return 0
 
 def apply_status_effect(target, effect_type, base_damage, duration):
-    """Enhanced status effect application"""
-    effect = {
+    """Enhanced status effect system with all required effects"""
+    effects = {
         "burn": {
             "name": "Burned",
             "damage": max(1, base_damage // 3),
@@ -1788,6 +1788,7 @@ def apply_status_effect(target, effect_type, base_damage, duration):
         "stun": {
             "name": "Stunned",
             "duration": duration,
+            "skip_turn": True,
             "message": "⚡ {} is stunned!"
         },
         "poison": {
@@ -1795,11 +1796,97 @@ def apply_status_effect(target, effect_type, base_damage, duration):
             "damage": max(1, base_damage // 3),
             "duration": duration,
             "message": "☠️ {} is poisoned!"
+        },
+        "bleed": {
+            "name": "Bleeding",
+            "damage": max(1, base_damage // 2),
+            "duration": duration,
+            "message": "💉 {} is bleeding!"
+        },
+        "root": {
+            "name": "Rooted",
+            "duration": duration,
+            "movement_locked": True,
+            "message": "🌱 {} is rooted!"
+        },
+        "holy": {
+            "name": "Holy",
+            "damage": max(1, base_damage // 3),
+            "heal_reduction": 0.5,
+            "duration": duration,
+            "message": "✨ {} is marked by holy light!"
+        },
+        "curse": {
+            "name": "Cursed",
+            "damage": max(1, base_damage // 4),
+            "damage_taken_increase": 1.3,
+            "duration": duration,
+            "message": "👻 {} is cursed!"
+        },
+        "acid": {
+            "name": "Corroded",
+            "damage": max(1, base_damage // 3),
+            "defense_reduction": 5,
+            "duration": duration,
+            "message": "⚗️ {} is corroded!"
+        },
+        "blind": {
+            "name": "Blinded",
+            "accuracy_reduction": 0.5,
+            "duration": duration,
+            "message": "🌑 {} is blinded!"
+        },
+        "rage": {
+            "name": "Enraged",
+            "damage_boost": 1.3,
+            "defense_reduction": 0.7,
+            "duration": duration,
+            "message": "💢 {} is enraged!"
+        },
+        "enlightened": {
+            "name": "Enlightened",
+            "damage_boost": 1.2,
+            "healing_boost": 1.2,
+            "duration": duration,
+            "message": "🔆 {} is enlightened!"
+        },
+        "spirit": {
+            "name": "Spirit Marked",
+            "damage_taken_increase": 1.2,
+            "duration": duration,
+            "message": "👻 {} is spirit marked!"
+        },
+        "regenerate": {
+            "name": "Regenerating",
+            "heal": max(1, base_damage // 4),
+            "duration": duration,
+            "message": "💚 {} is regenerating!"
+        },
+        "pierce": {
+            "name": "Armor Pierced",
+            "defense_ignored": True,
+            "duration": duration,
+            "message": "🎯 {} armor is pierced!"
+        },
+        "lifesteal": {
+            "name": "Life Drained",
+            "damage": max(1, base_damage // 3),
+            "heal_percent": 0.5,
+            "duration": duration,
+            "message": "💀 {} life force is being drained!"
         }
     }
 
-    if effect_type in effect:
-        status = effect[effect_type].copy()
+    # Handle multiple effects
+    if isinstance(effect_type, list):
+        for effect in effect_type:
+            if effect in effects:
+                status = effects[effect].copy()
+                target.status_effects.append(status)
+                print(status["message"].format(target.name))
+    # Handle single effect
+    elif effect_type in effects:
+        status = effects[effect_type].copy()
         target.status_effects.append(status)
         print(status["message"].format(target.name))
 
@@ -2332,4 +2419,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\nAn error occurred: {e}")
         print("Game terminated.")
+
 
