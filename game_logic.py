@@ -836,111 +836,37 @@ def process_gadget_effect(player, target, enemies, effect):
 # Update experience and level scaling
 def calculate_exp_requirement(level):
     """More balanced experience requirements"""
-    return int(75 * (1 + (level * 0.4)))  # Reduced from 0.5 to 0.4
+    # Changed from 75 * (1 + (level * 0.4)) to a better curve
+    return int(100 * (1 + (level * 0.35)) * (1 + (level * 0.1)))
 
 def calculate_level_rewards(level):
     """More balanced level-up rewards"""
     return {
-        "health": 12 + (level * 2),  # Reduced from 15 + (level * 3)
-        "mana": 6 + (level * 1.5),   # Reduced from 8 + (level * 2)
-        "damage_bonus": int(level * 0.8),
-        "defense_bonus": int(level * 0.7)
+        "health": 10 + int(level * 1.5),  # Reduced from 12 + (level * 2)
+        "mana": 5 + int(level * 1.2),     # Reduced from 6 + (level * 1.5)
+        "damage_bonus": int(level * 0.6),  # Reduced from 0.8
+        "defense_bonus": int(level * 0.5)  # Reduced from 0.7
     }
 
 # Update shop function's item handling
 def shop(player):
     items = {
         # Basic items (adjusted prices)
-        "Health Potion": {"cost": 15, "effect": "Restore 35 HP", "min_level": 1},
-        "Mana Potion": {"cost": 15, "effect": "Restore 30 MP", "min_level": 1},
+        "Health Potion": {"cost": 20, "effect": "Restore 40 HP", "min_level": 1},
+        "Mana Potion": {"cost": 20, "effect": "Restore 35 MP", "min_level": 1},
         
-        # Melee Weapons
-        # Tier 1
-        "Iron Sword": {"cost": 45, "damage": 10, "type": "melee", "min_level": 1},
-        "Bronze Axe": {"cost": 50, "damage": 12, "type": "melee", "min_level": 1},
+        # Tier 1 weapons (adjusted damage)
+        "Iron Sword": {"cost": 50, "damage": 12, "type": "melee", "min_level": 1},
+        "Wooden Bow": {"cost": 50, "damage": 10, "type": "ranged", "min_level": 1},
         
-        # Tier 2
-        "Steel Sword": {"cost": 140, "damage": 16, "type": "melee", "min_level": 3},
-        "Battle Axe": {"cost": 150, "damage": 18, "type": "melee", "min_level": 3},
-        "War Hammer": {
-            "cost": 200, 
-            "damage": 14, 
-            "area_damage": 8, 
-            "type": "melee",
-            "min_level": 3,
-            "description": "Heavy weapon that deals area damage"
-        },
+        # Tier 2 weapons
+        "Steel Sword": {"cost": 150, "damage": 20, "type": "melee", "min_level": 3},
+        "Longbow": {"cost": 150, "damage": 18, "type": "ranged", "min_level": 3},
         
-        # Tier 3
-        "Flame Sword": {"cost": 280, "damage": 28, "type": "melee", "min_level": 5},
-        "Dragon Cleaver": {
-            "cost": 400, 
-            "damage": 25, 
-            "area_damage": 15, 
-            "type": "melee",
-            "min_level": 5,
-            "description": "Massive sword with wide cleaving damage"
-        },
-
-        # Ranged Weapons
-        # Tier 1
-        "Wooden Bow": {"cost": 40, "damage": 8, "type": "ranged", "min_level": 1},
-        "Wooden Staff": {"cost": 45, "damage": 8, "mana_bonus": 12, "type": "ranged", "min_level": 1},
-        
-        # Tier 2
-        "Longbow": {"cost": 145, "damage": 15, "type": "ranged", "min_level": 3},
-        "Magic Staff": {"cost": 160, "damage": 14, "mana_bonus": 20, "type": "ranged", "min_level": 3},
-        "Thundering Bow": {
-            "cost": 220, 
-            "damage": 12, 
-            "area_damage": 10, 
-            "type": "ranged",
-            "min_level": 3,
-            "description": "Bow that creates lightning area damage"
-        },
-        
-        # Tier 3
-        "Frost Staff": {"cost": 290, "damage": 25, "mana_bonus": 35, "type": "ranged", "min_level": 5},
-        "Storm Staff": {
-            "cost": 450, 
-            "damage": 22, 
-            "area_damage": 18, 
-            "mana_bonus": 30,
-            "type": "ranged",
-            "min_level": 5,
-            "description": "Powerful staff that creates storm damage"
-        },
-        
-        # Armor remains the same
-        "Leather Armor": {"cost": 50, "defense": 6, "min_level": 1},
-        "Chain Mail": {"cost": 120, "defense": 12, "min_level": 3},
-        "Plate Armor": {"cost": 250, "defense": 20, "min_level": 5},
-
-        # Multi-hit weapons
-        "Twin Daggers": {
-            "cost": 160,
-            "damage": 8,
-            "hits": 2,
-            "type": "melee",
-            "min_level": 3,
-            "description": "Strike twice per attack"
-        },
-        "Triple Crossbow": {
-            "cost": 180,
-            "damage": 7,
-            "hits": 3,
-            "type": "ranged",
-            "min_level": 3,
-            "description": "Fire three bolts per attack"
-        },
-        "Flurry Blade": {
-            "cost": 350,
-            "damage": 12,
-            "hits": 4,
-            "type": "melee",
-            "min_level": 5,
-            "description": "Fast blade dealing multiple hits"
-        }
+        # Armor (adjusted defense)
+        "Leather Armor": {"cost": 60, "defense": 8, "min_level": 1},
+        "Chain Mail": {"cost": 140, "defense": 15, "min_level": 3},
+        "Plate Armor": {"cost": 300, "defense": 25, "min_level": 5}
     }
     
     while True:
@@ -1472,15 +1398,20 @@ class EnemyType:
     def scale_to_level(self, player_level):
         """Scale enemy stats based on player level"""
         level_diff = max(0, player_level - self.min_level)
-        scaling = 1 + (level_diff * 0.2)  # 20% increase per level difference
+        # Reduced scaling from 0.2 to 0.15 for smoother progression
+        scaling = 1 + (level_diff * 0.15)
+        
+        # Add randomization for variety
+        health_var = random.uniform(0.9, 1.1)
+        damage_var = random.uniform(0.9, 1.1)
         
         return Enemy(
             self.name,
-            int(self.base_health * scaling),
-            int(self.base_damage * scaling),
+            int(self.base_health * scaling * health_var),
+            int(self.base_damage * scaling * damage_var),
             int(self.base_exp * scaling),
             int(self.base_gold * scaling),
-            min(player_level, self.min_level + 2)  # Cap enemy level
+            min(player_level, self.min_level + 2)
         )
 
 # Update spawn table with base stats
@@ -1550,9 +1481,9 @@ spawn_table = [
 ]
 
 def currency_exchange(player):
-    """Exchange gold for tech points and vice versa"""
-    GOLD_TO_TP_RATE = 10  # 100 gold = 1 tech point
-    TP_TO_GOLD_RATE = 10   # 1 tech point = 100 gold 
+    """More balanced exchange rates"""
+    GOLD_TO_TP_RATE = 120  # Increased from 100
+    TP_TO_GOLD_RATE = 80   # Decreased from 100
     
     while True:
         print("\n=== Currency Exchange ===")
@@ -1743,3 +1674,29 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\nAn error occurred: {e}")
         print("Game terminated.")
+
+def calculate_combat_rewards(player, enemies):
+    base_exp = sum(e.exp_reward for e in enemies)
+    base_gold = sum(e.gold_reward for e in enemies)
+    base_tp = sum((player.level * 10) for e in enemies)  # Reduced from 15
+    
+    # Add scaling based on enemy count
+    enemy_count_bonus = len(enemies) * 0.15
+    
+    return {
+        "exp": int(base_exp * (1 + enemy_count_bonus)),
+        "gold": int(base_gold * (1 + enemy_count_bonus)),
+        "tech_points": int(base_tp * (1 + enemy_count_bonus))
+    }
+
+def rest(player):
+    """More balanced resting mechanic"""
+    rest_cost = 20 + (player.level * 5)  # Scales with level
+    if player.gold >= rest_cost:
+        heal_amount = player.max_health * 0.4  # Reduced from 0.5
+        mana_amount = player.max_mana * 0.4    # Reduced from 0.5
+        player.health = min(player.max_health, player.health + int(heal_amount))
+        player.mana = min(player.max_mana, player.mana + int(mana_amount))
+        player.gold -= rest_cost
+        return True
+    return False
