@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Combat - RPG Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div id="combatContainer" class="interface-section active">
+        <div class="combat-status" id="combatStatus"></div>
+        <div class="enemy-list" id="enemyList"></div>
+        <div class="combat-actions">
+            <button onclick="handleCombatAction('attack')">Attack</button>
+            <button onclick="handleCombatAction('ability')">Ability</button>
+            <button onclick="handleCombatAction('item')">Item</button>
+            <button onclick="handleCombatAction('gadget')">Gadget</button>
+            <button onclick="handleCombatAction('flee')">Flee</button>
+        </div>
+        <button onclick="returnToMain()" class="return-button">Return to Main</button>
+    </div>
+    <script src="game_logic.js"></script>
+    <script>
+        function returnToMain() {
+            window.location.href = 'index.html';
+        }
+
+        async function handleCombatAction(action) {
+            const player = JSON.parse(localStorage.getItem('currentPlayer'));
+            if (!player) return;
+
+            switch (action) {
+                case 'attack':
+                    await processAttack(player);
+                    break;
+                case 'ability':
+                    await processAbility(player);
+                    break;
+                case 'item':
+                    await processItem(player);
+                    break;
+                case 'gadget':
+                    await processGadget(player);
+                    break;
+                case 'flee':
+                    if (Math.random() < 0.5) {
+                        alert('Successfully fled from combat!');
+                        returnToMain();
+                    } else {
+                        alert('Failed to flee!');
+                    }
+                    break;
+            }
+            localStorage.setItem('currentPlayer', JSON.stringify(player));
+            updateCombatDisplay();
+        }
+
+        function updateCombatDisplay() {
+            // Update combat status and enemy list
+        }
+    </script>
+</body>
+
+</html>

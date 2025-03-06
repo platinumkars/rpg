@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Shop - RPG Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div id="shopContainer" class="interface-section active">
+        <div class="shop-status" id="shopStatus"></div>
+        <div class="shop-inventory" id="shopInventory"></div>
+        <div class="shop-actions">
+            <button onclick="handleShopAction('buy')">Buy</button>
+            <button onclick="handleShopAction('sell')">Sell</button>
+            <button onclick="returnToMain()">Exit Shop</button>
+        </div>
+    </div>
+    <script src="game_logic.js"></script>
+    <script>
+        function returnToMain() {
+            window.location.href = 'index.html';
+        }
+
+        async function handleShopAction(action) {
+            const player = JSON.parse(localStorage.getItem('currentPlayer'));
+            if (!player) return;
+
+            switch (action) {
+                case 'buy':
+                    await processPurchase(player);
+                    break;
+                case 'sell':
+                    await processSale(player);
+                    break;
+            }
+            localStorage.setItem('currentPlayer', JSON.stringify(player));
+            updateShopDisplay();
+        }
+
+        function updateShopDisplay() {
+            // Update shop inventory and player gold
+        }
+    </script>
+</body>
+
+</html>

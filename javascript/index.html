@@ -280,38 +280,17 @@
         async function handleCommand(command) {
             if (!currentPlayer) return;
 
+            // Store player data before navigation
+            localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+
             switch (command) {
                 case '1':
-                    pageManager.showPage('combatInterface');
-                    await startCombat(currentPlayer);
+                    window.location.href = 'combat.html';
                     break;
                 case '2':
-                    pageManager.showPage('shopInterface');
-                    await shop(currentPlayer);
+                    window.location.href = 'shop.html';
                     break;
-                case '3':
-                    await showInventory(currentPlayer);
-                    break;
-                case '4':
-                    await rest(currentPlayer);
-                    break;
-                case '5':
-                    await showAbilities(currentPlayer);
-                    break;
-                case '6':
-                    await gadgetShop(currentPlayer);
-                    break;
-                case '7':
-                    await currencyExchange(currentPlayer);
-                    break;
-                case '8':
-                    await powerShop(currentPlayer);
-                    break;
-                case '9':
-                    if (confirm('Are you sure you want to quit?')) {
-                        window.close();
-                    }
-                    break;
+                // ... rest of the cases
             }
             updatePlayerStats(currentPlayer);
         }
