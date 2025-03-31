@@ -878,6 +878,79 @@ class Character:
                 except ValueError:
                     print("Please enter a number!")
 
+def earn_companion_token(self):
+        """Earn a companion token from boss fights"""
+        self.companion_tokens += 1
+        print(f"\n🎫 Earned a Companion Token! (Total: {self.companion_tokens})")
+
+def upgrade_companion(self):
+        """Upgrade companion with tokens"""
+        if not self.companion:
+            print("You don't have a companion to upgrade!")
+            return
+        
+        while True:
+            print("\n=== Companion Upgrades ===")
+            print(f"Available Tokens: {self.companion_tokens}")
+            print("\nUpgrade Options:")
+            print(f"1. Health (Level {self.companion_upgrades['health']}/5) - +20% HP")
+            print(f"2. Damage (Level {self.companion_upgrades['damage']}/5) - +20% DMG")
+            print(f"3. Ability (Level {self.companion_upgrades['ability']}/3) - Enhance special ability")
+            print("4. Back")
+            
+            choice = input("\nChoose upgrade (or back): ")
+            
+            if choice == "4" or choice.lower() == "back":
+                break
+            
+            try:
+                choice = int(choice)
+                if choice == 1:
+                    stat = "health"
+                    max_level = 5
+                    bonus = "HP"
+                elif choice == 2:
+                    stat = "damage"
+                    max_level = 5
+                    bonus = "damage"
+                elif choice == 3:
+                    stat = "ability"
+                    max_level = 3
+                    bonus = "ability power"
+                else:
+                    print("Invalid choice!")
+                    continue
+                
+                current_level = self.companion_upgrades[stat]
+                if current_level >= max_level:
+                    print(f"This upgrade is already at maximum level!")
+                    continue
+                
+                if self.companion_tokens > 0:
+                    self.companion_tokens -= 1
+                    self.companion_upgrades[stat] += 1
+                    
+                    # Apply upgrade effects
+                    if stat == "health":
+                        old_health = self.companion.max_health
+                        self.companion.max_health = int(self.companion.max_health * 1.2)
+                        self.companion.health = self.companion.max_health
+                        print(f"Companion HP increased from {old_health} to {self.companion.max_health}!")
+                    elif stat == "damage":
+                        old_damage = self.companion.damage
+                        self.companion.damage = int(self.companion.damage * 1.2)
+                        print(f"Companion damage increased from {old_damage} to {self.companion.damage}!")
+                    else:
+                        print(f"Companion {self.companion.ability} enhanced!")
+                    
+                    print(f"\n✨ Upgraded companion's {bonus}!")
+                    print(f"Remaining tokens: {self.companion_tokens}")
+                else:
+                    print("Not enough companion tokens!")
+                
+            except ValueError:
+                print("Invalid input!")
+
 # Add Companion class
 class Companion:
     def __init__(self, name, companion_type):
