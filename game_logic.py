@@ -846,6 +846,32 @@ class Character:
             print(f"\n✨ Special Ability Unlocked: {ability_name}")
             print(f"📜 {special_abilities[self.special_type][ability_name]['description']}")
 
+    def unlock_companion(self):
+        """Allow player to choose a companion"""
+        if self.level >= 5 and not self.companion_unlocked:
+            print("\n🐾 You've unlocked the ability to have a companion!")
+            print("\nAvailable Companions:")
+            print("1. Wolf - Loyal fighter with pack tactics")
+            print("2. Fairy - Magical healer that supports you")
+            print("3. Drake - Small dragon with fire abilities")
+            print("4. Golem - Stone defender that protects you")
+            
+            while True:
+                try:
+                    choice = int(input("\nChoose your companion (1-4): "))
+                    if 1 <= choice <= 4:
+                        companion_types = ["wolf", "fairy", "drake", "golem"]
+                        companion_name = input(f"\nName your {companion_types[choice-1].title()}: ")
+                        self.companion = Companion(companion_name, companion_types[choice-1])
+                        self.companion_unlocked = True
+                        print(f"\n✨ {companion_name} has joined your adventure!")
+                        print(f"Special Ability: {self.companion.ability}")
+                        print(f"Effect: {self.companion.ability_description}")
+                        break
+                    print("Invalid choice!")
+                except ValueError:
+                    print("Please enter a number!")
+
 # Add Companion class
 class Companion:
     def __init__(self, name, companion_type):
