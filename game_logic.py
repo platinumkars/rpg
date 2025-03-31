@@ -2336,6 +2336,10 @@ def main():
                             enemies.append(scaled_enemy)
                             break
 
+            # Add to main game loop after level check
+            if player.level >= 5 and not player.companion_unlocked:
+                player.unlock_companion()
+
             # Remove duplicate combat call and time.sleep
             if enemies:
                 result = combat(player, enemies)
