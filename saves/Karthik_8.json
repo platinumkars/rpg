@@ -7,7 +7,7 @@
   "max_mana": 192,
   "level": 8,
   "exp": 448,
-  "gold": 1169,
+  "gold": 1069,
   "inventory": {
     "Health Potion": 2,
     "Mana Potion": 2
@@ -103,5 +103,5 @@
       "description": "Explosive chain of reactions"
     }
   },
-  "timestamp": "2025-03-06 20:21:22"
+  "timestamp": "2025-03-31 22:05:12"
 }
