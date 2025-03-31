@@ -1270,9 +1270,11 @@ def combat(player, enemies):
         elif choice == "3":  # Use item
             print("\nAvailable items:")
             if player.inventory.get("Health Potion", 0) > 0:
-                print("1. Health Potion")
+                heal_amount = calculate_potion_healing(player.level)
+                print(f"1. Health Potion (Restores {heal_amount} HP)")
             if player.inventory.get("Mana Potion", 0) > 0:
-                print("2. Mana Potion")
+                mana_amount = calculate_potion_mana(player.level)
+                print(f"2. Mana Potion (Restores {mana_amount} MP)")
             
             item_choice = input("Choose item to use (or 'back'): ")
             
