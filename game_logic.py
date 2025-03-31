@@ -915,6 +915,9 @@ class Enemy:
         self.exp_reward = exp_reward
         self.gold_reward = gold_reward
         self.status_effects = []
+        self.accuracy = 85  # Base 85% hit chance
+        self.base_accuracy = 85  # Store base accuracy for modifications
+        self.evasion = 5   # Base 5% chance to evade
 
     def scale_stats(self, player_level):
         """Scale enemy stats based on player level"""
@@ -926,6 +929,10 @@ class Enemy:
         self.damage = int(self.damage * scaling)
         self.exp_reward = int(self.exp_reward * scaling)
         self.gold_reward = int(self.gold_reward * scaling)
+        
+        # Scale accuracy and evasion with diminishing returns
+        self.accuracy = min(95, self.accuracy + (level_diff * 0.5))  # Cap at 95%
+        self.evasion = min(15, self.evasion + (level_diff * 0.3))   # Cap at 15%
 
     def is_alive(self):
         """Check if enemy is still alive"""
@@ -1124,9 +1131,14 @@ def combat(player, enemies):
         # Enemy turns
         for enemy in enemies:
             if enemy.health > 0:
-                damage = enemy.damage
-                player.health -= damage
-                print(f"{enemy.name} attacks you for {damage} damage!")
+                # Calculate hit chance
+                hit_roll = random.randint(1, 100)
+                if hit_roll <= enemy.accuracy:
+                    damage = enemy.damage
+                    player.health -= damage
+                    print(f"🎯 {enemy.name} hits you for {damage} damage!")
+                else:
+                    print(f"❌ {enemy.name}'s attack missed!")
         
         # Check player death
         if player.health <= 0:
@@ -1729,7 +1741,7 @@ def process_ability(player, target, enemies, ability_name, duration=0):
         return 0
 
 def apply_status_effect(target, effect_type, base_damage, duration):
-    """Enhanced status effect system with all required effects"""
+    """Enhanced status effect system with accuracy modifications"""
     effects = {
         "burn": {
             "name": "Burned",
@@ -1791,9 +1803,15 @@ def apply_status_effect(target, effect_type, base_damage, duration):
         },
         "blind": {
             "name": "Blinded",
-            "accuracy_reduction": 0.5,
+            "accuracy_reduction": 30,  # Reduce accuracy by 30%
             "duration": duration,
-            "message": "🌑 {} is blinded!"
+            "message": "🌑 {} is blinded and has reduced accuracy!"
+        },
+        "daze": {
+            "name": "Dazed",
+            "accuracy_reduction": 15,  # Reduce accuracy by 15%
+            "duration": duration,
+            "message": "💫 {} is dazed and has reduced accuracy!"
         },
         "rage": {
             "name": "Enraged",
@@ -1850,9 +1868,10 @@ def apply_status_effect(target, effect_type, base_damage, duration):
         print(status["message"].format(target.name))
 
 def process_status_effects(entity):
-    """Process status effects at the start of turn"""
+    """Process status effects including accuracy modifications"""
     is_stunned = False
     damage_multiplier = 1.0
+    accuracy_modifier = 0  # Track accuracy modifications
     
     for effect in entity.status_effects[:]:
         if effect["name"] == "Corroded":
@@ -1882,12 +1901,18 @@ def process_status_effects(entity):
             heal = effect["heal"]
             entity.health = min(entity.max_health, entity.health + heal)
             print(f"{entity.name} is stunned and skips their turn!")
+        elif "accuracy_reduction" in effect:
+            accuracy_modifier -= effect["accuracy_reduction"]
             
         effect["duration"] -= 1
         if effect["duration"] <= 0:
             entity.status_effects.remove(effect)
             print(f"{effect['name']} effect has worn off!")
-            
+    
+    # Apply accuracy modifications if entity is an enemy
+    if isinstance(entity, Enemy):
+        entity.accuracy = max(5, min(95, entity.base_accuracy + accuracy_modifier))
+    
     return is_stunned, damage_multiplier
 
 
