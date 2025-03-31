@@ -878,12 +878,12 @@ class Character:
                 except ValueError:
                     print("Please enter a number!")
 
-def earn_companion_token(self):
+    def earn_companion_token(self):
         """Earn a companion token from boss fights"""
         self.companion_tokens += 1
         print(f"\n🎫 Earned a Companion Token! (Total: {self.companion_tokens})")
-
-def upgrade_companion(self):
+        
+    def upgrade_companion(self):
         """Upgrade companion with tokens"""
         if not self.companion:
             print("You don't have a companion to upgrade!")
