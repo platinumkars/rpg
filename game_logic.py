@@ -47,6 +47,8 @@ class Character:
         self.tech_points = 0
         self.gadgets = {}
         self.powers = {}  # Dictionary to store unlocked powers
+        self.companion = None
+        self.companion_unlocked = False
         
         # Initialize base abilities based on class
         self.update_abilities()
@@ -843,6 +845,56 @@ class Character:
             ability_name = list(special_abilities[self.special_type].keys())[0]
             print(f"\n✨ Special Ability Unlocked: {ability_name}")
             print(f"📜 {special_abilities[self.special_type][ability_name]['description']}")
+
+# Add Companion class
+class Companion:
+    def __init__(self, name, companion_type):
+        self.name = name
+        self.type = companion_type
+        self.level = 1
+        self.exp = 0
+        
+        # Base stats based on type
+        companion_stats = {
+            "wolf": {
+                "health": 80,
+                "damage": 15,
+                "ability": "Pack Tactics",
+                "description": "Bonus damage when attacking same target"
+            },
+            "fairy": {
+                "health": 50,
+                "damage": 8,
+                "ability": "Healing Light",
+                "description": "Heals player for 15% of damage dealt"
+            },
+            "drake": {
+                "health": 70,
+                "damage": 20,
+                "ability": "Fire Breath",
+                "description": "Deals area damage to enemies"
+            },
+            "golem": {
+                "health": 120,
+                "damage": 12,
+                "ability": "Stone Shield",
+                "description": "Reduces damage taken by player"
+            }
+        }
+        
+        stats = companion_stats[companion_type]
+        self.max_health = stats["health"]
+        self.health = self.max_health
+        self.damage = stats["damage"]
+        self.ability = stats["ability"]
+        self.ability_description = stats["description"]
+        
+    def scale_stats(self, player_level):
+        """Scale companion stats based on player level"""
+        scaling = 1 + ((self.level - 1) * 0.15)
+        self.max_health = int(self.max_health * scaling)
+        self.health = self.max_health
+        self.damage = int(self.damage * scaling)
 
 # Add Gadget class
 class Gadget:
