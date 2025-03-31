@@ -2519,16 +2519,17 @@ def main():
         # Main menu
         print("\nWhat would you like to do?")
         print("1. Fight monsters")
-        print("2. Visit shop")
-        print("3. Check inventory")
-        print("4. Rest (Heal 50% HP/MP for 15 gold)")
-        print("5. Show abilities")
-        print("6. Visit gadget shop") 
-        print("7. Currency Exchange")
-        print("8. Visit power shop")
-        print("9. Save game")
-        print("10. Load game")
-        print("11. Quit")
+        print("2. Challenge Boss (Level 5+ required)")  # Add this line
+        print("3. Visit shop")
+        print("4. Check inventory")
+        print("5. Rest (Heal 50% HP/MP for 15 gold)")
+        print("6. Show abilities")
+        print("7. Visit gadget shop") 
+        print("8. Currency Exchange")
+        print("9. Visit power shop")
+        print("10. Save game")
+        print("11. Load game")
+        print("12. Quit")
         
         choice = input("> ")
         if choice == "1":
@@ -2570,12 +2571,40 @@ def main():
                 time.sleep(1)
 
         elif choice == "2":
+            if player.level < 5:
+                print("You must be at least level 5 to challenge bosses!")
+                continue
+                
+            print("\nAvailable Bosses:")
+            available_bosses = []
+            for name, boss in BOSSES.items():
+                if player.level >= boss.level_req:
+                    available_bosses.append((name, boss))
+                    print(f"{len(available_bosses)}. {name} (Level {boss.level_req}+ required)")
+            
+            if not available_bosses:
+                print("No bosses available at your level!")
+                continue
+                
+            try:
+                boss_choice = int(input("\nChoose boss to fight (0 to cancel): "))
+                if 0 < boss_choice <= len(available_bosses):
+                    boss_name, boss = available_bosses[boss_choice - 1]
+                    boss.scale_stats(player.level)
+                    result = boss_battle(player, boss)
+                    if result == False:  # Player died
+                        print(f"\nGame Over! Final Level: {player.level}")
+                        break
+            except ValueError:
+                print("Invalid input!")
+
+        elif choice == "3":
             shop(player)
            
-        elif choice == "3":
+        elif choice == "4":
             show_inventory_menu(player)
             
-        elif choice == "4":
+        elif choice == "5":
             rest_cost = 15
             if player.gold >= rest_cost:
                 heal_amount = player.max_health // 2
@@ -2587,27 +2616,27 @@ def main():
             else:
                 print("Not enough gold to rest!")
                         
-        elif choice == "5":
+        elif choice == "6":
             show_abilities(player)
             
-        elif choice == "6":
+        elif choice == "7":
             gadget_shop(player)
             
-        elif choice == "7":
+        elif choice == "8":
             currency_exchange(player)
             
-        elif choice == "8":
+        elif choice == "9":
             power_shop(player)
             
-        elif choice == "9":
+        elif choice == "10":
             save_game(player)
             
-        elif choice == "10":
+        elif choice == "11":
             loaded_player = load_game()
             if loaded_player:
                 player = loaded_player
             
-        elif choice == "11":
+        elif choice == "12":
             confirm = input("Are you sure you want to quit? (y/n): ").lower()
             if confirm == 'y':
                 print("Thanks for playing!")
