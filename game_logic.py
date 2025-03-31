@@ -1114,7 +1114,17 @@ class Boss:
         self.accuracy = 90  # Higher base accuracy than regular enemies
         self.base_accuracy = 90
         self.phase = 1      # For multi-phase boss fights
-        
+        self.evasion = 5   # Base evasion chance
+
+    def take_damage(self, amount):
+        """Handle damage taken by boss"""
+        self.health = max(0, self.health - amount)
+        return amount
+
+    def is_alive(self):
+        """Check if boss is still alive"""
+        return self.health > 0
+
     def scale_stats(self, player_level):
         """Scale boss stats based on player level"""
         level_diff = max(0, player_level - self.level_req)
