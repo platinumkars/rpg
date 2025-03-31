@@ -40,7 +40,33 @@ class Character:
         self.inventory = {"Health Potion": 2, "Mana Potion": 2}
         self.weapons = {"Basic Sword": 8}
         self.current_weapon = "Basic Sword"
-        self.abilities = {}
+        self.abilities = {"Basic Attack": {
+            "damage": 10,
+            "mana_cost": 0,
+            "description": "Basic weapon attack"
+        },
+        "Power Strike": {
+            "damage": 15,
+            "mana_cost": 10,
+            "description": "A stronger attack with increased damage"
+        },
+        "Quick Shot": {
+            "damage": 12,
+            "hits": 2,
+            "mana_cost": 15,
+            "description": "Fire two quick attacks"
+        },
+        "Minor Heal": {
+            "heal": 20,
+            "mana_cost": 15,
+            "description": "Restore some health points"
+        },
+        "Focus": {
+            "mana": 25,
+            "mana_cost": 0,
+            "cooldown": 3,
+            "description": "Restore mana and increase next attack damage"
+        }}
         self.status_effects = []
         self.armor = {"Basic Leather": 5}
         self.current_armor = "Basic Leather"
