@@ -1277,13 +1277,15 @@ def combat(player, enemies):
             item_choice = input("Choose item to use (or 'back'): ")
             
             if item_choice == "1" and player.inventory.get("Health Potion", 0) > 0:
-                player.health = min(player.max_health, player.health + 30)
+                heal_amount = calculate_potion_healing(player.level)
+                player.health = min(player.max_health, player.health + heal_amount)
                 player.inventory["Health Potion"] -= 1
-                print("You drink a health potion and recover 30 HP!")
+                print(f"You drink a health potion and recover {heal_amount} HP!")
             elif item_choice == "2" and player.inventory.get("Mana Potion", 0) > 0:
-                player.mana = min(player.max_mana, player.mana + 25)
+                mana_amount = calculate_potion_mana(player.level)
+                player.mana = min(player.max_mana, player.mana + mana_amount)
                 player.inventory["Mana Potion"] -= 1
-                print("You drink a mana potion and recover 25 MP!")
+                print(f"You drink a mana potion and recover {mana_amount} MP!")
             elif item_choice.lower() == "back":
                 continue
             else:
@@ -1430,6 +1432,18 @@ def calculate_level_rewards(level):
         "damage_bonus": int(level * 0.6),  # Reduced from 0.8
         "defense_bonus": int(level * 0.5)  # Reduced from 0.7
     }
+
+def calculate_potion_healing(player_level):
+    """Calculate healing amount based on player level"""
+    base_heal = 40
+    level_bonus = int(player_level * 5)  # 5 HP per level
+    return base_heal + level_bonus
+
+def calculate_potion_mana(player_level):
+    """Calculate mana restoration based on player level"""
+    base_mana = 35
+    level_bonus = int(player_level * 3)  # 3 MP per level
+    return base_mana + level_bonus
 
 # Update shop function's item handling
 def shop(player):
