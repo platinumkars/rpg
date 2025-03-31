@@ -2514,6 +2514,11 @@ def main():
     player = Character(name, class_choice)
     print(f"\nWelcome, {player.name} the {player.class_type}!")
     
+    # Add immediate companion check for new characters at level 5+
+    if player.level >= 5 and not player.companion_unlocked:
+        print("\nSince you're level 5 or higher, you can choose a companion!")
+        player.unlock_companion()
+    
     while True:
         # Status display
         print(f"\n{'='*50}")
@@ -2537,9 +2542,10 @@ def main():
         print("7. Visit gadget shop") 
         print("8. Currency Exchange")
         print("9. Visit power shop")
-        print("10. Save game")
-        print("11. Load game")
-        print("12. Quit")
+        print("10. Manage Companion")  # Add this option
+        print("11. Save game")
+        print("12. Load game")
+        print("13. Quit")
         
         choice = input("> ")
         if choice == "1":
@@ -2613,6 +2619,20 @@ def main():
            
         elif choice == "4":
             show_inventory_menu(player)
+            # Add companion management option if companion exists
+            if player.companion:
+                print("\nCompanion Status:")
+                print(f"Name: {player.companion.name}")
+                print(f"Type: {player.companion.type}")
+                print(f"Health: {player.companion.health}/{player.companion.max_health}")
+                print(f"Damage: {player.companion.damage}")
+                print(f"Ability: {player.companion.ability}")
+                print(f"\nCompanion Tokens: {player.companion_tokens}")
+                
+                if player.companion_tokens > 0:
+                    upgrade = input("\nWould you like to upgrade your companion? (y/n): ")
+                    if upgrade.lower() == 'y':
+                        player.upgrade_companion()
             
         elif choice == "5":
             rest_cost = 15
@@ -2638,15 +2658,43 @@ def main():
         elif choice == "9":
             power_shop(player)
             
-        elif choice == "10":
+        elif choice == "10":  # Add companion management
+            if player.companion:
+                print(f"\n=== {player.companion.name} Status ===")
+                print(f"Type: {player.companion.type}")
+                print(f"Health: {player.companion.health}/{player.companion.max_health}")
+                print(f"Damage: {player.companion.damage}")
+                print(f"Ability: {player.companion.ability}")
+                print(f"Description: {player.companion.ability_description}")
+                print(f"\nCompanion Tokens: {player.companion_tokens}")
+                print(f"\nUpgrade Levels:")
+                print(f"Health: {player.companion_upgrades['health']}/5")
+                print(f"Damage: {player.companion_upgrades['damage']}/5")
+                print(f"Ability: {player.companion_upgrades['ability']}/3")
+                
+                if player.companion_tokens > 0:
+                    upgrade = input("\nWould you like to upgrade your companion? (y/n): ")
+                    if upgrade.lower() == 'y':
+                        player.upgrade_companion()
+            elif player.level >= 5:
+                print("\nYou are eligible for a companion!")
+                player.unlock_companion()
+            else:
+                print("\nReach level 5 to unlock a companion!")
+
+        elif choice == "11":  # Save
             save_game(player)
             
-        elif choice == "11":
+        elif choice == "12":  # Load
             loaded_player = load_game()
             if loaded_player:
                 player = loaded_player
+                # Check for companion eligibility after loading
+                if player.level >= 5 and not player.companion_unlocked:
+                    print("\nYou can choose a companion!")
+                    player.unlock_companion()
             
-        elif choice == "12":
+        elif choice == "13":  # Quit
             confirm = input("Are you sure you want to quit? (y/n): ").lower()
             if confirm == 'y':
                 print("Thanks for playing!")
