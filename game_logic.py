@@ -1495,6 +1495,22 @@ def shop(player):
             print("\nInvalid input!")
             
         input("\nPress Enter to continue...")
+        
+        print("5. Companion Services")
+        
+        if choice == "5" and player.companion:
+            print("\n=== Companion Services ===")
+            print(f"1. Heal Companion (30 gold) - Current HP: {player.companion.health}/{player.companion.max_health}")
+            print("2. Back")
+            
+            service = input("> ")
+            if service == "1":
+                if player.gold >= 30:
+                    player.gold -= 30
+                    player.companion.health = player.companion.max_health
+                    print(f"{player.companion.name} has been fully healed!")
+                else:
+                    print("Not enough gold!")
 
 # Add Gadget Shop function
 def gadget_shop(player):
