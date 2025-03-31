@@ -1272,7 +1272,7 @@ def combat(player, enemies):
                         for enemy in enemies:
                             if enemy != target and enemy.health > 0:
                                 enemy.take_damage(area_damage)
-                                print(f"Area effect hits {enemy.name} for {area_damage} damage!")
+                                print(f"⚡ Splash damage: {area_damage} to {enemy.name}")  # Missing closing bracket
                                 
                         player.mana -= ability["mana_cost"]
                         
@@ -2016,6 +2016,39 @@ def process_ability(player, target, enemies, ability_name, duration=0):
                 effect_duration
             )
 
+        if ability_name == "Power Strike":
+            damage = ability["damage"] + int(player.level * 1.5)
+            target.health -= damage
+            print(f"💥 Power Strike deals {damage} damage!")
+            return damage
+            
+        elif ability_name == "Quick Shot":
+            total_damage = 0
+            for hit in range(ability["hits"]):
+                damage = ability["damage"] + int(player.level * 0.8)
+                target.health -= damage
+                total_damage += damage
+                print(f"🏹 Quick Shot hit {hit+1}: {damage} damage!")
+            return total_damage
+            
+        elif ability_name == "Minor Heal":
+            heal = ability["heal"] + int(player.level * 1.2)
+            player.health = min(player.max_health, player.health + heal)
+            print(f"💚 Minor Heal restores {heal} HP!")
+            return 0
+            
+        elif ability_name == "Focus":
+            mana_restore = ability["mana"]
+            player.mana = min(player.max_mana, player.mana + mana_restore)
+            print(f"✨ Focus restores {mana_restore} MP!")
+            print("Your next attack will deal more damage!")
+            player.status_effects.append({
+                "name": "Focused",
+                "damage_boost": 1.3,
+                "duration": 1
+            })
+            return 0
+        
         # Display totals
         if total_damage > 0:
             print(f"\nTotal damage dealt: {total_damage}")
