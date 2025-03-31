@@ -49,6 +49,12 @@ class Character:
         self.powers = {}  # Dictionary to store unlocked powers
         self.companion = None
         self.companion_unlocked = False
+        self.companion_tokens = 0
+        self.companion_upgrades = {
+            "health": 0,
+            "damage": 0,
+            "ability": 0
+        }
         
         # Initialize base abilities based on class
         self.update_abilities()
