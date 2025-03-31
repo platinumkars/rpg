@@ -1206,6 +1206,38 @@ def combat(player, enemies):
             else:
                 print("You failed to run away!")
         
+        # Companion turn
+        if player.companion and player.companion.health > 0:
+            print(f"\n🐾 {player.companion.name}'s turn!")
+            
+            # Get target for companion
+            target = get_target(enemies, True)  # Auto-target for companion
+            if target:
+                # Process companion attack
+                damage = player.companion.damage
+                target.health -= damage
+                print(f"💥 {player.companion.name} attacks {target.name} for {damage} damage!")
+                
+                # Process companion ability
+                if player.companion.type == "wolf" and target:
+                    bonus = int(damage * 0.3)
+                    target.health -= bonus
+                    print(f"🐺 Pack Tactics: Extra {bonus} damage!")
+                elif player.companion.type == "fairy":
+                    heal = int(damage * 0.15)
+                    player.health = min(player.max_health, player.health + heal)
+                    print(f"✨ Healing Light: Restored {heal} HP!")
+                elif player.companion.type == "drake" and len(enemies) > 1:
+                    area_damage = int(damage * 0.5)
+                    for enemy in enemies:
+                        if enemy != target and enemy.health > 0:
+                            enemy.health -= area_damage
+                            print(f"🔥 Fire Breath: {area_damage} damage to {enemy.name}!")
+                elif player.companion.type == "golem":
+                    reduction = int(player.companion.damage * 0.2)
+                    print(f"🛡️ Stone Shield: Reducing next attack by {reduction}!")
+                    player.temp_defense = reduction
+
         # Enemy turns
         for enemy in enemies:
             if enemy.health > 0:
