@@ -1021,6 +1021,32 @@ class Enemy:
         self.health = max(0, self.health - amount)
         return amount
 
+class Boss:
+    def __init__(self, name, health, damage, exp_reward, gold_reward, special_moves, level_req):
+        self.name = name
+        self.max_health = health
+        self.health = health
+        self.damage = damage
+        self.exp_reward = exp_reward
+        self.gold_reward = gold_reward
+        self.special_moves = special_moves
+        self.level_req = level_req
+        self.status_effects = []
+        self.accuracy = 90  # Higher base accuracy than regular enemies
+        self.base_accuracy = 90
+        self.phase = 1      # For multi-phase boss fights
+        
+    def scale_stats(self, player_level):
+        """Scale boss stats based on player level"""
+        level_diff = max(0, player_level - self.level_req)
+        scaling = 1 + (level_diff * 0.12)  # Slightly reduced scaling for better balance
+        
+        self.max_health = int(self.max_health * scaling)
+        self.health = self.max_health
+        self.damage = int(self.damage * scaling)
+        self.exp_reward = int(self.exp_reward * scaling)
+        self.gold_reward = int(self.gold_reward * scaling)
+
 def get_target(enemies, auto=False):
     """Improved target selection with better validation"""
     living_enemies = [e for e in enemies if e.health > 0]
