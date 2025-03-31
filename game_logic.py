@@ -2366,6 +2366,117 @@ def currency_exchange(player):
         elif choice == "3":
             break
 
+# Add boss definitions
+BOSSES = {
+    "Dragon Warlord": Boss(
+        name="Dragon Warlord",
+        health=300,
+        damage=25,
+        exp_reward=200,
+        gold_reward=300,
+        special_moves={
+            "Flame Breath": {"damage": 40, "area_damage": 20, "effect": "burn"},
+            "Wing Slash": {"damage": 30, "hits": 2},
+            "Ground Slam": {"damage": 35, "effect": "stun"}
+        },
+        level_req=5
+    ),
+    "Shadow Queen": Boss(
+        name="Shadow Queen",
+        health=400,
+        damage=30,
+        exp_reward=300,
+        gold_reward=400,
+        special_moves={
+            "Dark Nova": {"damage": 45, "area_damage": 25, "effect": "blind"},
+            "Soul Drain": {"damage": 35, "heal": 35},
+            "Shadow Storm": {"damage": 25, "hits": 4}
+        },
+        level_req=10
+    ),
+    "Ancient Golem": Boss(
+        name="Ancient Golem",
+        health=500,
+        damage=35,
+        exp_reward=400,
+        gold_reward=500,
+        special_moves={
+            "Earthquake": {"damage": 50, "area_damage": 30, "effect": "stun"},
+            "Rock Barrage": {"damage": 30, "hits": 3},
+            "Stone Armor": {"defense": 50, "duration": 3}
+        },
+        level_req=15
+    )
+}
+
+def boss_battle(player, boss):
+    """Handle boss battle with phases and special moves"""
+    print(f"\n{'='*60}")
+    print(f"BOSS BATTLE: {boss.name}")
+    print(f"{'='*60}")
+    
+    while boss.health > 0 and player.health > 0:
+        # Display boss status with HP bar
+        hp_percent = boss.health / boss.max_health
+        hp_bar = "█" * int(hp_percent * 20)
+        hp_bar += "░" * (20 - len(hp_bar))
+        print(f"\n{boss.name} HP: [{hp_bar}] {boss.health}/{boss.max_health}")
+        
+        # Player turn
+        result = combat(player, [boss])
+        if result == "fled":
+            return "fled"
+            
+        # Boss phase changes
+        if boss.health <= boss.max_health * 0.5 and boss.phase == 1:
+            boss.phase = 2
+            print(f"\n⚠️ {boss.name} enters phase 2!")
+            boss.damage = int(boss.damage * 1.2)
+            
+        # Boss turn
+        if boss.health > 0:
+            # Choose special move or normal attack
+            if random.random() < 0.3:  # 30% chance for special move
+                move_name = random.choice(list(boss.special_moves.keys()))
+                move = boss.special_moves[move_name]
+                print(f"\n🔥 {boss.name} uses {move_name}!")
+                
+                if "damage" in move:
+                    damage = move["damage"]
+                    if boss.phase == 2:
+                        damage = int(damage * 1.2)
+                    player.health -= damage
+                    print(f"You take {damage} damage!")
+                    
+                    if "area_damage" in move and player.companion:
+                        player.companion.health -= move["area_damage"]
+                        print(f"Your companion takes {move['area_damage']} splash damage!")
+                        
+                if "effect" in move:
+                    apply_status_effect(player, move["effect"], damage, 2)
+                    
+                if "heal" in move:
+                    heal = move["heal"]
+                    boss.health = min(boss.max_health, boss.health + heal)
+                    print(f"{boss.name} heals for {heal} HP!")
+            else:
+                # Normal attack
+                damage = boss.damage
+                hit_roll = random.randint(1, 100)
+                if hit_roll <= boss.accuracy:
+                    player.health -= damage
+                    print(f"\n{boss.name} hits you for {damage} damage!")
+                else:
+                    print(f"\n{boss.name}'s attack missed!")
+                    
+    # Battle results
+    if player.health <= 0:
+        return handle_player_death(player)
+    else:
+        print(f"\n🏆 You have defeated {boss.name}!")
+        player.earn_companion_token()
+        return True
+
 # Fix enemy spawn logic in main()
 def main():
     print("Welcome to the Text RPG!")
