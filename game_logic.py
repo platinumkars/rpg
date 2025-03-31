@@ -1452,8 +1452,16 @@ def shop(player):
     """Improved shop with level-based filtering and numbered items"""
     items = {
         # Basic items (adjusted prices)
-        "Health Potion": {"cost": 20, "effect": "Restore 40 HP", "min_level": 1},
-        "Mana Potion": {"cost": 20, "effect": "Restore 35 MP", "min_level": 1},
+        "Health Potion": {
+            "cost": 20, 
+            "effect": f"Restore {calculate_potion_healing(player.level)} HP", 
+            "min_level": 1
+        },
+        "Mana Potion": {
+            "cost": 20, 
+            "effect": f"Restore {calculate_potion_mana(player.level)} MP", 
+            "min_level": 1
+        },
         
         # Tier 1 weapons (adjusted damage)
         "Iron Sword": {"cost": 50, "damage": 12, "type": "melee", "min_level": 1},
