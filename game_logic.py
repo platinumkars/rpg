@@ -1954,106 +1954,24 @@ def process_ability(player, target, enemies, ability_name, duration=0):
             modified_damage = int(base_damage * damage_modifier) + level_bonus
             
             # Handle area damage abilities
-            if "area_damage" in ability:
+            if "area_damage" in ability and target and target.health > 0:
                 # Main target damage
-                target.health -= modified_damage
-                total_damage += modified_damage
-                print(f"\n💥 {ability_name} hits {target.name} for {modified_damage} damage!")
+                damage_dealt = target.take_damage(modified_damage)
+                total_damage += damage_dealt
+                print(f"\n💥 {ability_name} hits {target.name} for {damage_dealt} damage!")
                 
                 # Area damage calculation
                 area_damage = int(ability["area_damage"] * damage_modifier) + level_bonus
-                for enemy in [e for e in enemies if e != target and e.health > 0]:
-                    enemy.health -= area_damage
-                    total_damage += area_damage
-                    print(f"⚡ Splash damage: {area_damage} to {enemy.name}")
-            
-            # Handle multi-hit abilities
-            elif "hits" in ability:
-                hits = ability["hits"]
-                print(f"\n⚔ {ability_name} strikes {hits} times!")
-                for hit in range(hits):
-                    if target.health > 0:
-                        hit_variation = random.randint(-2, 2)
-                        hit_damage = max(1, modified_damage + hit_variation)
-                        target.health -= hit_damage
-                        total_damage += hit_damage
-                        print(f"Hit {hit+1}: {hit_damage} damage to {target.name}")
-            
-            # Single hit damage
-            else:
-                damage_variation = random.randint(-3, 3)
-                final_damage = max(1, modified_damage + damage_variation)
-                target.health -= final_damage
-                total_damage += final_damage
-                print(f"\n💥 {ability_name} deals {final_damage} damage to {target.name}")
-
-        # Process healing with modifiers
-        if "heal" in ability:
-            heal_modifier = 1.0
-            if player.class_type.lower() in ["paladin", "3", "druid", "6"]:
-                heal_modifier *= 1.3  # Healing classes heal 30% more
-            
-            base_heal = ability["heal"]
-            heal_amount = int(base_heal * heal_modifier) + level_bonus
-            original_health = player.health
-            player.health = min(player.max_health, player.health + heal_amount)
-            actual_heal = player.health - original_health
-            total_healing += actual_heal
-            print(f"💚 Restored {actual_heal} HP!")
-
-        # Apply status effects with modified duration
-        if "effect" in ability:
-            effect_type = ability["effect"]
-            effect_duration = ability.get("duration", 3)
-            # Increase duration for control-focused classes
-            if player.class_type.lower() in ["mage", "2", "warlock", "9", "druid", "6"]:
-                effect_duration += 1
-            
-            apply_status_effect(
-                target, 
-                effect_type, 
-                int(total_damage * 0.3) if total_damage > 0 else 0,  # Scale DOT with ability damage
-                effect_duration
-            )
-
-        if ability_name == "Power Strike":
-            damage = ability["damage"] + int(player.level * 1.5)
-            target.health -= damage
-            print(f"💥 Power Strike deals {damage} damage!")
-            return damage
-            
-        elif ability_name == "Quick Shot":
-            total_damage = 0
-            for hit in range(ability["hits"]):
-                damage = ability["damage"] + int(player.level * 0.8)
-                target.health -= damage
-                total_damage += damage
-                print(f"🏹 Quick Shot hit {hit+1}: {damage} damage!")
-            return total_damage
-            
-        elif ability_name == "Minor Heal":
-            heal = ability["heal"] + int(player.level * 1.2)
-            player.health = min(player.max_health, player.health + heal)
-            print(f"💚 Minor Heal restores {heal} HP!")
-            return 0
-            
-        elif ability_name == "Focus":
-            mana_restore = ability["mana"]
-            player.mana = min(player.max_mana, player.mana + mana_restore)
-            print(f"✨ Focus restores {mana_restore} MP!")
-            print("Your next attack will deal more damage!")
-            player.status_effects.append({
-                "name": "Focused",
-                "damage_boost": 1.3,
-                "duration": 1
-            })
-            return 0
-        
-        # Display totals
-        if total_damage > 0:
-            print(f"\nTotal damage dealt: {total_damage}")
-        if total_healing > 0:
-            print(f"Total healing done: {total_healing}")
+                living_enemies = [e for e in enemies if e != target and e.health > 0]
+                
+                for enemy in living_enemies:
+                    splash_damage = enemy.take_damage(area_damage)
+                    total_damage += splash_damage
+                    print(f"⚡ Splash damage hits {enemy.name} for {splash_damage} damage!")
+                    
+                    # Update status if enemy dies from splash
+                    if enemy.health <= 0:
+                        print(f"💀 {enemy.name} was defeated by splash damage!")
 
         return total_damage
 
