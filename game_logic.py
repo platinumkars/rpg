@@ -54,7 +54,7 @@ COMPANION_QUESTS = {
     "Forest Trial": {
         "level_req": 7,
         "description": "Defeat the Ancient Treant without using potions",
-        "reward": "Additional companion slot and 1 companion token",
+        "reward": "Additional companion slot and a companion token",
         "boss": {
             "name": "Ancient Treant",
             "health": 300,
@@ -66,7 +66,7 @@ COMPANION_QUESTS = {
     "Spirit Challenge": {
         "level_req": 10,
         "description": "Survive 5 turns against the Spirit King with <30% HP",
-        "reward": "Additional companion slot and 2 companion tokens",
+        "reward": "Additional companion slot and a companion tokens",
         "boss": {
             "name": "Spirit King",
             "health": 400,
@@ -1002,7 +1002,7 @@ class Character:
                 break
             print("Invalid choice!")
 
-    def start_companion_quest(self, quest_name):
+    def start_quest_menu(self, quest_name):
         """Handle companion quest logic"""
         if quest_name not in COMPANION_QUESTS:
             print("Invalid quest!")
@@ -3135,30 +3135,38 @@ def main():
         elif choice == "9":
             power_shop(player)
             
-        elif choice == "10":  # Add companion management
-            if player.companions:
-                for companion in player.companions:
-                    print(f"\n=== {companion.name} Status ===")
-                    print(f"Type: {companion.type}")
-                    print(f"Health: {companion.health}/{companion.max_health}")
-                    print(f"Damage: {companion.damage}")
-                    print(f"Ability: {companion.ability}")
-                    print(f"Description: {companion.ability_description}")
-                print(f"\nCompanion Tokens: {player.companion_tokens}")
-                print(f"\nUpgrade Levels:")
-                print(f"Health: {player.companion_upgrades['health']}/5")
-                print(f"Damage: {player.companion_upgrades['damage']}/5")
-                print(f"Ability: {player.companion_upgrades['ability']}/3")
-                
+        elif choice == "10":  # Companion Management
+            print("\n=== Companion Management ===")
+            print("1. View Companions")
+            print("2. Upgrade Companions")
+            print("3. Available Quests")
+            print("4. Back")
+            
+            manage_choice = input("> ")
+            
+            if manage_choice == "1":
+                if player.companions:
+                    for companion in player.companions:
+                        print(f"\n=== {companion.name} Status ===")
+                        print(f"Type: {companion.type}")
+                        print(f"Health: {companion.health}/{companion.max_health}")
+                        print(f"Damage: {companion.damage}")
+                        print(f"Ability: {companion.ability}")
+                        print(f"Description: {companion.ability_description}")
+                elif player.level >= 5:
+                    print("\nYou are eligible for a companion!")
+                    player.unlock_companion()
+                else:
+                    print("\nReach level 5 to unlock companions!")
+                    
+            elif manage_choice == "2":
                 if player.companion_tokens > 0:
-                    upgrade = input("\nWould you like to upgrade your companion? (y/n): ")
-                    if upgrade.lower() == 'y':
-                        player.upgrade_companion()
-            elif player.level >= 5:
-                print("\nYou are eligible for a companion!")
-                player.unlock_companion()
-            else:
-                print("\nReach level 5 to unlock a companion!")
+                    player.upgrade_companion()
+                else:
+                    print("No upgrade tokens available!")
+                    
+            elif manage_choice == "3":
+                player.start_quest_menu()
 
         elif choice == "11":  # Save
             save_game(player)
