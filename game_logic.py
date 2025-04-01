@@ -1349,6 +1349,9 @@ def combat(player, enemies):
                 # Only show in boss battles
                 if isinstance(enemies[0], Boss):
                     print(f"3. Mega Health Potion (Restores {mega_heal} HP)")
+            if player.inventory.get("Companion Revival Potion", 0) > 0:
+                revival_percent = int(calculate_companion_revival(player.level) * 100)
+                print(f"4. Companion Revival Potion (Revives companion with {revival_percent}% HP)")
             
             item_choice = input("Choose item to use (or 'back'): ")
             
@@ -1370,6 +1373,29 @@ def combat(player, enemies):
                     print(f"💖 You drink a mega health potion and recover {mega_heal} HP!")
                 else:
                     print("Mega Health Potions can only be used during boss battles!")
+            elif item_choice == "4" and player.inventory.get("Companion Revival Potion", 0) > 0:
+                if player.companions:
+                    fallen_companions = [c for c in player.companions if c.health <= 0]
+                    if fallen_companions:
+                        print("\nChoose a companion to revive:")
+                        for i, companion in enumerate(fallen_companions, 1):
+                            print(f"{i}. {companion.name} ({companion.type})")
+                        try:
+                            revive_choice = int(input("> "))
+                            if 1 <= revive_choice <= len(fallen_companions):
+                                companion = fallen_companions[revive_choice - 1]
+                                revival_percent = calculate_companion_revival(player.level)
+                                companion.health = int(companion.max_health * revival_percent)
+                                player.inventory["Companion Revival Potion"] -= 1
+                                print(f"{companion.name} has been revived with {companion.health} HP!")
+                            else:
+                                print("Invalid choice!")
+                        except ValueError:
+                            print("Invalid input!")
+                    else:
+                        print("No fallen companions to revive!")
+                else:
+                    print("You have no companions!")
             elif item_choice.lower() == "back":
                 continue
             else:
@@ -1591,6 +1617,14 @@ def shop(player):
             "min_level": 5,  # Only available at level 5+
             "description": "Powerful healing potion for boss battles",
             "boss_only": True  # Mark as boss-only item
+        },
+        
+        # Add Companion Revival Potion
+        "Companion Revival Potion": {
+            "cost": 150,
+            "effect": f"Revive fallen companion with {int(calculate_companion_revival(player.level) * 100)}% HP",
+            "min_level": 5,
+            "description": "Resurrect fallen companions"
         },
         
         # Tier 1 weapons (adjusted damage)
