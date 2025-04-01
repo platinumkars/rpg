@@ -2292,31 +2292,28 @@ def process_enemy_attack(player, enemy):
     return final_damage
 
 def process_ability(player, target, enemies, ability_name):
-    """Process abilities with proper damage and healing handling"""
+    """Process ability with proper damage and healing handling"""
     try:
-        if ability_name not in player.abilities:
-            print("Invalid ability!")
+        ability = player.abilities.get(ability_name)
+        if not ability:
+            print(f"Error: Ability {ability_name} not found!")
             return 0, 0
-            
-        ability = player.abilities[ability_name]
-        total_damage = 0
-        total_healing = 0
         
-        # Check mana cost
-        if player.mana < ability['mana_cost']:
+        if player.mana < ability.get('mana_cost', 0):
             print("Not enough mana!")
             return 0, 0
 
-        # Deduct mana
+        # Deduct mana cost
         player.mana -= ability['mana_cost']
         
-        # 
-        player.mana += ability["mana"]
+        # Track total damage and healing
+        total_damage = 0
+        total_healing = 0
         
         # Calculate level bonus
         level_bonus = int(player.level * 0.5)
         
-        # Process healing abilities
+        # Process healing first
         if "heal" in ability:
             base_heal = ability["heal"]
             heal_modifier = 1.0
@@ -2328,11 +2325,10 @@ def process_ability(player, target, enemies, ability_name):
             heal_amount = int(base_heal * heal_modifier) + level_bonus
             old_health = player.health
             player.health = min(player.max_health, player.health + heal_amount)
-            actual_heal = player.health - old_health
-            total_healing = actual_heal
-            print(f"💚 {ability_name} heals for {actual_heal} HP!")
+            total_healing = player.health - old_health
+            print(f"💚 {ability_name} heals for {total_healing} HP!")
 
-        # Process damage abilities
+        # Process damage second
         if "damage" in ability:
             base_damage = ability["damage"]
             damage_modifier = 1.0
@@ -2362,26 +2358,26 @@ def process_ability(player, target, enemies, ability_name):
                     print(f"💥 {ability_name} deals {damage} damage!")
             
             # Handle area damage
-            if "area_damage" in ability:
+            if "area_damage" in ability and total_damage > 0:
                 area_damage = int(ability["area_damage"] * damage_modifier) + level_bonus
                 for enemy in enemies:
                     if enemy != target and enemy.health > 0:
-                        splash = enemy.take_damage(area_damage)
+                        splash = max(1, area_damage)
+                        enemy.take_damage(splash)
                         total_damage += splash
                         print(f"⚡ Splash damage hits {enemy.name} for {splash} damage!")
 
-        # Process status effects
-        if "effect" in ability:
+        # Process status effects last
+        if "effect" in ability and target and target.health > 0:
             effect = ability["effect"]
             duration = ability.get("duration", 2)
+            base = total_damage if total_damage > 0 else total_healing
             
             if isinstance(effect, list):
                 for single_effect in effect:
-                    if target and target.health > 0:
-                        apply_status_effect(target, single_effect, total_damage, duration)
+                    apply_status_effect(target, single_effect, base, duration)
             else:
-                if target and target.health > 0:
-                    apply_status_effect(target, effect, total_damage, duration)
+                apply_status_effect(target, effect, base, duration)
 
         return total_damage, total_healing
 
