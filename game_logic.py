@@ -1302,8 +1302,10 @@ def combat(player, enemies):
                 mana_amount = calculate_potion_mana(player.level)
                 print(f"2. Mana Potion (Restores {mana_amount} MP)")
             if player.inventory.get("Mega Health Potion", 0) > 0:
-                mega_heal_amount = calculate_mega_potion_healing(player.level)
-                print(f"3. Mega Health Potion (Restores {mega_heal_amount} HP)")
+                mega_heal = calculate_mega_potion_healing(player.level)
+                # Only show in boss battles
+                if isinstance(enemies[0], Boss):
+                    print(f"3. Mega Health Potion (Restores {mega_heal} HP)")
             
             item_choice = input("Choose item to use (or 'back'): ")
             
@@ -1318,10 +1320,13 @@ def combat(player, enemies):
                 player.inventory["Mana Potion"] -= 1
                 print(f"You drink a mana potion and recover {mana_amount} MP!")
             elif item_choice == "3" and player.inventory.get("Mega Health Potion", 0) > 0:
-                mega_heal_amount = calculate_mega_potion_healing(player.level)
-                player.health = min(player.max_health, player.health + mega_heal_amount)
-                player.inventory["Mega Health Potion"] -= 1
-                print(f"You drink a mega health potion and recover {mega_heal_amount} HP!")
+                if isinstance(enemies[0], Boss):
+                    mega_heal = calculate_mega_potion_healing(player.level)
+                    player.health = min(player.max_health, player.health + mega_heal)
+                    player.inventory["Mega Health Potion"] -= 1
+                    print(f"💖 You drink a mega health potion and recover {mega_heal} HP!")
+                else:
+                    print("Mega Health Potions can only be used during boss battles!")
             elif item_choice.lower() == "back":
                 continue
             else:
