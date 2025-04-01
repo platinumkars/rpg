@@ -2082,19 +2082,38 @@ def power_shop(player):
             print("Invalid power name!")
 
 def show_abilities(player):
-    """Show available abilities with proper categorization and formatting"""
-    # Initialize lists for different ability types
-    basic_abilities = []
-    class_abilities = []
-    special_abilities = []
-
+    """Show available abilities with proper categorization"""
+    abilities_list = []
+    
     print("\n=== Available Abilities ===")
     print(f"Mana: {player.mana}/{player.max_mana}")
-
-    # Process all abilities
+    
+    # Categorize abilities
+    basic_abilities = {}
+    class_abilities = {}
+    special_abilities = {}
+    
     for name, ability in player.abilities.items():
-        if ability['mana_cost'] <= player.mana:
-            # Create ability display info
+        if ability['mana_cost'] <= player.mana:  # Only show abilities player can use
+            # Basic abilities
+            if name in ["Basic Attack", "Power Strike", "Quick Shot", "Minor Heal", "Focus"]:
+                basic_abilities[name] = ability
+            # Special character abilities
+            elif name in ["Dragon's Breath", "Shadow Fusion", "Thunder Strike", "Glacial Storm", 
+                         "Blood Ritual", "Divine Radiance", "Primal Surge", "Overclock"]:
+                special_abilities[name] = ability
+            # Class-specific abilities
+            else:
+                class_abilities[name] = ability
+    
+    # Display basic abilities
+    if basic_abilities:
+        print("\n🗡️ Basic Abilities:")
+        for name, ability in basic_abilities.items():
+            abilities_list.append((name, ability))
+            index = len(abilities_list)
+            
+            # Build ability description
             stats = []
             if 'damage' in ability:
                 stats.append(f"💥 DMG: {ability['damage']}")
@@ -2102,47 +2121,61 @@ def show_abilities(player):
                 stats.append(f"⚔️ Hits: {ability['hits']}x")
             if 'heal' in ability:
                 stats.append(f"💚 Heal: {ability['heal']}")
-            if 'area_damage' in ability:
-                stats.append(f"⚡ Area: {ability['area_damage']}")
-            stats.append(f"💫 Cost: {ability['mana_cost']} MP")
-
-            # Categorize ability
-            ability_info = (name, ability, stats)
-            if name in ["Basic Attack", "Power Strike", "Quick Shot", "Minor Heal", "Focus"]:
-                basic_abilities.append(ability_info)
-            elif name in ["Dragon's Breath", "Shadow Fusion", "Thunder Strike", "Glacial Storm", 
-                         "Blood Ritual", "Divine Radiance", "Primal Surge", "Overclock"]:
-                special_abilities.append(ability_info)
-            else:
-                class_abilities.append(ability_info)
-
-    # Display abilities by category
-    if basic_abilities:
-        print("\n🗡️ Basic Abilities:")
-        for i, (name, ability, stats) in enumerate(basic_abilities, 1):
-            print(f"\n{i}. {name}")
+            if 'mana' in ability:
+                stats.append(f"✨ MP: {ability['mana']}")
+            stats.append(f"Cost: {ability['mana_cost']} MP")
+            
+            print(f"\n{index}. {name}")
             print(f"   {' | '.join(stats)}")
             print(f"   📜 {ability['description']}")
-
+    
+    # Display class abilities
     if class_abilities:
         print("\n✨ Class Abilities:")
-        offset = len(basic_abilities)
-        for i, (name, ability, stats) in enumerate(class_abilities, offset + 1):
-            print(f"\n{i}. {name}")
+        for name, ability in class_abilities.items():
+            abilities_list.append((name, ability))
+            index = len(abilities_list)
+            
+            stats = []
+            if 'damage' in ability:
+                stats.append(f"💥 DMG: {ability['damage']}")
+            if 'area_damage' in ability:
+                stats.append(f"⚡ Area: {ability['area_damage']}")
+            if 'heal' in ability:
+                stats.append(f"💚 Heal: {ability['heal']}")
+            stats.append(f"Cost: {ability['mana_cost']} MP")
+            
+            print(f"\n{index}. {name}")
             print(f"   {' | '.join(stats)}")
             print(f"   📜 {ability['description']}")
-
+    
+    # Display special abilities
     if special_abilities:
         print("\n🌟 Special Abilities:")
-        offset = len(basic_abilities) + len(class_abilities)
-        for i, (name, ability, stats) in enumerate(special_abilities, offset + 1):
-            print(f"\n{i}. {name}")
+        for name, ability in special_abilities.items():
+            abilities_list.append((name, ability))
+            index = len(abilities_list)
+            
+            stats = []
+            if 'damage' in ability:
+                stats.append(f"💥 DMG: {ability['damage']}")
+            if 'area_damage' in ability:
+                stats.append(f"⚡ Area: {ability['area_damage']}")
+            if 'effect' in ability:
+                if isinstance(ability['effect'], list):
+                    stats.append(f"✨ Effects: {', '.join(ability['effect'])}")
+                else:
+                    stats.append(f"✨ Effect: {ability['effect']}")
+            stats.append(f"Cost: {ability['mana_cost']} MP")
+            
+            print(f"\n{index}. {name}")
             print(f"   {' | '.join(stats)}")
             print(f"   📜 {ability['description']}")
-
-    # Return all available abilities in display order
-    all_abilities = basic_abilities + class_abilities + special_abilities
-    return [(name, ability) for name, ability, _ in all_abilities]
+    
+    if not abilities_list:
+        print("\nNo abilities available or not enough mana!")
+        
+    return abilities_list
 
 def show_gadgets(player):
     """Display available gadgets with numbers"""
