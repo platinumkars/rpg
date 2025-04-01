@@ -2249,21 +2249,103 @@ def process_ability(player, target, enemies, ability_name, duration=0):
                 damage_dealt = target.take_damage(modified_damage)
                 total_damage += damage_dealt
                 print(f"\n💥 {ability_name} hits {target.name} for {damage_dealt} damage!")
+            
+            # Area damage calculation
+            area_damage = int(ability["area_damage"] * damage_modifier) + level_bonus
+            living_enemies = [e for e in enemies if e != target and e.health > 0]
+            
+            for enemy in living_enemies:
+                splash_damage = enemy.take_damage(area_damage)
+                total_damage += splash_damage
+                print(f"⚡ Splash damage hits {enemy.name} for {splash_damage} damage!")
                 
-                # Area damage calculation
-                area_damage = int(ability["area_damage"] * damage_modifier) + level_bonus
-                living_enemies = [e for e in enemies if e != target and e.health > 0]
-                
-                for enemy in living_enemies:
-                    splash_damage = enemy.take_damage(area_damage)
-                    total_damage += splash_damage
-                    print(f"⚡ Splash damage hits {enemy.name} for {splash_damage} damage!")
-                    
-                    # Update status if enemy dies from splash
-                    if enemy.health <= 0:
-                        print(f"💀 {enemy.name} was defeated by splash damage!")
+                # Update status if enemy dies from splash
+                if enemy.health <= 0:
+                    print(f"💀 {enemy.name} was defeated by splash damage!")
 
-        return total_damage
+            else:
+            # Single target damage
+                if target and target.health > 0:
+                    damage_dealt = target.take_damage(modified_damage) 
+                    total_damage += damage_dealt
+                    print(f"\n💥 {ability_name} hits {target.name} for {damage_dealt} damage!")
+
+        # Process healing effects
+        if "heal" in ability:
+            base_heal = ability["heal"]
+            heal_modifier = 1.0
+            
+            # Enhanced healing for healing classes
+            if player.class_type.lower() in ["paladin", "3", "druid", "6"]:
+                heal_modifier *= 1.3
+            
+            heal_amount = int(base_heal * heal_modifier) + level_bonus
+            old_health = player.health
+            player.health = min(player.max_health, player.health + heal_amount)
+            actual_heal = player.health - old_health
+            total_healing += actual_heal
+            print(f"💚 {ability_name} heals for {actual_heal} HP!")
+
+        # Process status effects
+        if "effect" in ability:
+            effect = ability["effect"]
+            duration = ability.get("duration", 2)  # Default 2 turns if not specified
+            
+            # Handle multiple effects
+            if isinstance(effect, list):
+                for single_effect in effect:
+                    if target and target.health > 0:
+                        apply_status_effect(target, single_effect, modified_damage, duration)
+            else:
+                if target and target.health > 0:
+                    apply_status_effect(target, effect, modified_damage, duration)
+                
+        # Process ability based on type
+        if ability['type'] == "physical":
+            # Handle basic physical abilities
+            base_damage = ability["damage"]
+            level_bonus = int(player.level * 0.5)
+            
+            if "hits" in ability:
+                # Multi-hit abilities
+                for hit in range(ability["hits"]):
+                    damage = max(1, base_damage + level_bonus)
+                    if target and target.health > 0:
+                        target.take_damage(damage)
+                        total_damage += damage
+                        print(f"Hit {hit + 1}: {damage} damage!")
+            else:
+                # Single hit abilities
+                damage = max(1, base_damage + level_bonus)
+                if target and target.health > 0:
+                    target.take_damage(damage)
+                    total_damage = damage
+                    print(f"{ability_name} deals {damage} damage!")
+                    
+        elif ability['type'] == "healing":
+            # Handle healing abilities
+            heal_amount = ability["heal"] + int(player.level * 0.8)
+            old_health = player.health
+            player.health = min(player.max_health, player.health + heal_amount)
+            actual_heal = player.health - old_health
+            print(f"💚 Healed for {actual_heal} HP!")
+            
+        elif ability['type'] == "buff":
+            # Handle buff abilities
+            if ability_name == "Focus":
+                mana_gain = ability["mana"]
+                player.mana = min(player.max_mana, player.mana + mana_gain)
+                print(f"✨ Recovered {mana_gain} MP!")
+                
+                # Add damage boost effect
+                player.status_effects.append({
+                    "name": "Focused",
+                    "damage_boost": 1.3,
+                    "duration": 2
+                })
+                print("🔥 Next attack will deal 30% more damage!")
+        
+        return total_damage, total_healing
 
     except KeyError as e:
         print(f"Error: Invalid ability configuration - {e}")
