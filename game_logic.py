@@ -2312,6 +2312,14 @@ def process_ability(player, target, enemies, ability_name):
         
         # Calculate level bonus
         level_bonus = int(player.level * 0.5)
+
+        # Process mana restore if ability has it
+        if "mana" in ability:
+            mana_restore = ability["mana"]
+            old_mana = player.mana
+            player.mana = min(player.max_mana, player.mana + mana_restore)
+            restored_mana = player.mana - old_mana
+            print(f"✨ {ability_name} restores {restored_mana} MP!")
         
         # Process healing first
         if "heal" in ability:
