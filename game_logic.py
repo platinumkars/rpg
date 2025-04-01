@@ -1634,9 +1634,11 @@ def combat(player, enemies):
                 # Calculate hit chance
                 hit_roll = random.randint(1, 100)
                 if hit_roll <= enemy.accuracy:
-                    damage = enemy.damage
-                    player.health -= damage
-                    print(f"🎯 {enemy.name} hits you for {damage} damage!")
+                    # Process damage with defense
+                    raw_damage = enemy.damage
+                    final_damage = process_enemy_attack(player, enemy)
+                    player.health -= final_damage
+                    print(f"🎯 {enemy.name} hits you for {final_damage} damage! (Reduced from {raw_damage})")
                 else:
                     print(f"❌ {enemy.name}'s attack missed!")
         
