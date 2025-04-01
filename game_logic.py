@@ -148,6 +148,11 @@ class Character:
         self.max_companions = 1
         self.companion_quests_completed = []
         self.companion_tokens = 0
+        self.companion_upgrades = {
+        "health": 0,
+        "damage": 0,
+        "ability": 0
+    }
 
         # Initialize base abilities based on class
         self.update_abilities()
