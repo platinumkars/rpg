@@ -2901,7 +2901,14 @@ def boss_battle(player, boss):
         return handle_player_death(player)
     else:
         print(f"\n🏆 You have defeated {boss.name}!")
-        player.companion_tokens += 1
+        
+        # Add substantial tech points reward for boss victory
+        tech_points = calculate_tech_points_reward(player.level, True)
+        player.tech_points += tech_points
+        
+        print(f"Gained {boss.exp_reward} experience!")
+        print(f"Found {boss.gold_reward} gold!")
+        print(f"Earned {tech_points} tech points!")
         print(f"🎫 Earned a Companion Token! (Total: {player.companion_tokens})")
         return True
 
