@@ -1561,6 +1561,13 @@ def calculate_mega_potion_healing(player_level):
     level_bonus = int(player_level * 10)  # 10 HP per level
     return base_heal + level_bonus
 
+# Add to potion calculations
+def calculate_companion_revival(player_level):
+    """Calculate companion revival effectiveness based on player level"""
+    base_heal_percent = 0.5  # Base 50% health restoration
+    level_bonus = min(0.3, player_level * 0.02)  # Up to 30% bonus based on level
+    return base_heal_percent + level_bonus
+
 # Update shop function's item handling
 def shop(player):
     """Improved shop with level-based filtering and numbered items"""
