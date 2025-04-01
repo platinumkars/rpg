@@ -1002,46 +1002,39 @@ class Character:
                 break
             print("Invalid choice!")
 
-    def start_quest_menu(self, quest_name):
-        """Handle companion quest logic"""
-        if quest_name not in COMPANION_QUESTS:
-            print("Invalid quest!")
-            return
-                
-        quest = COMPANION_QUESTS[quest_name]
-        if self.level < quest["level_req"]:
-            print(f"You need to be level {quest['level_req']} for this quest!")
-            return
-                
-        if quest_name in self.companion_quests_completed:
-            print("You've already completed this quest!")
-            return
-                
-        print(f"\n=== {quest_name} ===")
-        print(f"📜 {quest['description']}")
-        print(f"🎁 Reward: {quest['reward']}")
+    # Add to Character class
+def start_quest_menu(self):
+    """Display and handle companion quest menu"""
+    while True:
+        print("\n=== Companion Quests ===")
+        available_quests = []
+        
+        for quest_name, quest in COMPANION_QUESTS.items():
+            # Show level requirement and completion status
+            status = "✅ Completed" if quest_name in self.companion_quests_completed else "❌ Incomplete"
+            level_status = "✨" if self.level >= quest["level_req"] else "🔒"
             
-        confirm = input("\nStart quest? (y/n): ").lower()
-        if confirm == 'y':
-            # Create boss for the quest
-            boss = Boss(
-                quest["boss"]["name"],
-                quest["boss"]["health"],
-                quest["boss"]["damage"],
-                exp_reward=200,
-                gold_reward=300,
-                special_moves={quest["boss"]["special"]: {"damage": 40}},
-                level_req=quest["level_req"]
-            )
-                
-            result = boss_battle(self, boss)
-            if result:
-                print(f"\n🎊 Congratulations! You've completed {quest_name}!")
-                self.max_companions += 1
-                self.companion_quests_completed.append(quest_name)
-                self.companion_tokens += 1
-                print(f"\n✨ You can now have up to {self.max_companions} companions!")
-                print("You've earned a companion token!")
+            print(f"\n{level_status} {quest_name} (Level {quest['level_req']}+) - {status}")
+            print(f"📜 {quest['description']}")
+            print(f"🎁 Reward: {quest['reward']}")
+            
+            if self.level >= quest["level_req"] and quest_name not in self.companion_quests_completed:
+                available_quests.append(quest_name)
+        
+        if not available_quests:
+            print("\nNo available quests right now!")
+            break
+            
+        print("\nEnter quest name to start (or 'back' to return):")
+        choice = input("> ")
+        
+        if choice.lower() == 'back':
+            break
+            
+        if choice in available_quests:
+            self.start_companion_quest(choice)
+        else:
+            print("Invalid quest name!")
 
 def upgrade_companion(self):
         """Upgrade companion stats with tokens"""
