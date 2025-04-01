@@ -2271,12 +2271,10 @@ def process_attack(player, target, enemies):
     return total_damage
 
 def process_enemy_attack(player, enemy):
-    """More balanced enemy damage calculation"""
-    base_damage = enemy.damage
-    armor_value = player.armor[player.current_armor]
-    defense_reduction = int(armor_value * (0.3 + (player.level * 0.015)))  # Reduced scaling
-    final_damage = max(1, base_damage - defense_reduction)
     """Process enemy attack with proper defense calculation"""
+    # Calculate base damage
+    base_damage = enemy.damage
+    
     # Calculate base defense from armor and bonus defense
     base_defense = player.armor.get(player.current_armor, 0)
     total_defense = base_defense + player.bonus_defense
@@ -2288,13 +2286,13 @@ def process_enemy_attack(player, enemy):
     damage_reduction = min(0.75, damage_reduction)
     
     # Calculate final damage
-    reduced_damage = max(1, int(final_damage * (1 - damage_reduction)))
+    reduced_damage = max(1, int(base_damage * (1 - damage_reduction)))
     
     # Show defense feedback
-    damage_blocked = final_damage - reduced_damage
+    damage_blocked = base_damage - reduced_damage
     print(f"🛡️ Your defense blocked {damage_blocked} damage!")
     
-    return reduced_damage, final_damage
+    return reduced_damage
 
 
 def process_ability(player, target, enemies, ability_name):
