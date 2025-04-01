@@ -130,34 +130,40 @@ class Character:
 
         # Add basic abilities that all classes get
         self.abilities = {
-            "Basic Attack": {
+            1:{
+                "Basic Attack": {
                 "damage": 10,
                 "mana_cost": 0,
                 "description": "Basic weapon attack"
+                }
             },
+            2:{
             "Power Strike": {
                 "damage": 15,
                 "mana_cost": 10,
                 "description": "A stronger attack with increased damage"
-            },
+            }},
+            3:{
             "Quick Shot": {
                 "damage": 12,
                 "hits": 2,
                 "mana_cost": 15,
                 "description": "Fire two quick attacks"
-            },
+            }},
+            4:{
             "Minor Heal": {
                 "heal": 20,
                 "mana_cost": 15,
                 "description": "Restore some health points"
-            },
+            }},
+            5:{
             "Focus": {
                 "mana": 25,
                 "mana_cost": 0,
                 "cooldown": 3,
                 "effect": "focus",
                 "description": "Restore mana and increase next attack damage"
-            }
+            }}
         }
 
         # Initialize and merge class-specific abilities
