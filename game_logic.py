@@ -144,17 +144,10 @@ class Character:
         self.tech_points = 0
         self.gadgets = {}
         self.powers = {}  # Dictionary to store unlocked powers
-        self.companion = None
-        self.companion_unlocked = False
-        self.companion_tokens = 0
-        self.companion_upgrades = {
-            "health": 0,
-            "damage": 0,
-            "ability": 0
-        }
         self.companions = []
         self.max_companions = 1
         self.companion_quests_completed = []
+        self.companion_tokens = 0
 
         # Initialize base abilities based on class
         self.update_abilities()
@@ -953,103 +946,79 @@ class Character:
             print(f"📜 {special_abilities[self.special_type][ability_name]['description']}")
 
     def unlock_companion(self):
-        """Allow player to choose a companion"""
-        if self.level >= 5 and not self.companion_unlocked:
-            print("\n🐾 You've unlocked the ability to have a companion!")
-            print("\nAvailable Companions:")
-            print("1. Wolf - Loyal fighter with pack tactics")
-            print("2. Fairy - Magical healer that supports you")
-            print("3. Drake - Small dragon with fire abilities")
-            print("4. Golem - Stone defender that protects you")
-            
-            while True:
-                try:
-                    choice = int(input("\nChoose your companion (1-4): "))
-                    if 1 <= choice <= 4:
-                        companion_types = ["wolf", "fairy", "drake", "golem"]
-                        companion_name = input(f"\nName your {companion_types[choice-1].title()}: ")
-                        self.companion = Companion(companion_name, companion_types[choice-1])
-                        self.companion_unlocked = True
-                        print(f"\n✨ {companion_name} has joined your adventure!")
-                        print(f"Special Ability: {self.companion.ability}")
-                        print(f"Effect: {self.companion.ability_description}")
-                        break
-                    print("Invalid choice!")
-                except ValueError:
-                    print("Please enter a number!")
-
-    def earn_companion_token(self):
-        """Earn a companion token from boss fights"""
-        self.companion_tokens += 1
-        print(f"\n🎫 Earned a Companion Token! (Total: {self.companion_tokens})")
-        
-    def upgrade_companion(self):
-        """Upgrade companion with tokens"""
-        if not self.companion:
-            print("You don't have a companion to upgrade!")
+        """Enhanced companion unlock system"""
+        if len(self.companions) >= self.max_companions:
+            print("\n❌ No free companion slots!")
+            print("Complete companion quests to unlock more slots!")
             return
+            
+        print("\n🐾 Available Companions:")
+        available_companions = []
         
+        for req_level, companions in COMPANION_TIERS.items():
+            if self.level >= req_level:
+                print(f"\nLevel {req_level} Companions:")
+                for comp_type, stats in companions.items():
+                    available_companions.append(comp_type)
+                    print(f"- {comp_type.title()}: {stats['description']}")
+        
+        if not available_companions:
+            print("No companions available at your level!")
+            return
+            
         while True:
-            print("\n=== Companion Upgrades ===")
-            print(f"Available Tokens: {self.companion_tokens}")
-            print("\nUpgrade Options:")
-            print(f"1. Health (Level {self.companion_upgrades['health']}/5) - +20% HP")
-            print(f"2. Damage (Level {self.companion_upgrades['damage']}/5) - +20% DMG")
-            print(f"3. Ability (Level {self.companion_upgrades['ability']}/3) - Enhance special ability")
-            print("4. Back")
-            
-            choice = input("\nChoose upgrade (or back): ")
-            
-            if choice == "4" or choice.lower() == "back":
+            choice = input("\nChoose companion type (or 'back'): ").lower()
+            if choice == 'back':
+                return
+                
+            if choice in available_companions:
+                name = input(f"\nName your {choice.title()}: ")
+                companion = Companion(name, choice)
+                self.companions.append(companion)
+                print(f"\n✨ {name} has joined your party!")
                 break
+            print("Invalid choice!")
+
+    def start_companion_quest(self, quest_name):
+        """Handle companion quest logic"""
+        if quest_name not in COMPANION_QUESTS:
+            print("Invalid quest!")
+            return
+                
+        quest = COMPANION_QUESTS[quest_name]
+        if self.level < quest["level_req"]:
+            print(f"You need to be level {quest['level_req']} for this quest!")
+            return
+                
+        if quest_name in self.companion_quests_completed:
+            print("You've already completed this quest!")
+            return
+                
+        print(f"\n=== {quest_name} ===")
+        print(f"📜 {quest['description']}")
+        print(f"🎁 Reward: {quest['reward']}")
             
-            try:
-                choice = int(choice)
-                if choice == 1:
-                    stat = "health"
-                    max_level = 5
-                    bonus = "HP"
-                elif choice == 2:
-                    stat = "damage"
-                    max_level = 5
-                    bonus = "damage"
-                elif choice == 3:
-                    stat = "ability"
-                    max_level = 3
-                    bonus = "ability power"
-                else:
-                    print("Invalid choice!")
-                    continue
+        confirm = input("\nStart quest? (y/n): ").lower()
+        if confirm == 'y':
+            # Create boss for the quest
+            boss = Boss(
+                quest["boss"]["name"],
+                quest["boss"]["health"],
+                quest["boss"]["damage"],
+                exp_reward=200,
+                gold_reward=300,
+                special_moves={quest["boss"]["special"]: {"damage": 40}},
+                level_req=quest["level_req"]
+            )
                 
-                current_level = self.companion_upgrades[stat]
-                if current_level >= max_level:
-                    print(f"This upgrade is already at maximum level!")
-                    continue
-                
-                if self.companion_tokens > 0:
-                    self.companion_tokens -= 1
-                    self.companion_upgrades[stat] += 1
-                    
-                    # Apply upgrade effects
-                    if stat == "health":
-                        old_health = self.companion.max_health
-                        self.companion.max_health = int(self.companion.max_health * 1.2)
-                        self.companion.health = self.companion.max_health
-                        print(f"Companion HP increased from {old_health} to {self.companion.max_health}!")
-                    elif stat == "damage":
-                        old_damage = self.companion.damage
-                        self.companion.damage = int(self.companion.damage * 1.2)
-                        print(f"Companion damage increased from {old_damage} to {self.companion.damage}!")
-                    else:
-                        print(f"Companion {self.companion.ability} enhanced!")
-                    
-                    print(f"\n✨ Upgraded companion's {bonus}!")
-                    print(f"Remaining tokens: {self.companion_tokens}")
-                else:
-                    print("Not enough companion tokens!")
-                
-            except ValueError:
-                print("Invalid input!")
+            result = boss_battle(self, boss)
+            if result:
+                print(f"\n🎊 Congratulations! You've completed {quest_name}!")
+                self.max_companions += 1
+                self.companion_quests_completed.append(quest_name)
+                self.companion_tokens += 1
+                print(f"\n✨ You can now have up to {self.max_companions} companions!")
+                print("You've earned a companion token!")
 
 # Add Companion class
 class Companion:
@@ -1439,36 +1408,38 @@ def combat(player, enemies):
                 print("You failed to run away!")
         
         # Companion turn
-        if player.companion and player.companion.health > 0:
-            print(f"\n🐾 {player.companion.name}'s turn!")
-            
-            # Get target for companion
-            target = get_target(enemies, True)  # Auto-target for companion
-            if target:
-                # Process companion attack
-                damage = player.companion.damage
-                target.health -= damage
-                print(f"💥 {player.companion.name} attacks {target.name} for {damage} damage!")
-                
-                # Process companion ability
-                if player.companion.type == "wolf" and target:
-                    bonus = int(damage * 0.3)
-                    target.health -= bonus
-                    print(f"🐺 Pack Tactics: Extra {bonus} damage!")
-                elif player.companion.type == "fairy":
-                    heal = int(damage * 0.15)
-                    player.health = min(player.max_health, player.health + heal)
-                    print(f"✨ Healing Light: Restored {heal} HP!")
-                elif player.companion.type == "drake" and len(enemies) > 1:
-                    area_damage = int(damage * 0.5)
-                    for enemy in enemies:
-                        if enemy != target and enemy.health > 0:
-                            enemy.health -= area_damage
-                            print(f"🔥 Fire Breath: {area_damage} damage to {enemy.name}!")
-                elif player.companion.type == "golem":
-                    reduction = int(player.companion.damage * 0.2)
-                    print(f"🛡️ Stone Shield: Reducing next attack by {reduction}!")
-                    player.temp_defense = reduction
+        if player.companions:
+            for companion in player.companions:
+                if companion.health > 0:
+                    print(f"\n🐾 {companion.name}'s turn!")
+                    
+                    # Get target for companion
+                    target = get_target(enemies, True)  # Auto-target for companion
+                    if target:
+                        # Process companion attack
+                        damage = companion.damage
+                        target.health -= damage
+                        print(f"💥 {companion.name} attacks {target.name} for {damage} damage!")
+                        
+                        # Process companion ability
+                        if companion.type == "wolf" and target:
+                            bonus = int(damage * 0.3)
+                            target.health -= bonus
+                            print(f"🐺 Pack Tactics: Extra {bonus} damage!")
+                        elif companion.type == "fairy":
+                            heal = int(damage * 0.15)
+                            player.health = min(player.max_health, player.health + heal)
+                            print(f"✨ Healing Light: Restored {heal} HP!")
+                        elif companion.type == "drake" and len(enemies) > 1:
+                            area_damage = int(damage * 0.5)
+                            for enemy in enemies:
+                                if enemy != target and enemy.health > 0:
+                                    enemy.health -= area_damage
+                                    print(f"🔥 Fire Breath: {area_damage} damage to {enemy.name}!")
+                        elif companion.type == "golem":
+                            reduction = int(companion.damage * 0.2)
+                            print(f"🛡️ Stone Shield: Reducing next attack by {reduction}!")
+                            player.temp_defense = reduction
 
         # Enemy turns
         for enemy in enemies:
@@ -1765,17 +1736,18 @@ def shop(player):
         
         print("5. Companion Services")
         
-        if choice == "5" and player.companion:
+        if choice == "5" and player.companions:
             print("\n=== Companion Services ===")
-            print(f"1. Heal Companion (30 gold) - Current HP: {player.companion.health}/{player.companion.max_health}")
+            for companion in player.companions:
+                print(f"1. Heal {companion.name} (30 gold) - Current HP: {companion.health}/{companion.max_health}")
             print("2. Back")
             
             service = input("> ")
             if service == "1":
                 if player.gold >= 30:
                     player.gold -= 30
-                    player.companion.health = player.companion.max_health
-                    print(f"{player.companion.name} has been fully healed!")
+                    companion.health = companion.max_health
+                    print(f"{companion.name} has been fully healed!")
                 else:
                     print("Not enough gold!")
 
@@ -2561,9 +2533,10 @@ def boss_battle(player, boss):
                     player.health -= damage
                     print(f"You take {damage} damage!")
                     
-                    if "area_damage" in move and player.companion:
-                        player.companion.health -= move["area_damage"]
-                        print(f"Your companion takes {move['area_damage']} splash damage!")
+                    if "area_damage" in move and player.companions:
+                        for companion in player.companions:
+                            companion.health -= move["area_damage"]
+                            print(f"{companion.name} takes {move['area_damage']} splash damage!")
                         
                 if "effect" in move:
                     apply_status_effect(player, move["effect"], damage, 2)
@@ -2587,7 +2560,8 @@ def boss_battle(player, boss):
         return handle_player_death(player)
     else:
         print(f"\n🏆 You have defeated {boss.name}!")
-        player.earn_companion_token()
+        player.companion_tokens += 1
+        print(f"🎫 Earned a Companion Token! (Total: {player.companion_tokens})")
         return True
 
 # Fix enemy spawn logic in main()
@@ -2618,7 +2592,7 @@ def main():
     print(f"\nWelcome, {player.name} the {player.class_type}!")
     
     # Add immediate companion check for new characters at level 5+
-    if player.level >= 5 and not player.companion_unlocked:
+    if player.level >= 5 and not player.companions:
         print("\nSince you're level 5 or higher, you can choose a companion!")
         player.unlock_companion()
     
@@ -2673,7 +2647,7 @@ def main():
                             break
 
             # Add to main game loop after level check
-            if player.level >= 5 and not player.companion_unlocked:
+            if player.level >= 5 and not player.companions:
                 player.unlock_companion()
 
             # Remove duplicate combat call and time.sleep
@@ -2723,13 +2697,14 @@ def main():
         elif choice == "4":
             show_inventory_menu(player)
             # Add companion management option if companion exists
-            if player.companion:
+            if player.companions:
                 print("\nCompanion Status:")
-                print(f"Name: {player.companion.name}")
-                print(f"Type: {player.companion.type}")
-                print(f"Health: {player.companion.health}/{player.companion.max_health}")
-                print(f"Damage: {player.companion.damage}")
-                print(f"Ability: {player.companion.ability}")
+                for companion in player.companions:
+                    print(f"Name: {companion.name}")
+                    print(f"Type: {companion.type}")
+                    print(f"Health: {companion.health}/{companion.max_health}")
+                    print(f"Damage: {companion.damage}")
+                    print(f"Ability: {companion.ability}")
                 print(f"\nCompanion Tokens: {player.companion_tokens}")
                 
                 if player.companion_tokens > 0:
@@ -2762,13 +2737,14 @@ def main():
             power_shop(player)
             
         elif choice == "10":  # Add companion management
-            if player.companion:
-                print(f"\n=== {player.companion.name} Status ===")
-                print(f"Type: {player.companion.type}")
-                print(f"Health: {player.companion.health}/{player.companion.max_health}")
-                print(f"Damage: {player.companion.damage}")
-                print(f"Ability: {player.companion.ability}")
-                print(f"Description: {player.companion.ability_description}")
+            if player.companions:
+                for companion in player.companions:
+                    print(f"\n=== {companion.name} Status ===")
+                    print(f"Type: {companion.type}")
+                    print(f"Health: {companion.health}/{companion.max_health}")
+                    print(f"Damage: {companion.damage}")
+                    print(f"Ability: {companion.ability}")
+                    print(f"Description: {companion.ability_description}")
                 print(f"\nCompanion Tokens: {player.companion_tokens}")
                 print(f"\nUpgrade Levels:")
                 print(f"Health: {player.companion_upgrades['health']}/5")
@@ -2793,7 +2769,7 @@ def main():
             if loaded_player:
                 player = loaded_player
                 # Check for companion eligibility after loading
-                if player.level >= 5 and not player.companion_unlocked:
+                if player.level >= 5 and not player.companions:
                     print("\nYou can choose a companion!")
                     player.unlock_companion()
             
