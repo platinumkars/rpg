@@ -1003,38 +1003,38 @@ class Character:
             print("Invalid choice!")
 
     # Add to Character class
-def start_quest_menu(self):
-    """Display and handle companion quest menu"""
-    while True:
-        print("\n=== Companion Quests ===")
-        available_quests = []
-        
-        for quest_name, quest in COMPANION_QUESTS.items():
-            # Show level requirement and completion status
-            status = "✅ Completed" if quest_name in self.companion_quests_completed else "❌ Incomplete"
-            level_status = "✨" if self.level >= quest["level_req"] else "🔒"
+    def start_quest_menu(self):
+        """Display and handle companion quest menu"""
+        while True:
+            print("\n=== Companion Quests ===")
+            available_quests = []
             
-            print(f"\n{level_status} {quest_name} (Level {quest['level_req']}+) - {status}")
-            print(f"📜 {quest['description']}")
-            print(f"🎁 Reward: {quest['reward']}")
+            for quest_name, quest in COMPANION_QUESTS.items():
+                # Show level requirement and completion status
+                status = "✅ Completed" if quest_name in self.companion_quests_completed else "❌ Incomplete"
+                level_status = "✨" if self.level >= quest["level_req"] else "🔒"
+                
+                print(f"\n{level_status} {quest_name} (Level {quest['level_req']}+) - {status}")
+                print(f"📜 {quest['description']}")
+                print(f"🎁 Reward: {quest['reward']}")
+                
+                if self.level >= quest["level_req"] and quest_name not in self.companion_quests_completed:
+                    available_quests.append(quest_name)
             
-            if self.level >= quest["level_req"] and quest_name not in self.companion_quests_completed:
-                available_quests.append(quest_name)
-        
-        if not available_quests:
-            print("\nNo available quests right now!")
-            break
+            if not available_quests:
+                print("\nNo available quests right now!")
+                break
+                
+            print("\nEnter quest name to start (or 'back' to return):")
+            choice = input("> ")
             
-        print("\nEnter quest name to start (or 'back' to return):")
-        choice = input("> ")
-        
-        if choice.lower() == 'back':
-            break
-            
-        if choice in available_quests:
-            start_companion_quest(choice)
-        else:
-            print("Invalid quest name!")
+            if choice.lower() == 'back':
+                break
+                
+            if choice in available_quests:
+                start_companion_quest(choice)
+            else:
+                print("Invalid quest name!")
 
 def start_companion_quest(self, quest_name):
     """Handle companion quest execution"""
