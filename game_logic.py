@@ -129,42 +129,7 @@ class Character:
         }
 
         # Add basic abilities that all classes get
-        self.abilities = {
-            1:{
-                "Basic Attack": {
-                "damage": 10,
-                "mana_cost": 0,
-                "description": "Basic weapon attack"
-                }
-            },
-            2:{
-            "Power Strike": {
-                "damage": 15,
-                "mana_cost": 10,
-                "description": "A stronger attack with increased damage"
-            }},
-            3:{
-            "Quick Shot": {
-                "damage": 12,
-                "hits": 2,
-                "mana_cost": 15,
-                "description": "Fire two quick attacks"
-            }},
-            4:{
-            "Minor Heal": {
-                "heal": 20,
-                "mana_cost": 15,
-                "description": "Restore some health points"
-            }},
-            5:{
-            "Focus": {
-                "mana": 25,
-                "mana_cost": 0,
-                "cooldown": 3,
-                "effect": "focus",
-                "description": "Restore mana and increase next attack damage"
-            }}
-        }
+        self.abilities = {}
 
         # Initialize and merge class-specific abilities
         self.update_abilities()
@@ -867,9 +832,46 @@ class Character:
         return False
 
     def add_special_abilities(self):
-        """Add special abilities based on character choice"""
+        """Add basic and special abilities"""
         scaling = self.get_scaling_factor()
         
+        # Add basic abilities that all characters get
+        basic_abilities = {
+            "Basic Attack": {
+                "damage": int(10 * scaling),
+                "mana_cost": 0,
+                "description": "Basic weapon attack"
+            },
+            "Power Strike": {
+                "damage": int(15 * scaling),
+                "mana_cost": 10, 
+                "description": "A stronger attack with increased damage"
+            },
+            "Quick Shot": {
+                "damage": int(12 * scaling),
+                "hits": 2,
+                "mana_cost": 15,
+                "description": "Fire two quick attacks"
+            },
+            "Minor Heal": {
+                "heal": int(20 * scaling),
+                "mana_cost": 15,
+                "description": "Restore some health points"
+            },
+            "Focus": {
+                "mana": 25,
+                "mana_cost": 0,
+                "cooldown": 3,
+                "effect": "focus",
+                "description": "Restore mana and increase next attack damage"
+            }
+        }
+        
+        # Add basic abilities first
+        self.abilities.update(basic_abilities)
+        print("\n✨ Basic Abilities Unlocked!")
+        
+        # Special character abilities
         special_abilities = {
             1: {  # Dragon Blood
                 "Dragon's Breath": {
