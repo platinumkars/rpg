@@ -2483,6 +2483,14 @@ def apply_status_effect(target, effect_type, base_damage, duration):
             "heal_percent": 0.5,
             "duration": duration,
             "message": "💀 {} life force is being drained!"
+        },
+        "focus": {
+            "name": "Focused",
+            "damage_boost": 1.5,
+            "accuracy_boost": 20,  # Increase accuracy by 20%
+            "critical_chance": 0.25,  # 25% increased crit chance
+            "duration": duration,
+            "message": "🎯 {} is focused and gains increased damage and accuracy!"
         }
     }
 
