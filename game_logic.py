@@ -1446,39 +1446,13 @@ def combat(player, enemies):
                 ability_idx = int(ability_choice) - 1
                 if 0 <= ability_idx < len(abilities_list):
                     ability_name, ability = abilities_list[ability_idx]
+                    total_damage, healing = process_ability(player, target, enemies, ability_name)
                     
-                    # Handle area abilities vs single target
-                    if "area_damage" in ability:
-                        damage = ability["damage"]
-                        area_damage = ability["area_damage"]
-                        
-                        # Apply primary damage to main target
-                        target = get_target(enemies, auto_target)
-                        if not target:
-                            continue
-                            
-                        target.take_damage(damage)
-                        print(f"{ability_name} hits {target.name} for {damage} damage!")
-                        
-                        # Apply area damage to other enemies
-                        for enemy in enemies:
-                            if enemy != target and enemy.health > 0:
-                                enemy.take_damage(area_damage)
-                                print(f"⚡ Splash damage: {area_damage} to {enemy.name}")  # Missing closing bracket
-                                
-                        player.mana -= ability["mana_cost"]
-                        
-                    else:
-                        # Single target ability
-                        target = get_target(enemies, auto_target)
-                        if not target:
-                            continue
-                            
-                        damage = ability["damage"]
-                        target.take_damage(damage)
-                        print(f"{ability_name} hits {target.name} for {damage} damage!")
-                        player.mana -= ability["mana_cost"]
-                        
+                    if total_damage > 0:
+                        print(f"✨ {ability_name} dealt a total of {total_damage} damage!")
+                    if healing > 0:
+                        print(f"💚 {ability_name} restored {healing} HP!")
+                    
                 else:
                     print("Invalid ability choice!")
             except ValueError:
