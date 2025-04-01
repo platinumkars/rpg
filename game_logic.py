@@ -133,33 +133,29 @@ class Character:
             "Basic Attack": {
                 "damage": 10,
                 "mana_cost": 0,
-                "type": "physical",
                 "description": "Basic weapon attack"
             },
             "Power Strike": {
                 "damage": 15,
                 "mana_cost": 10,
-                "type": "physical",
                 "description": "A stronger attack with increased damage"
             },
             "Quick Shot": {
                 "damage": 12,
                 "hits": 2,
                 "mana_cost": 15,
-                "type": "physical",
                 "description": "Fire two quick attacks"
             },
             "Minor Heal": {
                 "heal": 20,
                 "mana_cost": 15,
-                "type": "healing",
                 "description": "Restore some health points"
             },
             "Focus": {
                 "mana": 25,
                 "mana_cost": 0,
                 "cooldown": 3,
-                "type": "buff",
+                "effect": "focus",
                 "description": "Restore mana and increase next attack damage"
             }
         }
