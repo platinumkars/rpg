@@ -1659,7 +1659,22 @@ def combat(player, enemies):
             
     # Combat victory rewards
     if player.health > 0:
-        # Rest of victory logic remains unchanged...
+        print("\nVictory!")
+        total_exp = 0
+        total_gold = 0
+        tech_points = 0
+        
+        for enemy in enemies:
+            total_exp += enemy.exp_reward
+            total_gold += enemy.gold_reward
+            
+        # Add tech points reward
+        tech_points = calculate_tech_points_reward(player.level, isinstance(enemies[0], Boss))
+        player.tech_points += tech_points
+        
+        print(f"Gained {total_exp} experience!")
+        print(f"Found {total_gold} gold!")
+        print(f"Earned {tech_points} tech points!")
         return True
 
 # Add gadget effect processing
