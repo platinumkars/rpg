@@ -2310,6 +2310,9 @@ def process_ability(player, target, enemies, ability_name):
         # Deduct mana
         player.mana -= ability['mana_cost']
         
+        # 
+        player.mana += ability["mana"]
+        
         # Calculate level bonus
         level_bonus = int(player.level * 0.5)
         
