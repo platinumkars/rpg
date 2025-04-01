@@ -113,6 +113,8 @@ class Character:
         self.current_weapon = "Basic Sword"
         self.abilities = {}
         self.status_effects = []
+        self.bonus_defense = 0
+        self.defense_effects = []
         self.armor = {"Basic Leather": 5}
         self.current_armor = "Basic Leather"
         self.tech_points = 0
