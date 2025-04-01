@@ -129,7 +129,7 @@ class Character:
         }
 
         # Add basic abilities that all classes get
-        self.basic_abilities = {
+        self.abilities = {
             "Basic Attack": {
                 "damage": 10,
                 "mana_cost": 0,
@@ -163,11 +163,8 @@ class Character:
                 "description": "Restore mana and increase next attack damage"
             }
         }
-        
-        # Merge basic abilities with class abilities
-        self.abilities = self.basic_abilities.copy()
 
-        # Initialize base abilities based on class
+        # Initialize and merge class-specific abilities
         self.update_abilities()
         
         # Add character-specific abilities based on name choice
