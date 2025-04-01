@@ -1301,6 +1301,9 @@ def combat(player, enemies):
             if player.inventory.get("Mana Potion", 0) > 0:
                 mana_amount = calculate_potion_mana(player.level)
                 print(f"2. Mana Potion (Restores {mana_amount} MP)")
+            if player.inventory.get("Mega Health Potion", 0) > 0:
+                mega_heal_amount = calculate_mega_potion_healing(player.level)
+                print(f"3. Mega Health Potion (Restores {mega_heal_amount} HP)")
             
             item_choice = input("Choose item to use (or 'back'): ")
             
@@ -1314,6 +1317,11 @@ def combat(player, enemies):
                 player.mana = min(player.max_mana, player.mana + mana_amount)
                 player.inventory["Mana Potion"] -= 1
                 print(f"You drink a mana potion and recover {mana_amount} MP!")
+            elif item_choice == "3" and player.inventory.get("Mega Health Potion", 0) > 0:
+                mega_heal_amount = calculate_mega_potion_healing(player.level)
+                player.health = min(player.max_health, player.health + mega_heal_amount)
+                player.inventory["Mega Health Potion"] -= 1
+                print(f"You drink a mega health potion and recover {mega_heal_amount} HP!")
             elif item_choice.lower() == "back":
                 continue
             else:
@@ -1493,6 +1501,15 @@ def shop(player):
             "cost": 20, 
             "effect": f"Restore {calculate_potion_mana(player.level)} MP", 
             "min_level": 1
+        },
+        
+        # Add Mega Healing Potion
+        "Mega Health Potion": {
+            "cost": 100, 
+            "effect": f"Restore {calculate_mega_potion_healing(player.level)} HP", 
+            "min_level": 5,  # Only available at level 5+
+            "description": "Powerful healing potion for boss battles",
+            "boss_only": True  # Mark as boss-only item
         },
         
         # Tier 1 weapons (adjusted damage)
