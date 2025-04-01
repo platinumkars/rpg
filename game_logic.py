@@ -3231,6 +3231,19 @@ def load_game():
         print("Invalid choice!")
     return None
 
+def calculate_tech_points_reward(player_level, is_boss=False):
+    """Calculate tech points reward based on player level and enemy type"""
+    if is_boss:
+        # More tech points for boss battles
+        base_reward = 25
+        level_bonus = player_level * 5
+    else:
+        # Regular combat rewards
+        base_reward = 5
+        level_bonus = player_level * 2
+    
+    return base_reward + level_bonus
+
 if __name__ == "__main__":
     try:
         main()
