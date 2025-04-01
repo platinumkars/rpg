@@ -54,24 +54,26 @@ COMPANION_QUESTS = {
     "Forest Trial": {
         "level_req": 7,
         "description": "Defeat the Ancient Treant without using potions",
-        "reward": "Additional companion slot",
+        "reward": "Additional companion slot and 1 companion token",
         "boss": {
             "name": "Ancient Treant",
             "health": 300,
             "damage": 25,
-            "special": "Nature's Wrath"
-        }
+            "special": {"Nature's Wrath": {"damage": 40, "area_damage": 20}}
+        },
+        "quest_rules": {"no_potions": True}
     },
     "Spirit Challenge": {
         "level_req": 10,
         "description": "Survive 5 turns against the Spirit King with <30% HP",
-        "reward": "Additional companion slot",
+        "reward": "Additional companion slot and 2 companion tokens",
         "boss": {
             "name": "Spirit King",
             "health": 400,
             "damage": 30,
-            "special": "Soul Drain"
-        }
+            "special": {"Soul Drain": {"damage": 35, "heal": 35}}
+        },
+        "quest_rules": {"turns": 5, "health_threshold": 0.3}
     }
 }
 
