@@ -2247,21 +2247,21 @@ def process_ability(player, target, enemies, ability_name, duration=0):
                 total_damage += damage_dealt
                 print(f"\n💥 {ability_name} hits {target.name} for {damage_dealt} damage!")
             
-            # Area damage calculation
-            area_damage = int(ability["area_damage"] * damage_modifier) + level_bonus
-            living_enemies = [e for e in enemies if e != target and e.health > 0]
-            
-            for enemy in living_enemies:
-                splash_damage = enemy.take_damage(area_damage)
-                total_damage += splash_damage
-                print(f"⚡ Splash damage hits {enemy.name} for {splash_damage} damage!")
+                # Area damage calculation
+                area_damage = int(ability["area_damage"] * damage_modifier) + level_bonus
+                living_enemies = [e for e in enemies if e != target and e.health > 0]
                 
-                # Update status if enemy dies from splash
-                if enemy.health <= 0:
-                    print(f"💀 {enemy.name} was defeated by splash damage!")
+                for enemy in living_enemies:
+                    splash_damage = enemy.take_damage(area_damage)
+                    total_damage += splash_damage
+                    print(f"⚡ Splash damage hits {enemy.name} for {splash_damage} damage!")
+                    
+                    # Update status if enemy dies from splash
+                    if enemy.health <= 0:
+                        print(f"💀 {enemy.name} was defeated by splash damage!")
 
             else:
-            # Single target damage
+                # Single target damage
                 if target and target.health > 0:
                     damage_dealt = target.take_damage(modified_damage) 
                     total_damage += damage_dealt
@@ -2341,15 +2341,17 @@ def process_ability(player, target, enemies, ability_name, duration=0):
                     "duration": 2
                 })
                 print("🔥 Next attack will deal 30% more damage!")
+        else:
+            print(f"Unknown ability type: {ability['type']}")
         
         return total_damage, total_healing
 
     except KeyError as e:
         print(f"Error: Invalid ability configuration - {e}")
-        return 0
+        return 0, 0
     except Exception as e:
         print(f"Error processing ability: {e}")
-        return 0
+        return 0, 0
 
 def apply_status_effect(target, effect_type, base_damage, duration):
     """Enhanced status effect system with accuracy modifications"""
