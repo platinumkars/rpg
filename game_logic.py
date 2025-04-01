@@ -4,6 +4,77 @@ import json
 import os
 from datetime import datetime
 
+# Add at the top with other constants
+COMPANION_TIERS = {
+    5: {  # Level 5 companions
+        "wolf": {
+            "health": 80,
+            "damage": 15,
+            "ability": "Pack Tactics",
+            "description": "Bonus damage when attacking same target"
+        },
+        "fairy": {
+            "health": 50,
+            "damage": 8,
+            "ability": "Healing Light",
+            "description": "Heals player for 15% of damage dealt"
+        }
+    },
+    8: {  # Level 8 companions
+        "phoenix": {
+            "health": 70,
+            "damage": 18,
+            "ability": "Resurrection",
+            "description": "Once per battle, revive with 30% HP"
+        },
+        "spirit": {
+            "health": 60,
+            "damage": 22,
+            "ability": "Phase Strike",
+            "description": "30% chance to ignore enemy defense"
+        }
+    },
+    12: {  # Level 12 companions
+        "dragon": {
+            "health": 100,
+            "damage": 25,
+            "ability": "Dragon's Fury",
+            "description": "Deal increasing damage each turn"
+        },
+        "golem": {
+            "health": 120,
+            "damage": 20,
+            "ability": "Stone Shield",
+            "description": "Reduce damage taken by 20%"
+        }
+    }
+}
+
+COMPANION_QUESTS = {
+    "Forest Trial": {
+        "level_req": 7,
+        "description": "Defeat the Ancient Treant without using potions",
+        "reward": "Additional companion slot",
+        "boss": {
+            "name": "Ancient Treant",
+            "health": 300,
+            "damage": 25,
+            "special": "Nature's Wrath"
+        }
+    },
+    "Spirit Challenge": {
+        "level_req": 10,
+        "description": "Survive 5 turns against the Spirit King with <30% HP",
+        "reward": "Additional companion slot",
+        "boss": {
+            "name": "Spirit King",
+            "health": 400,
+            "damage": 30,
+            "special": "Soul Drain"
+        }
+    }
+}
+
 def level_up_display(player, old_level, rewards):
     """Display level up information with visual effects"""
     print("\n" + "="*50)
