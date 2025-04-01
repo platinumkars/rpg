@@ -1473,6 +1473,12 @@ def calculate_potion_mana(player_level):
     level_bonus = int(player_level * 3)  # 3 MP per level
     return base_mana + level_bonus
 
+def calculate_mega_potion_healing(player_level):
+    """Calculate mega potion healing based on player level"""
+    base_heal = 100
+    level_bonus = int(player_level * 10)  # 10 HP per level
+    return base_heal + level_bonus
+
 # Update shop function's item handling
 def shop(player):
     """Improved shop with level-based filtering and numbered items"""
