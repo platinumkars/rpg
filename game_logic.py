@@ -1446,13 +1446,22 @@ def combat(player, enemies):
                 ability_idx = int(ability_choice) - 1
                 if 0 <= ability_idx < len(abilities_list):
                     ability_name, ability = abilities_list[ability_idx]
+                    
+                    # Get target first if ability requires one
+                    target = None
+                    if "damage" in ability or "area_damage" in ability:
+                        target = get_target(enemies, auto_target)
+                        if not target:
+                            print("Invalid target!")
+                            continue
+                    
+                    # Then process the ability
                     total_damage, healing = process_ability(player, target, enemies, ability_name)
                     
                     if total_damage > 0:
                         print(f"✨ {ability_name} dealt a total of {total_damage} damage!")
                     if healing > 0:
                         print(f"💚 {ability_name} restored {healing} HP!")
-                    
                 else:
                     print("Invalid ability choice!")
             except ValueError:
