@@ -1344,14 +1344,19 @@ def combat(player, enemies):
             if player.inventory.get("Mana Potion", 0) > 0:
                 mana_amount = calculate_potion_mana(player.level)
                 print(f"2. Mana Potion (Restores {mana_amount} MP)")
-            if player.inventory.get("Mega Health Potion", 0) > 0:
+            if player.inventory.get("Mega Health Potion", 0) > 0 and isinstance(enemies[0], Boss):
                 mega_heal = calculate_mega_potion_healing(player.level)
-                # Only show in boss battles
-                if isinstance(enemies[0], Boss):
-                    print(f"3. Mega Health Potion (Restores {mega_heal} HP)")
+                print(f"3. Mega Health Potion (Restores {mega_heal} HP)")
             if player.inventory.get("Companion Revival Potion", 0) > 0:
-                revival_percent = int(calculate_companion_revival(player.level) * 100)
-                print(f"4. Companion Revival Potion (Revives companion with {revival_percent}% HP)")
+                revival_percent = calculate_companion_revival(player.level)
+                print(f"4. Companion Revival Potion (Revives companion with {int(revival_percent * 100)}% HP)")
+                
+                # Show dead companions
+                dead_companions = [comp for comp in player.companions if comp.health <= 0]
+                if dead_companions:
+                    print("\nFallen Companions:")
+                    for i, comp in enumerate(dead_companions, 1):
+                        print(f"{i}. {comp.name} ({comp.type})")
             
             item_choice = input("Choose item to use (or 'back'): ")
             
@@ -1374,28 +1379,26 @@ def combat(player, enemies):
                 else:
                     print("Mega Health Potions can only be used during boss battles!")
             elif item_choice == "4" and player.inventory.get("Companion Revival Potion", 0) > 0:
-                if player.companions:
-                    fallen_companions = [c for c in player.companions if c.health <= 0]
-                    if fallen_companions:
-                        print("\nChoose a companion to revive:")
-                        for i, companion in enumerate(fallen_companions, 1):
-                            print(f"{i}. {companion.name} ({companion.type})")
-                        try:
-                            revive_choice = int(input("> "))
-                            if 1 <= revive_choice <= len(fallen_companions):
-                                companion = fallen_companions[revive_choice - 1]
-                                revival_percent = calculate_companion_revival(player.level)
-                                companion.health = int(companion.max_health * revival_percent)
-                                player.inventory["Companion Revival Potion"] -= 1
-                                print(f"{companion.name} has been revived with {companion.health} HP!")
-                            else:
-                                print("Invalid choice!")
-                        except ValueError:
-                            print("Invalid input!")
-                    else:
-                        print("No fallen companions to revive!")
+                dead_companions = [comp for comp in player.companions if comp.health <= 0]
+                if dead_companions:
+                    print("\nChoose companion to revive:")
+                    for i, comp in enumerate(dead_companions, 1):
+                        print(f"{i}. {comp.name} ({comp.type})")
+                    
+                    try:
+                        comp_choice = int(input("\nChoice: ")) - 1
+                        if 0 <= comp_choice < len(dead_companions):
+                            companion = dead_companions[comp_choice]
+                            revival_percent = calculate_companion_revival(player.level)
+                            companion.health = int(companion.max_health * revival_percent)
+                            player.inventory["Companion Revival Potion"] -= 1
+                            print(f"✨ {companion.name} has been revived with {companion.health} HP!")
+                        else:
+                            print("Invalid choice!")
+                    except ValueError:
+                        print("Invalid input!")
                 else:
-                    print("You have no companions!")
+                    print("No fallen companions to revive!")
             elif item_choice.lower() == "back":
                 continue
             else:
