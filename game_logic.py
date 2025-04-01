@@ -2558,12 +2558,21 @@ def apply_status_effect(target, effect_type, base_damage, duration):
         target.status_effects.append(status)
         print(status["message"].format(target.name))
 
-def process_status_effects(entity):
+def process_status_effects(entity, player):
     """Process status effects including accuracy modifications"""
     is_stunned = False
     damage_multiplier = 1.0
     accuracy_modifier = 0  # Track accuracy modifications
     
+    """Process status effects including defense"""
+    # Process defense effects
+    if hasattr(player, 'defense_effects'):
+        for effect in player.defense_effects[:]:
+            effect['duration'] -= 1
+            if effect['duration'] <= 0:
+                player.bonus_defense -= effect['amount']
+                player.defense_effects.remove(effect)
+                print(f"🛡️ {effect['name']}'s defense bonus has worn off!")
     for effect in entity.status_effects[:]:
         if effect["name"] == "Corroded":
             damage = effect["damage"]
