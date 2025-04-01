@@ -2295,6 +2295,12 @@ def process_ability(player, target, enemies, ability_name):
         total_damage = 0
         total_healing = 0
         
+        # Initialize defense bonus system if not present
+        if not hasattr(player, 'bonus_defense'):
+            player.bonus_defense = 0
+        if not hasattr(player, 'defense_effects'):
+            player.defense_effects = []
+        
         # Calculate level bonus
         level_bonus = int(player.level * 0.5)
         # Process defense if ability has it
@@ -2309,14 +2315,18 @@ def process_ability(player, target, enemies, ability_name):
                 defense_modifier *= 0.8
             
             defense_amount = int(base_defense * defense_modifier) + level_bonus
+            duration = ability.get("duration", 2)
             
-            # Create or add to temporary defense
-            if hasattr(player, 'temp_defense'):
-                player.temp_defense += defense_amount
-            else:
-                player.temp_defense = defense_amount
+            # Add defense effect
+            defense_effect = {
+                "amount": defense_amount,
+                "duration": duration,
+                "name": ability_name
+            }
+            player.defense_effects.append(defense_effect)
+            player.bonus_defense += defense_amount
             
-            print(f"🛡️ {ability_name} grants {defense_amount} temporary defense!")
+            print(f"🛡️ {ability_name} grants {defense_amount} defense for {duration} turns!")
         # Process mana restore if ability has it
         if "mana" in ability:
             mana_restore = ability["mana"]
