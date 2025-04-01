@@ -2295,7 +2295,26 @@ def process_ability(player, target, enemies, ability_name):
         
         # Calculate level bonus
         level_bonus = int(player.level * 0.5)
-
+        # Process defense if ability has it
+        if "defense" in ability:
+            base_defense = ability["defense"]
+            defense_modifier = 1.0
+            
+            # Class defense modifiers
+            if player.class_type.lower() in ["warrior", "paladin"]:
+                defense_modifier *= 1.3
+            elif player.class_type.lower() in ["mage", "warlock"]:
+                defense_modifier *= 0.8
+            
+            defense_amount = int(base_defense * defense_modifier) + level_bonus
+            
+            # Create or add to temporary defense
+            if hasattr(player, 'temp_defense'):
+                player.temp_defense += defense_amount
+            else:
+                player.temp_defense = defense_amount
+            
+            print(f"🛡️ {ability_name} grants {defense_amount} temporary defense!")
         # Process mana restore if ability has it
         if "mana" in ability:
             mana_restore = ability["mana"]
