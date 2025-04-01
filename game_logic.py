@@ -2274,7 +2274,20 @@ def process_enemy_attack(player, enemy):
     armor_value = player.armor[player.current_armor]
     defense_reduction = int(armor_value * (0.3 + (player.level * 0.015)))  # Reduced scaling
     final_damage = max(1, base_damage - defense_reduction)
-    return final_damage
+    """Process enemy attack with proper defense calculation"""
+    # Get base armor defense
+    armor_defense = player.armor.get(player.current_armor, 0)
+    
+    # Add bonus defense from abilities
+    total_defense = armor_defense + player.bonus_defense
+    
+    # Calculate damage reduction
+    damage = enemy.damage
+    reduced_damage = max(1, damage - total_defense)
+    
+    print(f"🛡️ Defense reduced damage by {damage - reduced_damage}!")
+    return reduced_damage, final_damage
+
 
 def process_ability(player, target, enemies, ability_name):
     """Process ability with proper damage and healing handling"""
