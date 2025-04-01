@@ -81,7 +81,10 @@ class Character:
             "damage": 0,
             "ability": 0
         }
-        
+        self.companions = []
+        self.max_companions = 1
+        self.companion_quests_completed = []
+
         # Initialize base abilities based on class
         self.update_abilities()
         
