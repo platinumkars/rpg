@@ -1032,51 +1032,44 @@ class Character:
                 break
                 
             if choice in available_quests:
-                def start_companion_quest(self, quest_name):
-                    """Handle companion quest execution"""
-                    quest = COMPANION_QUESTS[quest_name]
-                    print(f"\n=== Starting {quest_name} ===")
-                    print(f"Boss: {quest['boss']['name']}")
+                quest = COMPANION_QUESTS[choice]
+                print(f"\n=== Starting {choice} ===")
+                print(f"Boss: {quest['boss']['name']}")
                     
-                    # Create boss instance
-                    boss = Enemy(
-                        quest['boss']['name'],
-                        quest['boss']['health'],
-                        quest['boss']['damage'],
-                        100,  # exp reward
-                        200,  # gold reward
-                    )
-                    
-                    # Handle quest-specific rules
-                    if quest['quest_rules'].get('no_potions'):
-                        old_inventory = self.inventory.copy()
-                    
-                    # Start boss battle
-                    result = combat(self, [boss])
-                    
-                    # Check quest completion conditions
-                    quest_completed = False
-                    if result and not isinstance(result, str):  # Combat wasn't fled
-                        if quest_name == "Forest Trial" and quest['quest_rules'].get('no_potions'):
-                            # Check if potions were used
-                            quest_completed = old_inventory == self.inventory
-                        elif quest_name == "Spirit Challenge" and quest['quest_rules'].get('health_threshold'):
-                            # Check if survived with low health
-                            quest_completed = (self.health / self.max_health) <= quest['quest_rules']['health_threshold']
-                    
-                    if quest_completed:
-                        print("\n✨ Quest Complete! ✨")
-                        self.companion_quests_completed.append(quest_name)
-                        self.max_companions += 1
-                        self.companion_tokens += 1
-                        print(f"Rewards: Additional companion slot and {self.companion_tokens} companion token(s)!")
-                    else:
-                        print("\n❌ Quest Failed! Try again when you're stronger!")
-
+                # Create boss instance
+                boss = Enemy(
+                    quest['boss']['name'],
+                    quest['boss']['health'],
+                    quest['boss']['damage'],
+                    100,  # exp reward
+                    200,  # gold reward
+                )
                 
-                start_companion_quest(choice)
-            else:
-                print("Invalid quest name!")
+                # Handle quest-specific rules
+                if quest['quest_rules'].get('no_potions'):
+                    old_inventory = self.inventory.copy()
+                
+                # Start boss battle
+                result = combat(self, [boss])
+                
+                # Check quest completion conditions
+                quest_completed = False
+                if result and not isinstance(result, str):  # Combat wasn't fled
+                    if choice == "Forest Trial" and quest['quest_rules'].get('no_potions'):
+                        # Check if potions were used
+                        quest_completed = old_inventory == self.inventory
+                    elif choice == "Spirit Challenge" and quest['quest_rules'].get('health_threshold'):
+                        # Check if survived with low health
+                        quest_completed = (self.health / self.max_health) <= quest['quest_rules']['health_threshold']
+                
+                if quest_completed:
+                    print("\n✨ Quest Complete! ✨")
+                    self.companion_quests_completed.append(choice)
+                    self.max_companions += 1
+                    self.companion_tokens += 1
+                    print(f"Rewards: Additional companion slot and {self.companion_tokens} companion token(s)!")
+                else:
+                    print("\n❌ Quest Failed! Try again when you're stronger!")
 
 def upgrade_companion(self):
         """Upgrade companion stats with tokens"""
