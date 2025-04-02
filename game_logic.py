@@ -1615,13 +1615,19 @@ def combat(player, enemies):
                 print("You failed to run away!")
         
         # Companion turn
+        attacked_this_turn = False  # Track if a companion has attacked
         if player.companions:
             # Get all living enemies once for companions to target
             living_enemies = [e for e in enemies if e.health > 0]
             if living_enemies:
                 for companion in player.companions:
                     if companion.health > 0:
-                        print(f"\n🐾 {companion.name}'s turn!")
+                    # If a companion has already attacked this turn, skip additional companions
+                        if attacked_this_turn:
+                            print(f"\n🐾 {companion.name} waits for their turn!")
+                            continue
+                    
+                print(f"\n🐾 {companion.name}'s turn!")
             
                 # Handle phoenix resurrection first
                 if companion.type == "phoenix" and companion.health <= 0:
@@ -1670,6 +1676,8 @@ def combat(player, enemies):
                     else:  # Default attack for any other companion types
                         target.take_damage(damage)
                         print(f"🐾 {companion.name} attacks for {damage} damage!")
+                    
+                    attacked_this_turn = True  # Mark that a companion has attacked this turn
                     
                     # Update living enemies list after each companion attack
                     living_enemies = [e for e in enemies if e.health > 0]
