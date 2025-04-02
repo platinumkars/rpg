@@ -1622,21 +1622,13 @@ def combat(player, enemies):
                 for companion in player.companions:
                     if companion.health > 0:
                         print(f"\n🐾 {companion.name}'s turn!")
-                
-                # Process companion ability
+            
                 # Handle phoenix resurrection first
                 if companion.type == "phoenix" and companion.health <= 0:
                     companion.health = int(companion.max_health * 0.3)
                     print(f"🔥 {companion.name} resurrects with {companion.health} HP!")
                     continue
-
-                # Get random target from living enemies
-                target = random.choice(living_enemies)
-                if target:
-                    damage = companion.damage
-                    target.take_damage(damage)
-                    print(f"🐾 {companion.name} attacks for {damage} damage!")
-                
+                    
                 # Get random target from living enemies
                 target = random.choice(living_enemies)
                 if target:
@@ -1655,6 +1647,14 @@ def combat(player, enemies):
                         player.health = min(player.max_health, player.health + heal)
                         print(f"✨ {companion.name} attacks for {damage} damage and heals you for {heal} HP!")
                     
+                    elif companion.type == "spirit":
+                        if random.random() < 0.3:  # 30% chance to ignore defense
+                            target.take_damage(damage * 2)  # Double damage when ignoring defense
+                            print(f"👻 {companion.name} phases through defenses for {damage*2} damage!")
+                        else:
+                            target.take_damage(damage)
+                            print(f"👻 {companion.name} attacks for {damage} damage!")
+                    
                     elif companion.type == "dragon":
                         damage_boost = len([c for c in player.companions if c.health > 0]) * 0.1
                         boosted_damage = int(damage * (1 + damage_boost))
@@ -1666,6 +1666,10 @@ def combat(player, enemies):
                         defense_boost = int(damage * 0.2)
                         print(f"🛡️ {companion.name} attacks for {damage} damage and reduces next damage taken by {defense_boost}!")
                         player.temp_defense = defense_boost
+                    
+                    else:  # Default attack for any other companion types
+                        target.take_damage(damage)
+                        print(f"🐾 {companion.name} attacks for {damage} damage!")
                     
                     # Update living enemies list after each companion attack
                     living_enemies = [e for e in enemies if e.health > 0]
