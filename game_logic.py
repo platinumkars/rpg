@@ -1212,31 +1212,44 @@ class Companion:
         
         # Base stats based on type
         companion_stats = {
-            "wolf": {
-                "health": 80,
-                "damage": 15,
-                "ability": "Pack Tactics",
-                "description": "Bonus damage when attacking same target"
-            },
-            "fairy": {
-                "health": 50,
-                "damage": 8,
-                "ability": "Healing Light",
-                "description": "Heals player for 15% of damage dealt"
-            },
-            "drake": {
-                "health": 70,
-                "damage": 20,
-                "ability": "Fire Breath",
-                "description": "Deals area damage to enemies"
-            },
-            "golem": {
-                "health": 120,
-                "damage": 12,
-                "ability": "Stone Shield",
-                "description": "Reduces damage taken by player"
-            }
+        "wolf": {
+            "health": 80,
+            "damage": 15,
+            "ability": "Pack Tactics",
+            "description": "Bonus damage when attacking same target"
+        },
+        "fairy": {
+            "health": 50,
+            "damage": 8,
+            "ability": "Healing Light",
+            "description": "Heals player for 15% of damage dealt"
+        },
+        "phoenix": {
+            "health": 70,
+            "damage": 18,
+            "ability": "Resurrection",
+            "description": "Once per battle, revive with 30% HP"
+        },
+        "spirit": {
+            "health": 60,
+            "damage": 22,
+            "ability": "Phase Strike",
+            "description": "30% chance to ignore enemy defense"
+        },
+        "dragon": {
+            "health": 100,
+            "damage": 25,
+            "ability": "Dragon's Fury",
+            "description": "Deal increasing damage each turn"
+        },
+        "golem": {
+            "health": 120,
+            "damage": 20,
+            "ability": "Stone Shield",
+            "description": "Reduce damage taken by 20%"
         }
+        }
+    
         
         stats = companion_stats[companion_type]
         self.max_health = stats["health"]
