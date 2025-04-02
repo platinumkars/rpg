@@ -1692,6 +1692,35 @@ def combat(player, enemies):
         tech_points = calculate_tech_points_reward(player.level, isinstance(enemies[0], Boss))
         player.tech_points += tech_points
         
+        # Add gold and exp to player
+        player.gold += total_gold
+        player.exp += total_exp
+        
+        # Check for level up
+        level_up_exp = calculate_exp_requirement(player.level)
+        while player.exp >= level_up_exp:
+            old_level = player.level
+            player.level += 1
+            player.exp -= level_up_exp
+            
+            # Get level up rewards
+            rewards = calculate_level_rewards(player.level)
+            player.max_health += rewards['health']
+            player.health = player.max_health  # Heal to full on level up
+            player.max_mana += rewards['mana']
+            player.mana = player.max_mana  # Restore full mana on level up
+            
+            # Display level up
+            level_up_display(player, old_level, rewards)
+            
+            # Check companion unlock at level 5
+            if player.level == 5:
+                print("\n🎉 You've unlocked companions!")
+                player.unlock_companion()
+            
+            # Calculate next level requirement
+            level_up_exp = calculate_exp_requirement(player.level)
+        
         print(f"Gained {total_exp} experience!")
         print(f"Found {total_gold} gold!")
         print(f"Earned {tech_points} tech points!")
