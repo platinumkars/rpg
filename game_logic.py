@@ -1067,6 +1067,7 @@ class Character:
                     self.companion_quests_completed.append(choice)
                     self.max_companions += 1
                     self.companion_tokens += 1
+                    self.unlock_companion()
                     print(f"Rewards: Additional companion slot and {self.companion_tokens} companion token(s)!")
                 else:
                     print("\n❌ Quest Failed! Try again when you're stronger!")
