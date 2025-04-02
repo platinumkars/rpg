@@ -3170,6 +3170,7 @@ def main():
             print("2. Upgrade Companions")
             print("3. Available Quests")
             print("4. Back")
+            player.unlock_companion()
             
             manage_choice = input("> ")
             
