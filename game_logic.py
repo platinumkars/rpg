@@ -1629,8 +1629,8 @@ def combat(player, enemies):
                 if not living_enemies:
                     break
                 
-            if companion.health > 0:  # Only let living companions attack
-                print(f"\n🐾 {companion.name}'s turn!")
+                if companion.health > 0:  # Only let living companions attack
+                    print(f"\n🐾 {companion.name}'s turn!")
                 
                 # Get random target from living enemies
                 target = random.choice(living_enemies)
