@@ -115,7 +115,9 @@ class Character:
         self.current_weapon = "Basic Sword"
         self.abilities = {}
         self.status_effects = []
-        self.bonus_defense = 0
+        self.bonus_defense = 0  # Track temporary defense bonuses from abilities and effects
+        self.base_defense = 0   # Track base defense value
+        self.defense_modifiers = []  # Store active defense modifiers
         self.defense_effects = []
         self.armor = {"Basic Leather": 5}
         self.current_armor = "Basic Leather"
@@ -1672,7 +1674,12 @@ def combat(player, enemies):
                     target.take_damage(damage)
                     defense_boost = int(damage * 0.2)
                     print(f"🛡️ {companion.name} attacks for {damage} damage and reduces next damage taken by {defense_boost}!")
-                    player.armor[player.current_armor] = player.armor.get(player.current_armor, 0) + defense_boost
+                    player.defense_effects.append({
+                        "amount": defense_boost,
+                        "duration": 2,
+                        "name": "Golem Shield"
+                    })
+                    player.bonus_defense += defense_boost
                 
                 else:  # Default attack for any other companion types
                     target.take_damage(damage)
