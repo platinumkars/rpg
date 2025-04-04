@@ -1678,10 +1678,8 @@ def combat(player, enemies):
                     target.take_damage(damage)
                     print(f"🐾 {companion.name} attacks for {damage} damage!")
                 
-                # Update living enemies list after each companion attack
-                living_enemies = [e for e in enemies if e.health > 0]
-            
-            companion_index += 1
+            # Update living enemies list after each companion attack
+            living_enemies = [e for e in enemies if e.health > 0]
 
         # Enemy turns
         for enemy in enemies:
