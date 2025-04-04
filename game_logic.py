@@ -1621,13 +1621,13 @@ def combat(player, enemies):
         if player.companions:
             # Get all living enemies once for companions to target
             living_enemies = [e for e in enemies if e.health > 0]
-            companion_index = 0
             
-            while living_enemies and companion_index < len(player.companions):
-                companion = player.companions[companion_index]
-            
-            if companion.health > 0:  # Only let living companions attack
-                print(f"\n🐾 {companion.name}'s turn!")
+            for companion in player.companions:
+                if not living_enemies:
+                    break
+                    
+                if companion.health > 0:  # Only let living companions attack
+                    print(f"\n🐾 {companion.name}'s turn!")
             
                 # Handle phoenix resurrection first
                 if companion.type == "phoenix" and companion.health <= 0:
