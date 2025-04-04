@@ -7,45 +7,45 @@ from datetime import datetime
 # Add at the top with other constants
 COMPANION_TIERS = {
     5: {  # Level 5 companions
-        "wolf": {
-            "health": 80,
-            "damage": 15,
-            "ability": "Pack Tactics",
-            "description": "Bonus damage when attacking same target"
+        "cat": {
+            "health": 60,
+            "damage": 12,
+            "ability": "Agile Strike", 
+            "description": "20% chance to dodge attacks"
         },
-        "fairy": {
-            "health": 50,
-            "damage": 8,
-            "ability": "Healing Light",
-            "description": "Heals player for 15% of damage dealt"
+        "owl": {
+            "health": 45,
+            "damage": 10,
+            "ability": "Night Vision",
+            "description": "Reveals enemy weaknesses, increasing damage by 25%"
         }
     },
     8: {  # Level 8 companions
-        "phoenix": {
-            "health": 70,
-            "damage": 18,
-            "ability": "Resurrection",
-            "description": "Once per battle, revive with 30% HP"
+        "bear": {
+            "health": 100,
+            "damage": 20,
+            "ability": "Mighty Roar",
+            "description": "Intimidates enemies, reducing their damage by 15%"
         },
-        "spirit": {
-            "health": 60,
-            "damage": 22,
-            "ability": "Phase Strike",
-            "description": "30% chance to ignore enemy defense"
+        "fox": {
+            "health": 70,
+            "damage": 15,
+            "ability": "Cunning",
+            "description": "35% chance to strike twice"
         }
     },
     12: {  # Level 12 companions
-        "dragon": {
-            "health": 100,
-            "damage": 25,
-            "ability": "Dragon's Fury",
-            "description": "Deal increasing damage each turn"
+        "unicorn": {
+            "health": 90,
+            "damage": 18,
+            "ability": "Holy Light",
+            "description": "Heals player for 20% of damage dealt"
         },
-        "golem": {
-            "health": 120,
-            "damage": 20,
-            "ability": "Stone Shield",
-            "description": "Reduce damage taken by 20%"
+        "griffin": {
+            "health": 110,
+            "damage": 22,
+            "ability": "Sky Strike",
+            "description": "Can attack multiple enemies for 60% damage"
         }
     }
 }
@@ -1620,6 +1620,7 @@ def combat(player, enemies):
         # Companion turn
         # Companion turn
         # Companion turn
+        # Companion turn
         if player.companions:
             # Get all living enemies once for companions to target
             living_enemies = [e for e in enemies if e.health > 0]
@@ -1627,66 +1628,67 @@ def combat(player, enemies):
             for companion in player.companions:
                 if not living_enemies:
                     break
-                    
-                if companion.health > 0:  # Only let living companions attack
-                    print(f"\n🐾 {companion.name}'s turn!")
-            
-                # Handle phoenix resurrection first
-                if companion.type == "phoenix" and companion.health <= 0:
-                    companion.health = int(companion.max_health * 0.3)
-                    print(f"🔥 {companion.name} resurrects with {companion.health} HP!")
-                    companion_index += 1
-                    continue
+                
+            if companion.health > 0:  # Only let living companions attack
+                print(f"\n🐾 {companion.name}'s turn!")
                 
                 # Get random target from living enemies
                 target = random.choice(living_enemies)
-                if target:
-                    damage = companion.damage
+                damage = companion.damage
                 
-                # Apply companion-specific abilities
-                if companion.type == "wolf":
-                    bonus = int(damage * 0.3)
-                    total_damage = damage + bonus
-                    target.take_damage(total_damage)
-                    print(f"🐺 {companion.name} attacks with Pack Tactics for {total_damage} damage!")
-                
-                elif companion.type == "fairy":
+                # Find companion tier
+                for tier, companions in COMPANION_TIERS.items():
+                    if companion.type in companions:
+                        companion_data = companions[companion.type]
+                        ability = companion_data["ability"]
+                    
+                    # Handle abilities based on companion type
+                    if companion.type == "cat":  # Level 5
+                        if random.random() < 0.20:  # 20% dodge chance
+                            print(f"😺 {companion.name} dodges the next attack!")
+                            companion.status_effects.append({
+                            "name": "Dodge",
+                            "duration": 1
+                            })
                     target.take_damage(damage)
-                    heal = int(damage * 0.15)
-                    player.health = min(player.max_health, player.health + heal)
-                    print(f"✨ {companion.name} attacks for {damage} damage and heals you for {heal} HP!")
-                
-                elif companion.type == "spirit":
-                    if random.random() < 0.3:  # 30% chance to ignore defense
-                        target.take_damage(damage * 2)  # Double damage when ignoring defense
-                        print(f"👻 {companion.name} phases through defenses for {damage*2} damage!")
-                    else:
+                    print(f"🐱 {companion.name} uses Agile Strike for {damage} damage!")
+                    
+                    if companion.type == "owl":  # Level 5
+                        target.take_damage(int(damage * 1.25))  # 25% bonus damage
+                        print(f"🦉 {companion.name} reveals enemy weakness for {int(damage * 1.25)} damage!")
+                    
+                    elif companion.type == "bear":  # Level 8
                         target.take_damage(damage)
-                        print(f"👻 {companion.name} attacks for {damage} damage!")
+                        target.damage = int(target.damage * 0.85)  # Reduce enemy damage by 15%
+                        print(f"🐻 {companion.name} uses Mighty Roar for {damage} damage and reduces enemy damage!")
+                    
+                    elif companion.type == "fox":  # Level 8
+                        if random.random() < 0.35:  # 35% double strike chance
+                            target.take_damage(damage * 2)
+                            print(f"🦊 {companion.name} strikes twice for {damage * 2} damage!")
+                        else:
+                            target.take_damage(damage)
+                            print(f"🦊 {companion.name} attacks for {damage} damage!")
+                        
+                    elif companion.type == "unicorn":  # Level 12
+                        target.take_damage(damage)
+                        heal = int(damage * 0.2)  # Heal 20% of damage
+                        player.health = min(player.max_health, player.health + heal)
+                        print(f"🦄 {companion.name} uses Holy Light for {damage} damage and heals you for {heal}!")
+                    
+                    elif companion.type == "griffin":  # Level 12
+                        # Attack multiple enemies for 60% damage
+                        for enemy in living_enemies[:3]:  # Hit up to 3 enemies
+                            splash = int(damage * 0.6)
+                            enemy.take_damage(splash)
+                            print(f"🦅 {companion.name} hits {enemy.name} for {splash} damage with Sky Strike!")
+                        
+                    else:  # Default attack if type not found
+                        target.take_damage(damage)
+                        print(f"🐾 {companion.name} attacks for {damage} damage!")
                 
-                elif companion.type == "dragon":
-                    damage_boost = len([c for c in player.companions if c.health > 0]) * 0.1
-                    boosted_damage = int(damage * (1 + damage_boost))
-                    target.take_damage(boosted_damage)
-                    print(f"🐲 {companion.name} deals {boosted_damage} damage with Dragon's Fury!")
-                
-                elif companion.type == "golem":
-                    target.take_damage(damage)
-                    defense_boost = int(damage * 0.2)
-                    print(f"🛡️ {companion.name} attacks for {damage} damage and reduces next damage taken by {defense_boost}!")
-                    player.defense_effects.append({
-                        "amount": defense_boost,
-                        "duration": 2,
-                        "name": "Golem Shield"
-                    })
-                    player.bonus_defense += defense_boost
-                
-                else:  # Default attack for any other companion types
-                    target.take_damage(damage)
-                    print(f"🐾 {companion.name} attacks for {damage} damage!")
-                
-            # Update living enemies list after each companion attack
-            living_enemies = [e for e in enemies if e.health > 0]
+                # Update living enemies list after attack
+                living_enemies = [e for e in enemies if e.health > 0]
 
         # Enemy turns
         for enemy in enemies:
