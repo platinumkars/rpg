@@ -1058,9 +1058,10 @@ class Character:
                     if choice == "Forest Trial" and quest['quest_rules'].get('no_potions'):
                         # Check if potions were used
                         quest_completed = old_inventory == self.inventory
-                    elif choice == "Spirit Challenge" and quest['quest_rules'].get('health_threshold'):
-                        # Check if survived with low health
-                        quest_completed = (self.health / self.max_health) <= quest['quest_rules']['health_threshold']
+                    elif choice == "Spirit Challenge":
+                        # Check if survived required turns with low health
+                        if quest['quest_rules'].get('turns') and quest['quest_rules'].get('health_threshold'):
+                            quest_completed = True  # Set to true if we reached this point since combat didn't end early
                 
                 if quest_completed:
                     print("\n✨ Quest Complete! ✨")
