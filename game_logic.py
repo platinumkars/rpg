@@ -1672,7 +1672,7 @@ def combat(player, enemies):
                     target.take_damage(damage)
                     defense_boost = int(damage * 0.2)
                     print(f"🛡️ {companion.name} attacks for {damage} damage and reduces next damage taken by {defense_boost}!")
-                    player.temp_defense = defense_boost
+                    player.bonus_defense = defense_boost
                 
                 else:  # Default attack for any other companion types
                     target.take_damage(damage)
