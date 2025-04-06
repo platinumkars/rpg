@@ -1059,18 +1059,12 @@ class Character:
         if confirm == 'y':
             # Create boss for the quest
             boss_info = quest["boss"]
-            if not boss_info["special"]:
-                special_moves = {}
-            else:
-                special_move_name = list(boss_info["special"].keys())[0]
-                special_moves = {special_move_name: boss_info["special"][special_move_name]}
-                special_move_effects = list(boss_info["special"].keys())[1]
             boss = Boss(
                 name=boss_info["name"],
                 health=boss_info["health"],
                 exp_reward=200,
                 gold_reward=300,
-                special_moves={special_move_name: special_move_effects},
+                special_moves=boss_info["special"],
                 level_req=quest["level_req"]
             )
             
