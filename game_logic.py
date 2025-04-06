@@ -1062,6 +1062,7 @@ class Character:
             boss = Boss(
                 name=boss_info["name"],
                 health=boss_info["health"],
+                damage=boss_info["damage"],
                 exp_reward=200,
                 gold_reward=300,
                 special_moves=boss_info["special"],
