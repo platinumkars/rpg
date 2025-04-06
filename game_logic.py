@@ -1604,8 +1604,8 @@ def combat(player, enemies):
             if companion.health > 0:  # Only let living companions attack
                 print(f"\n🐾 {companion.name}'s turn!")
             
-            # Make 1 attack
-            for attack_num in range(1):
+            # Make 3 attacks
+            for attack_num in range(3):
                 if not living_enemies:
                     break
                 
