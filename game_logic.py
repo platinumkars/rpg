@@ -2775,14 +2775,13 @@ def spawn_enemies(player, num_enemies):
             eligible_enemies.append((enemy_type, chance))
     
     if not eligible_enemies:
-        print("No suitable enemies found for your level!")
+        # Fallback to basic enemies if nothing else is available
+        basic_enemy = EnemyType("Goblin", 45, 8, 20, 25, 1)
+        enemies.append(basic_enemy.scale_to_level(player.level))
         return enemies
     
     # Spawn requested number of enemies
     for _ in range(num_enemies):
-        if not eligible_enemies:  # Check if list is empty
-            break
-            
         # Calculate total chance for normalization
         total_chance = sum(chance for _, chance in eligible_enemies)
         if total_chance <= 0:
@@ -2801,9 +2800,9 @@ def spawn_enemies(player, num_enemies):
                 enemies.append(enemy)
                 enemy_spawned = True
                 break
-                
-        if not enemy_spawned:
-            # Fallback to first enemy type if no spawn occurred
+        
+        # Fallback if no enemy was spawned
+        if not enemy_spawned and eligible_enemies:
             enemy_type, _ = eligible_enemies[0]
             enemy = enemy_type.scale_to_level(player.level)
             enemies.append(enemy)
