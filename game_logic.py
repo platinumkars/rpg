@@ -1140,71 +1140,6 @@ class Character:
             except ValueError:
                 print("Invalid input!")
 
-    def upgrade_companion(self):
-            """Upgrade companion stats with tokens"""
-            if not self.companions:
-                print("No companions to upgrade!")
-                return
-
-            if self.companion_tokens <= 0:
-                print("No upgrade tokens available!")
-                return
-
-            print("\n=== Companion Upgrade ===")
-            print(f"Available Tokens: {self.companion_tokens}")
-            print("\nUpgrade Options:")
-            print(f"1. Health (Level {self.companion_upgrades['health']}/5) - +20% HP")
-            print(f"2. Damage (Level {self.companion_upgrades['damage']}/5) - +20% DMG")
-            print(f"3. Ability (Level {self.companion_upgrades['ability']}/3) - Enhance special ability")
-            print("4. Back")
-
-            choice = input("\nChoose upgrade: ")
-
-            try:
-                if choice == "1":
-                    if self.companion_upgrades['health'] >= 5:
-                        print("Health upgrade already at maximum level!")
-                        return
-                    self.companion_tokens -= 1
-                    self.companion_upgrades['health'] += 1
-                    for companion in self.companions:
-                        old_health = companion.max_health
-                        companion.max_health = int(companion.max_health * 1.2)
-                        companion.health = companion.max_health
-                        print(f"{companion.name}'s HP increased from {old_health} to {companion.max_health}!")
-
-                elif choice == "2":
-                    if self.companion_upgrades['damage'] >= 5:
-                        print("Damage upgrade already at maximum level!")
-                        return
-                    self.companion_tokens -= 1
-                    self.companion_upgrades['damage'] += 1
-                    for companion in self.companions:
-                        old_damage = companion.damage
-                        companion.damage = int(companion.damage * 1.2)
-                        print(f"{companion.name}'s damage increased from {old_damage} to {companion.damage}!")
-
-                elif choice == "3":
-                    if self.companion_upgrades['ability'] >= 3:
-                        print("Ability upgrade already at maximum level!")
-                        return
-                    self.companion_tokens -= 1
-                    self.companion_upgrades['ability'] += 1
-                    for companion in self.companions:
-                        print(f"{companion.name}'s {companion.ability} ability enhanced!")
-
-                elif choice == "4":
-                    return
-
-                else:
-                    print("Invalid choice!")
-                    return
-
-                print(f"\nUpgrade successful! Remaining tokens: {self.companion_tokens}")
-
-            except ValueError:
-                print("Invalid input!")
-
 # Add Companion class
 class Companion:
     def __init__(self, name, companion_type):
@@ -1404,13 +1339,14 @@ def get_target(enemies, auto=False):
 
 # In the combat function, update the auto-target initialization
 def combat(player, enemies):
-    """Updated combat function with proper ability and targeting handling"""
+    """Updated combat function with proper end condition"""
     print("\nEnemies appear!")
     for enemy in enemies:
         print(f"- {enemy.name} (HP: {enemy.health})")
     
     auto_target = False
     
+    # Main combat loop with proper enemy check
     while any(enemy.health > 0 for enemy in enemies) and player.health > 0:
         # Process status effects
         process_status_effects(player)
@@ -1418,6 +1354,10 @@ def combat(player, enemies):
             if enemy.health > 0:
                 process_status_effects(enemy)
         
+        # Check if all enemies are defeated before player's turn
+        if not any(enemy.health > 0 for enemy in enemies):
+            break  # Exit combat loop if all enemies are dead
+
         # Display battle status
         print(f"\n{'-'*40}")
         print(f"Your HP: {player.health}/{player.max_health}")
@@ -1426,7 +1366,7 @@ def combat(player, enemies):
         for i, enemy in enumerate(enemies, 1):
             if enemy.health > 0:
                 print(f"{i}. {enemy.name} - HP: {enemy.health}")
-        
+                
         print("\nWhat would you like to do?")
         print("1. Attack")
         print("2. Use Ability")
@@ -1682,6 +1622,10 @@ def combat(player, enemies):
         if player.health <= 0:
             return handle_player_death(player)
             
+        # Check again after player's action
+        if not any(enemy.health > 0 for enemy in enemies):
+            break  # Exit combat loop if all enemies are dead after player's turn
+
     # Combat victory rewards
     if player.health > 0:
         print("\nVictory!")
