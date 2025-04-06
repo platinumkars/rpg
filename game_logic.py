@@ -1213,48 +1213,16 @@ class Companion:
         self.level = 1
         self.exp = 0
         
-        # Base stats based on type
-        companion_stats = {
-        "wolf": {
-            "health": 80,
-            "damage": 15,
-            "ability": "Pack Tactics",
-            "description": "Bonus damage when attacking same target"
-        },
-        "fairy": {
-            "health": 50,
-            "damage": 8,
-            "ability": "Healing Light",
-            "description": "Heals player for 15% of damage dealt"
-        },
-        "phoenix": {
-            "health": 70,
-            "damage": 18,
-            "ability": "Resurrection",
-            "description": "Once per battle, revive with 30% HP"
-        },
-        "spirit": {
-            "health": 60,
-            "damage": 22,
-            "ability": "Phase Strike",
-            "description": "30% chance to ignore enemy defense"
-        },
-        "dragon": {
-            "health": 100,
-            "damage": 25,
-            "ability": "Dragon's Fury",
-            "description": "Deal increasing damage each turn"
-        },
-        "golem": {
-            "health": 120,
-            "damage": 20,
-            "ability": "Stone Shield",
-            "description": "Reduce damage taken by 20%"
-        }
-        }
+        # Get companion tier based on type
+        for tier, companions in COMPANION_TIERS.items():
+            if companion_type in companions:
+                stats = companions[companion_type]
+                break
+        else:
+            raise ValueError(f"Invalid companion type: {companion_type}")
     
         
-        stats = companion_stats[companion_type]
+        stats = companions[companion_type]
         self.max_health = stats["health"]
         self.health = self.max_health
         self.damage = stats["damage"]
@@ -1345,18 +1313,22 @@ class Enemy:
 
     def scale_stats(self, player_level):
         """Scale enemy stats based on player level"""
+        # Calculate level difference and scaling factor
         level_diff = max(0, player_level - self.level)
         scaling = 1 + (level_diff * 0.15)  # Reduced from 0.2 for smoother scaling
         
+        # Scale base stats
         self.max_health = int(self.max_health * scaling)
         self.health = self.max_health
         self.damage = int(self.damage * scaling)
         self.exp_reward = int(self.exp_reward * scaling)
         self.gold_reward = int(self.gold_reward * scaling)
         
-        # Scale accuracy and evasion with diminishing returns
-        self.accuracy = min(95, self.accuracy + (level_diff * 0.5))  # Cap at 95%
-        self.evasion = min(15, self.evasion + (level_diff * 0.3))   # Cap at 15%
+        # Scale accuracy and evasion based on player level
+        if player_level > self.level:
+            # Scale accuracy and evasion with diminishing returns
+            self.accuracy = min(95, self.base_accuracy + (level_diff * 0.5))  # Cap at 95%
+            self.evasion = min(15, self.evasion + (level_diff * 0.3))   # Cap at 15%
 
     def is_alive(self):
         """Check if enemy is still alive"""
@@ -1628,9 +1600,14 @@ def combat(player, enemies):
             for companion in player.companions:
                 if not living_enemies:
                     break
-                
-                if companion.health > 0:  # Only let living companions attack
-                    print(f"\n🐾 {companion.name}'s turn!")
+            
+            if companion.health > 0:  # Only let living companions attack
+                print(f"\n🐾 {companion.name}'s turn!")
+            
+            # Make 1 attack
+            for attack_num in range(1):
+                if not living_enemies:
+                    break
                 
                 # Get random target from living enemies
                 target = random.choice(living_enemies)
@@ -1641,53 +1618,53 @@ def combat(player, enemies):
                     if companion.type in companions:
                         companion_data = companions[companion.type]
                         ability = companion_data["ability"]
-                    
-                    # Handle abilities based on companion type
-                    if companion.type == "cat":  # Level 5
-                        if random.random() < 0.20:  # 20% dodge chance
-                            print(f"😺 {companion.name} dodges the next attack!")
-                            companion.status_effects.append({
-                            "name": "Dodge",
-                            "duration": 1
-                            })
-                    target.take_damage(damage)
-                    print(f"🐱 {companion.name} uses Agile Strike for {damage} damage!")
-                    
-                    if companion.type == "owl":  # Level 5
-                        target.take_damage(int(damage * 1.25))  # 25% bonus damage
-                        print(f"🦉 {companion.name} reveals enemy weakness for {int(damage * 1.25)} damage!")
-                    
-                    elif companion.type == "bear":  # Level 8
-                        target.take_damage(damage)
-                        target.damage = int(target.damage * 0.85)  # Reduce enemy damage by 15%
-                        print(f"🐻 {companion.name} uses Mighty Roar for {damage} damage and reduces enemy damage!")
-                    
-                    elif companion.type == "fox":  # Level 8
-                        if random.random() < 0.35:  # 35% double strike chance
-                            target.take_damage(damage * 2)
-                            print(f"🦊 {companion.name} strikes twice for {damage * 2} damage!")
-                        else:
-                            target.take_damage(damage)
-                            print(f"🦊 {companion.name} attacks for {damage} damage!")
-                        
-                    elif companion.type == "unicorn":  # Level 12
-                        target.take_damage(damage)
-                        heal = int(damage * 0.2)  # Heal 20% of damage
-                        player.health = min(player.max_health, player.health + heal)
-                        print(f"🦄 {companion.name} uses Holy Light for {damage} damage and heals you for {heal}!")
-                    
-                    elif companion.type == "griffin":  # Level 12
-                        # Attack multiple enemies for 60% damage
-                        for enemy in living_enemies[:3]:  # Hit up to 3 enemies
-                            splash = int(damage * 0.6)
-                            enemy.take_damage(splash)
-                            print(f"🦅 {companion.name} hits {enemy.name} for {splash} damage with Sky Strike!")
-                        
-                    else:  # Default attack if type not found
-                        target.take_damage(damage)
-                        print(f"🐾 {companion.name} attacks for {damage} damage!")
                 
-                # Update living enemies list after attack
+                # Handle abilities based on companion type
+                if companion.type == "cat":  # Level 5
+                    if random.random() < 0.20:  # 20% dodge chance
+                        print(f"😺 {companion.name} dodges the next attack!")
+                        companion.status_effects.append({
+                        "name": "Dodge",
+                        "duration": 1
+                        })
+                target.take_damage(damage)
+                print(f"🐱 {companion.name}'s Attack #{attack_num+1}: Agile Strike for {damage} damage!")
+                
+                if companion.type == "owl":  # Level 5
+                    target.take_damage(int(damage * 1.25))  # 25% bonus damage
+                    print(f"🦉 {companion.name}'s Attack #{attack_num+1}: Reveals weakness for {int(damage * 1.25)} damage!")
+                
+                elif companion.type == "bear":  # Level 8
+                    target.take_damage(damage)
+                    target.damage = int(target.damage * 0.85)  # Reduce enemy damage by 15%
+                    print(f"🐻 {companion.name}'s Attack #{attack_num+1}: Mighty Roar for {damage} damage and reduces enemy damage!")
+                
+                elif companion.type == "fox":  # Level 8
+                    if random.random() < 0.35:  # 35% double strike chance
+                        target.take_damage(damage * 2)
+                        print(f"🦊 {companion.name}'s Attack #{attack_num+1}: Strikes twice for {damage * 2} damage!")
+                    else:
+                        target.take_damage(damage)
+                        print(f"🦊 {companion.name}'s Attack #{attack_num+1}: Attacks for {damage} damage!")
+                    
+                elif companion.type == "unicorn":  # Level 12
+                    target.take_damage(damage)
+                    heal = int(damage * 0.2)  # Heal 20% of damage
+                    player.health = min(player.max_health, player.health + heal)
+                    print(f"🦄 {companion.name}'s Attack #{attack_num+1}: Holy Light for {damage} damage and heals you for {heal}!")
+                
+                elif companion.type == "griffin":  # Level 12
+                    # Attack multiple enemies for 60% damage
+                    for enemy in living_enemies[:3]:  # Hit up to 3 enemies
+                        splash = int(damage * 0.6)
+                        enemy.take_damage(splash)
+                        print(f"🦅 {companion.name}'s Attack #{attack_num+1}: Hits {enemy.name} for {splash} damage with Sky Strike!")
+                    
+                else:  # Default attack if type not found
+                    target.take_damage(damage)
+                    print(f"🐾 {companion.name}'s Attack #{attack_num+1}: Deals {damage} damage!")
+                
+                # Update living enemies list after each attack
                 living_enemies = [e for e in enemies if e.health > 0]
 
         # Enemy turns
