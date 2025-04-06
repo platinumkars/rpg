@@ -2294,14 +2294,15 @@ def process_attack(player, target, enemies):
             # Handle target death
             if current_target.health <= 0:
                 print(f"{current_target.name} has been defeated!")
-                # Update living enemies and index
+                 # Update living enemies and index
                 living_enemies = [e for e in enemies if e.health > 0]
                 if living_enemies:
-                    enemy_index = enemy_index % len(living_enemies)
+                    enemy_index = min(enemy_index, len(living_enemies) - 1)
                 else:
-                    break
+                    break  # No more enemies to attack
+                
             else:
-                enemy_index = (enemy_index + 1) % len(living_enemies)
+               enemy_index = (enemy_index + 1) % len(living_enemies)
         
         # Process area damage after hits
         if "area_damage" in weapon_stats:
