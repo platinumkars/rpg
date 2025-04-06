@@ -2250,6 +2250,10 @@ def show_gadgets(player):
 
 def process_attack(player, target, enemies):
     """Process attack with improved target validation"""
+    if not enemies:
+        print("No enemies to attack!")
+        return 0
+        
     weapon_stats = player.weapons[player.current_weapon]
     total_damage = 0
     living_enemies = [e for e in enemies if e.health > 0]
@@ -2257,6 +2261,10 @@ def process_attack(player, target, enemies):
     if not living_enemies:
         print("No valid targets remaining!")
         return total_damage
+        
+    # If no target is provided or target is invalid, select first living enemy
+    if target is None or target not in living_enemies:
+        target = living_enemies[0]
 
     # Validate target exists in living enemies
     if target not in living_enemies:
