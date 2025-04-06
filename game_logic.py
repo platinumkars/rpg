@@ -2209,29 +2209,28 @@ def process_attack(player, target, enemies):
                     enemy_index = min(enemy_index, len(living_enemies) - 1)
                 else:
                     print("Victory! All enemies have been defeated!")
-                    if player.health > 0:
-                        print("\nVictory!")
-                        total_exp = 0
-                        total_gold = 0
-                        tech_points = 0
+                    
+                    total_exp = 0
+                    total_gold = 0
+                    tech_points = 0
                         
-                        for enemy in enemies:
-                            total_exp += enemy.exp_reward
-                            total_gold += enemy.gold_reward
+                    for enemy in enemies:
+                        total_exp += enemy.exp_reward
+                        total_gold += enemy.gold_reward
                             
-                        # Add tech points reward (only if there were enemies)
-                        if enemies:
-                            tech_points = calculate_tech_points_reward(player.level, isinstance(enemies[0], Boss))
+                    # Add tech points reward (only if there were enemies)
+                    if enemies:
+                        tech_points = calculate_tech_points_reward(player.level, isinstance(enemies[0], Boss))
                             
-                            # Add rewards
-                            player.exp += total_exp
-                            player.gold += total_gold
-                            player.tech_points += tech_points
+                        # Add rewards
+                        player.exp += total_exp
+                        player.gold += total_gold
+                        player.tech_points += tech_points
                             
-                            print(f"Gained {total_exp} experience!")
-                            print(f"Found {total_gold} gold!")
-                            print(f"Earned {tech_points} tech points!")
-                        return True
+                        print(f"Gained {total_exp} experience!")
+                        print(f"Found {total_gold} gold!")
+                        print(f"Earned {tech_points} tech points!")
+                        
                     break  # No more enemies to attack
                 
             else:
