@@ -3075,7 +3075,6 @@ def main():
                     continue
                     
             except Exception as e:
-                print(f"Error spawning enemies: {e}")
                 continue
 
         elif choice == "2":
