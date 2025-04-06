@@ -2826,35 +2826,34 @@ spawn_table = [
     # ...existing level 3-5 enemies...
 ]
 
+# Fix spawn_enemies function
 def spawn_enemies(player, num_enemies):
-    """Spawn enemies with proper scaling"""
+    """Spawn enemies with proper validation and scaling"""
     enemies = []
+    
+    # Filter eligible enemy types based on player level
+    eligible_enemies = [
+        (enemy_type, chance) 
+        for enemy_type, chance, min_level in spawn_table 
+        if player.level >= min_level
+    ]
+    
+    if not eligible_enemies:
+        print("No suitable enemies found for your level!")
+        return enemies
+        
     for _ in range(num_enemies):
-        try:
-            roll = random.uniform(0, 100)
-            cumulative = 0
-            
-            # Filter eligible enemies based on player level
-            eligible_enemies = [
-                (enemy, chance, min_level) 
-                for enemy, chance, min_level in spawn_table 
-                if player.level >= min_level
-            ]
-            
-            if not eligible_enemies:
-                continue
+        roll = random.uniform(0, 100)
+        cumulative = 0
+        
+        for enemy_type, chance in eligible_enemies:
+            cumulative += chance
+            if roll <= cumulative:
+                # Create and scale enemy
+                enemy = enemy_type.scale_to_level(player.level)
+                enemies.append(enemy)
+                break
                 
-            for enemy_type, chance, _ in eligible_enemies:
-                cumulative += chance
-                if roll <= cumulative:
-                    enemy = enemy_type.scale_to_level(player.level)
-                    enemies.append(enemy)
-                    break
-                    
-        except Exception as e:
-            print(f"Error spawning enemy: {e}")
-            continue
-            
     return enemies
 
 def currency_exchange(player):
