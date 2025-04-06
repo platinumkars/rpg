@@ -3097,13 +3097,22 @@ def main():
         print("13. Quit")
         
         choice = input("> ")
+        # Update the combat section in main()
         if choice == "1":
             num_enemies = 1
             if player.level >= 5:
                 num_enemies = random.randint(2, 3)
             
-            # Initialize empty enemies list
-            enemies = []
+            enemies = spawn_enemies(player, num_enemies)
+            
+            if enemies:
+                result = combat(player, enemies)
+                if result == False:  # Player died and chose not to continue
+                    print(f"\nGame Over! Final Level: {player.level}")
+                    print(f"Gold collected: {player.gold}")
+                    break
+            else:
+                print("\nNo enemies appeared! Try exploring a different area.")
             
             # Fix the enemy spawn loop
             for _ in range(num_enemies):
