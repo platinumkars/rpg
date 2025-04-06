@@ -2273,138 +2273,49 @@ def process_enemy_attack(player, enemy):
 
 
 def process_ability(player, target, enemies, ability_name):
-    """Process ability with proper damage and healing handling"""
-    try:
-        ability = player.abilities.get(ability_name)
-        if not ability:
-            print(f"Error: Ability {ability_name} not found!")
-            return 0, 0
-        
-        if player.mana < ability.get('mana_cost', 0):
-            print("Not enough mana!")
-            return 0, 0
-
-        # Deduct mana cost
-        player.mana -= ability['mana_cost']
-        
-        # Track total damage and healing
-        total_damage = 0
-        total_healing = 0
-        
-        # Initialize defense bonus system if not present
-        if not hasattr(player, 'bonus_defense'):
-            player.bonus_defense = 0
-        if not hasattr(player, 'defense_effects'):
-            player.defense_effects = []
-        
-        # Calculate level bonus
-        level_bonus = int(player.level * 0.5)
-        # Process defense if ability has it
-        if "defense" in ability:
-            base_defense = ability["defense"]
-            defense_modifier = 1.0
-            
-            # Class defense modifiers
-            if player.class_type.lower() in ["warrior", "paladin"]:
-                defense_modifier *= 1.3
-            elif player.class_type.lower() in ["mage", "warlock"]:
-                defense_modifier *= 0.8
-            
-            defense_amount = int(base_defense * defense_modifier) + level_bonus
-            duration = ability.get("duration", 2)
-            
-            # Add defense effect
-            defense_effect = {
-                "amount": defense_amount,
-                "duration": duration,
-                "name": ability_name
-            }
-            player.defense_effects.append(defense_effect)
-            player.bonus_defense += defense_amount
-            
-            print(f"🛡️ {ability_name} grants {defense_amount} defense for {duration} turns!")
-        # Process mana restore if ability has it
-        if "mana" in ability:
-            mana_restore = ability["mana"]
-            old_mana = player.mana
-            player.mana = min(player.max_mana, player.mana + mana_restore)
-            restored_mana = player.mana - old_mana
-            print(f"✨ {ability_name} restores {restored_mana} MP!")
-        
-        # Process healing first
-        if "heal" in ability:
-            base_heal = ability["heal"]
-            heal_modifier = 1.0
-            
-            # Enhanced healing for healing classes
-            if player.class_type.lower() in ["paladin", "druid"]:
-                heal_modifier *= 1.3
-            
-            heal_amount = int(base_heal * heal_modifier) + level_bonus
-            old_health = player.health
-            player.health = min(player.max_health, player.health + heal_amount)
-            total_healing = player.health - old_health
-            print(f"💚 {ability_name} heals for {total_healing} HP!")
-
-        # Process damage second
-        if "damage" in ability:
-            base_damage = ability["damage"]
-            damage_modifier = 1.0
-            
-            # Class damage modifiers
-            if player.class_type.lower() in ["mage", "warlock"]:
-                damage_modifier *= 1.3
-            elif player.class_type.lower() in ["warrior", "berserker"]:
-                damage_modifier *= 0.8
-                
-            modified_damage = int(base_damage * damage_modifier) + level_bonus
-            
-            # Handle multi-hit abilities
-            if "hits" in ability:
-                for hit in range(ability["hits"]):
-                    if target and target.health > 0:
-                        damage = max(1, modified_damage)
-                        target.take_damage(damage)
-                        total_damage += damage
-                        print(f"Hit {hit + 1}: {damage} damage!")
-            else:
-                # Single hit
-                if target and target.health > 0:
-                    damage = max(1, modified_damage)
-                    target.take_damage(damage)
-                    total_damage = damage
-                    print(f"💥 {ability_name} deals {damage} damage!")
-            
-            # Handle area damage
-            if "area_damage" in ability and total_damage > 0:
-                area_damage = int(ability["area_damage"] * damage_modifier) + level_bonus
-                for enemy in enemies:
-                    if enemy != target and enemy.health > 0:
-                        splash = max(1, area_damage)
-                        enemy.take_damage(splash)
-                        total_damage += splash
-                        print(f"⚡ Splash damage hits {enemy.name} for {splash} damage!")
-
-        # Process status effects last
-        if "effect" in ability and target and target.health > 0:
-            effect = ability["effect"]
-            duration = ability.get("duration", 2)
-            base = total_damage if total_damage > 0 else total_healing
-            
-            if isinstance(effect, list):
-                for single_effect in effect:
-                    apply_status_effect(target, single_effect, base, duration)
-            else:
-                apply_status_effect(target, effect, base, duration)
-
-        return total_damage, total_healing
-
-    except KeyError as e:
-        print(f"Error: Invalid ability configuration - {e}")
+    """Process abilities with proper validation"""
+    if ability_name not in player.abilities:
+        print("Invalid ability!")
         return 0, 0
-    except Exception as e:
-        print(f"Error processing ability: {e}")
+        
+    ability = player.abilities[ability_name]
+    
+    # Validate mana cost
+    if player.mana < ability['mana_cost']:
+        print("Not enough mana!")
         return 0, 0
+        
+    # Deduct mana
+    player.mana -= ability['mana_cost']
+    
+    total_damage = 0
+    total_healing = 0
+    
+    # Process healing if present
+    if "heal" in ability:
+        heal_amount = ability["heal"]
+        old_health = player.health
+        player.health = min(player.max_health, player.health + heal_amount)
+        total_healing = player.health - old_health
+        print(f"💚 Healed for {total_healing} HP!")
+    
+    # Process damage if present
+    if "damage" in ability and target and target.health > 0:
+        damage = ability["damage"]
+        target.health -= damage
+        total_damage += damage
+        print(f"💥 Dealt {damage} damage to {target.name}!")
+        
+        # Handle area damage
+        if "area_damage" in ability:
+            area_damage = ability["area_damage"]
+            for enemy in enemies:
+                if enemy != target and enemy.health > 0:
+                    enemy.health -= area_damage
+                    total_damage += area_damage
+                    print(f"⚡ Area damage: {area_damage} to {enemy.name}!")
+    
+    return total_damage, total_healing
 
 def apply_status_effect(target, effect_type, base_damage, duration):
     """Enhanced status effect system with accuracy modifications"""
