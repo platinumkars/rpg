@@ -1591,68 +1591,68 @@ def combat(player, enemies):
                 continue
         
         # Companion turn
+        # Companion turns - now all living companions will attack
         if player.companions:
             # Get all living enemies once for companions to target
             living_enemies = [e for e in enemies if e.health > 0]
             
-            # Loop through living companions
-            for companion in [c for c in player.companions if c.health > 0]:
-                if not living_enemies:
-                    break
-                
-            print(f"\n🐾 {companion.name}'s turn!")
+            # Get all living companions
+            living_companions = [c for c in player.companions if c.health > 0]
             
-            attack_count = 0
-            while attack_count < 3 and living_enemies:  # Make 3 attacks if possible
+            # Have each living companion take their turn
+            for companion in living_companions:
+                if living_enemies:  # Only attack if there are still enemies alive
+                    print(f"\n🐾 {companion.name}'s turn!")
+            
                 # Get random target from living enemies
                 target = random.choice(living_enemies)
                 damage = companion.damage
-                
+            
                 # Find companion tier
                 for tier, companions in COMPANION_TIERS.items():
                     if companion.type in companions:
                         companion_data = companions[companion.type]
                         ability = companion_data["ability"]
                         break
-                
-                # Handle abilities based on companion type
             
+                # Handle abilities based on companion type
                 if companion.type == "cat":  # Level 5
                     target.take_damage(damage)
-                    print(f"😺 {companion.name}'s Attack #{attack_count+1}: Agile Strike for {damage} damage!")
+                    print(f"😺 {companion.name}'s Attack: Agile Strike for {damage} damage!")
                 elif companion.type == "owl":  # Level 5
                     enhanced_damage = int(damage * 1.25)  # 25% bonus damage
                     target.take_damage(enhanced_damage)
-                    print(f"🦉 {companion.name}'s Attack #{attack_count+1}: Reveals weakness for {enhanced_damage} damage!")
+                    print(f"🦉 {companion.name}'s Attack: Reveals weakness for {enhanced_damage} damage!")
                 elif companion.type == "bear":  # Level 8
                     target.take_damage(damage)
                     target.damage = int(target.damage * 0.85)  # Reduce enemy damage by 15%
-                    print(f"🐻 {companion.name}'s Attack #{attack_count+1}: Mighty Roar for {damage} damage and reduces enemy damage!")
+                    print(f"🐻 {companion.name}'s Attack: Mighty Roar for {damage} damage and reduces enemy damage!")
                 elif companion.type == "fox":  # Level 8
                     if random.random() < 0.35:  # 35% double strike chance
                         target.take_damage(damage * 2)
-                        print(f"🦊 {companion.name}'s Attack #{attack_count+1}: Strikes twice for {damage * 2} damage!")
+                        print(f"🦊 {companion.name}'s Attack: Strikes twice for {damage * 2} damage!")
                     else:
                         target.take_damage(damage)
-                        print(f"🦊 {companion.name}'s Attack #{attack_count+1}: Attacks for {damage} damage!")
+                        print(f"🦊 {companion.name}'s Attack: Attacks for {damage} damage!")
                 elif companion.type == "unicorn":  # Level 12
                     target.take_damage(damage)
                     heal = int(damage * 0.2)  # Heal 20% of damage
                     player.health = min(player.max_health, player.health + heal)
-                    print(f"🦄 {companion.name}'s Attack #{attack_count+1}: Holy Light for {damage} damage and heals you for {heal}!")
+                    print(f"🦄 {companion.name}'s Attack: Holy Light for {damage} damage and heals you for {heal}!")
                 elif companion.type == "griffin":  # Level 12
-                    # Attack multiple enemies for 60% damage
+                # Attack multiple enemies for 60% damage
                     for enemy in living_enemies[:3]:  # Hit up to 3 enemies
                         splash = int(damage * 0.6)
                         enemy.take_damage(splash)
-                        print(f"🦅 {companion.name}'s Attack #{attack_count+1}: Hits {enemy.name} for {splash} damage with Sky Strike!")
+                        print(f"🦅 {companion.name}'s Attack: Hits {enemy.name} for {splash} damage with Sky Strike!")
                 else:  # Default attack if type not found
                     target.take_damage(damage)
-                    print(f"🐾 {companion.name}'s Attack #{attack_count+1}: Deals {damage} damage!")
+                    print(f"🐾 {companion.name}'s Attack: Deals {damage} damage!")
                 
-                # Update living enemies and increment attack counter
+                # Update living enemies list after each companion's attacks
                 living_enemies = [e for e in enemies if e.health > 0]
-                attack_count += 1
+                if not living_enemies:
+                    break  # Stop companion turns if all enemies are defeated
 
         # Enemy turns
         for enemy in enemies:
