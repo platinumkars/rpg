@@ -1339,7 +1339,7 @@ def get_target(enemies, auto=False):
 
 # In the combat function, update the auto-target initialization
 def combat(player, enemies):
-    """Updated combat function with proper end condition"""
+    """Updated combat function with proper victory condition"""
     print("\nEnemies appear!")
     for enemy in enemies:
         print(f"- {enemy.name} (HP: {enemy.health})")
@@ -1347,10 +1347,23 @@ def combat(player, enemies):
     auto_target = False
     
     # Main combat loop
-    while True:
-        # Check for combat end conditions first
+    while any(enemy.health > 0 for enemy in enemies) and player.health > 0:
+        # Check victory condition at start of each loop
         if not any(enemy.health > 0 for enemy in enemies):
-            break  # Exit combat loop if all enemies are dead
+            # Process victory rewards
+            total_exp = sum(enemy.exp_reward for enemy in enemies)
+            total_gold = sum(enemy.gold_reward for enemy in enemies)
+            tech_points = calculate_tech_points_reward(player.level, isinstance(enemies[0], Boss))
+            
+            player.exp += total_exp
+            player.gold += total_gold
+            player.tech_points += tech_points
+            
+            print("\nVictory!")
+            print(f"Gained {total_exp} experience!")
+            print(f"Found {total_gold} gold!")
+            print(f"Earned {tech_points} tech points!")
+            return True
 
         # Display battle status
         print(f"\n{'-'*40}")
