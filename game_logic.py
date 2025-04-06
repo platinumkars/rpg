@@ -3056,19 +3056,26 @@ def main():
             if player.level >= 5:
                 num_enemies = random.randint(2, 3)
             
-            # Try to spawn enemies
-            enemies = spawn_enemies(player, num_enemies)
-            
-            # Only enter combat if we have enemies
-            if enemies:
-                print(f"\nEncountered {len(enemies)} enemies!")
-                result = combat(player, enemies)
-                if isinstance(result, bool) and not result:  # Player died and chose not to continue
-                    print(f"\nGame Over! Final Level: {player.level}")
-                    print(f"Gold collected: {player.gold}")
-                    break
-            else:
-                print("\nNo enemies appeared! Try exploring a different area.")
+            try:
+                # Spawn enemies with validation
+                enemies = spawn_enemies(player, num_enemies)
+                
+                if enemies:
+                    print(f"\nEncountered {len(enemies)} enemies!")
+                    for enemy in enemies:
+                        print(f"- {enemy.name} (Level {enemy.level})")
+                    
+                    result = combat(player, enemies)
+                    if result == False:  # Player died and chose not to continue
+                        print(f"\nGame Over! Final Level: {player.level}")
+                        print(f"Gold collected: {player.gold}")
+                        break
+                else:
+                    print("\nArea seems quiet. Try exploring somewhere else.")
+                    continue
+                    
+            except Exception as e:
+                print(f"Error spawning enemies: {e}")
                 continue
 
         elif choice == "2":
