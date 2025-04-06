@@ -1646,8 +1646,14 @@ def combat(player, enemies):
                         enemy.take_damage(splash)
                         print(f"🦅 {companion.name}'s Attack: Hits {enemy.name} for {splash} damage with Sky Strike!")
                 else:  # Default attack if type not found
-                    target.take_damage(damage)
-                    print(f"🐾 {companion.name}'s Attack: Deals {damage} damage!")
+                    # Check if there are any living enemies before attacking
+                    living_enemies = [e for e in enemies if e.health > 0]
+                    if living_enemies:
+                        target = random.choice(living_enemies)
+                        target.take_damage(damage)
+                        print(f"🐾 {companion.name}'s Attack: Deals {damage} damage to {target.name}!")
+                    else:
+                        break  # No living enemies to attack
                 
                 # Update living enemies list after each companion's attacks
                 living_enemies = [e for e in enemies if e.health > 0]
