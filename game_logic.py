@@ -2810,40 +2810,53 @@ class EnemyType:
             min(player_level, self.min_level + 2)
         )
 
-# Update spawn table with base stats
+# Add at the top of the file with other constants
 spawn_table = [
-    # Level 1 enemies - Reduced base stats for better early game
+    # Level 1 enemies
     (EnemyType("Goblin", 45, 8, 20, 25, 1), 20, 1),      
     (EnemyType("Wolf", 50, 10, 25, 30, 1), 20, 1),        
     (EnemyType("Slime", 40, 6, 15, 20, 1), 15, 1),       
     
-    # Level 2 enemies - Smoother progression
-    (EnemyType("Bandit", 65, 12, 35, 45, 2), 15, 2),      
-    (EnemyType("Skeleton", 60, 13, 30, 40, 2), 15, 2),     
-    (EnemyType("Giant Spider", 58, 14, 32, 38, 2), 15, 2), 
+    # Level 3 enemies
+    (EnemyType("Bandit", 65, 12, 35, 45, 3), 15, 3),      
+    (EnemyType("Skeleton", 60, 13, 30, 40, 3), 15, 3),     
     
-    # Level 3-5 enemies - Balanced for mid-game
-    # ...existing level 3-5 enemies...
+    # Level 5 enemies
+    (EnemyType("Orc", 80, 15, 45, 55, 5), 10, 5),
+    (EnemyType("Dark Elf", 70, 18, 50, 60, 5), 10, 5),
+    
+    # Level 7 enemies
+    (EnemyType("Troll", 100, 20, 65, 75, 7), 8, 7),
+    (EnemyType("Wraith", 85, 22, 70, 80, 7), 8, 7),
+    
+    # Level 10 enemies
+    (EnemyType("Giant", 130, 25, 90, 100, 10), 5, 10),
+    (EnemyType("Dragon Whelp", 110, 28, 95, 105, 10), 5, 10)
 ]
 
-# Fix spawn_enemies function
 def spawn_enemies(player, num_enemies):
     """Spawn enemies with proper validation and scaling"""
     enemies = []
     
     # Filter eligible enemy types based on player level
-    eligible_enemies = [
-        (enemy_type, chance) 
-        for enemy_type, chance, min_level in spawn_table 
-        if player.level >= min_level
-    ]
+    eligible_enemies = []
+    for enemy_type, chance, min_level in spawn_table:
+        if player.level >= min_level:
+            eligible_enemies.append((enemy_type, chance))
     
     if not eligible_enemies:
         print("No suitable enemies found for your level!")
         return enemies
-        
+    
+    # Spawn requested number of enemies
     for _ in range(num_enemies):
-        roll = random.uniform(0, 100)
+        # Calculate total chance for normalization
+        total_chance = sum(chance for _, chance in eligible_enemies)
+        if total_chance <= 0:
+            break
+            
+        # Roll for enemy type
+        roll = random.uniform(0, total_chance)
         cumulative = 0
         
         for enemy_type, chance in eligible_enemies:
@@ -2853,7 +2866,7 @@ def spawn_enemies(player, num_enemies):
                 enemy = enemy_type.scale_to_level(player.level)
                 enemies.append(enemy)
                 break
-                
+    
     return enemies
 
 def currency_exchange(player):
