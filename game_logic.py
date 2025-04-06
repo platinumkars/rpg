@@ -1693,9 +1693,10 @@ def combat(player, enemies):
             total_exp += enemy.exp_reward
             total_gold += enemy.gold_reward
             
-        # Add tech points reward
-        tech_points = calculate_tech_points_reward(player.level, isinstance(enemies[0], Boss))
-        player.tech_points += tech_points
+        # Add tech points reward (only if there were enemies)
+        if enemies:
+            tech_points = calculate_tech_points_reward(player.level, isinstance(enemies[0], Boss))
+            player.tech_points += tech_points
         
         # Add gold and exp to player
         player.gold += total_gold
