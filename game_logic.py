@@ -1037,47 +1037,54 @@ class Character:
                 self.start_companion_quest(choice)
 
     def start_companion_quest(self, quest_name):
-        """Start a specific companion quest"""
-        quest = COMPANION_QUESTS[quest_name]
-        print(f"\n=== Starting {quest_name} ===")
-        print(f"Boss: {quest['boss']['name']}")
+        """Handle companion quest logic"""
+        if quest_name not in COMPANION_QUESTS:
+            print("Invalid quest!")
+            return
             
-        # Create boss instance
-        boss = Enemy(
-            quest['boss']['name'],
-            quest['boss']['health'],
-            quest['boss']['damage'],
-            100,  # exp reward
-            200,  # gold reward
-        )
+        quest = COMPANION_QUESTS[quest_name]
+        if self.level < quest["level_req"]:
+            print(f"You need to be level {quest['level_req']} for this quest!")
+            return
+            
+        if quest_name in self.companion_quests_completed:
+            print("You've already completed this quest!")
+            return
+            
+        print(f"\n=== {quest_name} ===")
+        print(f"📜 {quest['description']}")
+        print(f"🎁 Reward: {quest['reward']}")
         
-        # Handle quest-specific rules
-        if quest['quest_rules'].get('no_potions'):
-            old_inventory = self.inventory.copy()
-        
-        # Start boss battle
-        result = combat(self, [boss])
-        
-        # Check quest completion conditions
-        quest_completed = False
-        if result and not isinstance(result, str):  # Combat wasn't fled
-            if quest_name == "Forest Trial" and quest['quest_rules'].get('no_potions'):
-                # Check if potions were used
-                quest_completed = old_inventory == self.inventory
-            elif quest_name == "Spirit Challenge":
-                # Check if survived required turns with low health
-                if quest['quest_rules'].get('turns') and quest['quest_rules'].get('health_threshold'):
-                    quest_completed = True  # Set to true if we reached this point since combat didn't end early
-        
-        if quest_completed:
-            print("\n✨ Quest Complete! ✨")
-            self.companion_quests_completed.append(quest_name)
-            self.max_companions += 1
-            self.companion_tokens += 1
-            self.unlock_companion()
-            print(f"Rewards: Additional companion slot and {self.companion_tokens} companion token(s)!")
-        else:
-            print("\n❌ Quest Failed! Try again when you're stronger!")
+        confirm = input("\nStart quest? (y/n): ").lower()
+        if confirm == 'y':
+            # Create boss for the quest
+            boss_info = quest["boss"]
+            boss = Boss(
+                name=boss_info["name"],
+                health=boss_info["health"],
+                damage=boss_info["damage"],
+                exp_reward=200,
+                gold_reward=300,
+                special_moves={boss_info["special"]: {"damage": 40, "area_damage": 20}},
+                level_req=quest["level_req"]
+            )
+            
+            # Scale boss to player level
+            boss.scale_stats(self.level)
+            
+            # Start boss battle
+            result = combat(self, [boss])
+            if result is True:  # Victory
+                print(f"\n🎊 Congratulations! You've completed {quest_name}!")
+                self.max_companions += 1
+                self.companion_quests_completed.append(quest_name)
+                self.companion_tokens += 1
+                print(f"\n✨ You can now have up to {self.max_companions} companions!")
+                print("You've earned a companion token!")
+                
+                if len(self.companions) < self.max_companions:
+                    if input("\nWould you like to recruit a new companion? (y/n): ").lower() == 'y':
+                        self.unlock_companion()
 
     def upgrade_companion(self):
             """Upgrade companion stats with tokens"""
