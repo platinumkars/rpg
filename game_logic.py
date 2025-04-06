@@ -2176,7 +2176,7 @@ def show_gadgets(player):
     return gadget_list
 
 def process_attack(player, target, enemies):
-    """Process attack with improved target validation"""
+    """Process attack with improved target validation and victory check"""
     if not enemies:
         print("No enemies to attack!")
         return 0
@@ -2186,7 +2186,7 @@ def process_attack(player, target, enemies):
     living_enemies = [e for e in enemies if e.health > 0]
     
     if not living_enemies:
-        print("No valid targets remaining!")
+        print("Victory! All enemies have been defeated!")
         return total_damage
         
     # If no target is provided or target is invalid, select first living enemy
@@ -2198,6 +2198,7 @@ def process_attack(player, target, enemies):
         if living_enemies:
             target = living_enemies[0]
         else:
+            print("Victory! All enemies have been defeated!")
             return total_damage
 
     # Get target index from living enemies
@@ -2213,6 +2214,7 @@ def process_attack(player, target, enemies):
             # Update living enemies list
             living_enemies = [e for e in enemies if e.health > 0]
             if not living_enemies:
+                print("Victory! All enemies have been defeated!")
                 break
                 
             # Get current target
@@ -2229,15 +2231,16 @@ def process_attack(player, target, enemies):
             # Handle target death
             if current_target.health <= 0:
                 print(f"{current_target.name} has been defeated!")
-                 # Update living enemies and index
+                # Update living enemies and index
                 living_enemies = [e for e in enemies if e.health > 0]
                 if living_enemies:
                     enemy_index = min(enemy_index, len(living_enemies) - 1)
                 else:
+                    print("Victory! All enemies have been defeated!")
                     break  # No more enemies to attack
                 
             else:
-               enemy_index = (enemy_index + 1) % len(living_enemies)
+                enemy_index = (enemy_index + 1) % len(living_enemies)
         
         # Process area damage after hits
         if "area_damage" in weapon_stats:
@@ -2249,6 +2252,12 @@ def process_attack(player, target, enemies):
                         other.health -= splash_damage
                         total_damage += splash_damage
                         print(f"{other.name} takes {splash_damage} splash damage!")
+                        if other.health <= 0:
+                            print(f"{other.name} has been defeated!")
+                
+                # Check if all enemies are defeated after splash damage
+                if not any(e.health > 0 for e in enemies):
+                    print("Victory! All enemies have been defeated!")
         
         print(f"Total damage dealt: {total_damage}")
                     
@@ -2258,6 +2267,11 @@ def process_attack(player, target, enemies):
         target.health -= main_damage
         total_damage = main_damage
         print(f"You deal {main_damage} damage to {target.name}!")
+        
+        if target.health <= 0:
+            print(f"{target.name} has been defeated!")
+            if not any(e.health > 0 for e in enemies):
+                print("Victory! All enemies have been defeated!")
     
     return total_damage
 
