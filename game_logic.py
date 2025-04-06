@@ -1016,15 +1016,15 @@ class Character:
                 status = "✅ Completed" if quest_name in self.companion_quests_completed else "❌ Incomplete"
                 level_status = "✨" if self.level >= quest["level_req"] else "🔒"
                 
-                print(f"\n{level_status} {quest_name} (Level {quest['level_req']}+) - {status}")
-                print(f"📜 {quest['description']}")
-                print(f"🎁 Reward: {quest['reward']}")
-                
                 if self.level >= quest["level_req"] and quest_name not in self.companion_quests_completed:
                     available_quests.append(quest_name)
+                    print(f"\n{level_status} {quest_name} (Level {quest['level_req']}+) - {status}")
+                    print(f"📜 {quest['description']}")
+                    print(f"🎁 Reward: {quest['reward']}")
             
             if not available_quests:
                 print("\nNo available quests right now!")
+                input("\nPress Enter to continue...")
                 break
                 
             print("\nEnter quest name to start (or 'back' to return):")
@@ -1034,46 +1034,50 @@ class Character:
                 break
                 
             if choice in available_quests:
-                quest = COMPANION_QUESTS[choice]
-                print(f"\n=== Starting {choice} ===")
-                print(f"Boss: {quest['boss']['name']}")
-                    
-                # Create boss instance
-                boss = Enemy(
-                    quest['boss']['name'],
-                    quest['boss']['health'],
-                    quest['boss']['damage'],
-                    100,  # exp reward
-                    200,  # gold reward
-                )
-                
-                # Handle quest-specific rules
-                if quest['quest_rules'].get('no_potions'):
-                    old_inventory = self.inventory.copy()
-                
-                # Start boss battle
-                result = combat(self, [boss])
-                
-                # Check quest completion conditions
-                quest_completed = False
-                if result and not isinstance(result, str):  # Combat wasn't fled
-                    if choice == "Forest Trial" and quest['quest_rules'].get('no_potions'):
-                        # Check if potions were used
-                        quest_completed = old_inventory == self.inventory
-                    elif choice == "Spirit Challenge":
-                        # Check if survived required turns with low health
-                        if quest['quest_rules'].get('turns') and quest['quest_rules'].get('health_threshold'):
-                            quest_completed = True  # Set to true if we reached this point since combat didn't end early
-                
-                if quest_completed:
-                    print("\n✨ Quest Complete! ✨")
-                    self.companion_quests_completed.append(choice)
-                    self.max_companions += 1
-                    self.companion_tokens += 1
-                    self.unlock_companion()
-                    print(f"Rewards: Additional companion slot and {self.companion_tokens} companion token(s)!")
-                else:
-                    print("\n❌ Quest Failed! Try again when you're stronger!")
+                self.start_companion_quest(choice)
+
+    def start_companion_quest(self, quest_name):
+        """Start a specific companion quest"""
+        quest = COMPANION_QUESTS[quest_name]
+        print(f"\n=== Starting {quest_name} ===")
+        print(f"Boss: {quest['boss']['name']}")
+            
+        # Create boss instance
+        boss = Enemy(
+            quest['boss']['name'],
+            quest['boss']['health'],
+            quest['boss']['damage'],
+            100,  # exp reward
+            200,  # gold reward
+        )
+        
+        # Handle quest-specific rules
+        if quest['quest_rules'].get('no_potions'):
+            old_inventory = self.inventory.copy()
+        
+        # Start boss battle
+        result = combat(self, [boss])
+        
+        # Check quest completion conditions
+        quest_completed = False
+        if result and not isinstance(result, str):  # Combat wasn't fled
+            if quest_name == "Forest Trial" and quest['quest_rules'].get('no_potions'):
+                # Check if potions were used
+                quest_completed = old_inventory == self.inventory
+            elif quest_name == "Spirit Challenge":
+                # Check if survived required turns with low health
+                if quest['quest_rules'].get('turns') and quest['quest_rules'].get('health_threshold'):
+                    quest_completed = True  # Set to true if we reached this point since combat didn't end early
+        
+        if quest_completed:
+            print("\n✨ Quest Complete! ✨")
+            self.companion_quests_completed.append(quest_name)
+            self.max_companions += 1
+            self.companion_tokens += 1
+            self.unlock_companion()
+            print(f"Rewards: Additional companion slot and {self.companion_tokens} companion token(s)!")
+        else:
+            print("\n❌ Quest Failed! Try again when you're stronger!")
 
     def upgrade_companion(self):
             """Upgrade companion stats with tokens"""
