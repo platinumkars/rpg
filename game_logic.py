@@ -1346,15 +1346,9 @@ def combat(player, enemies):
     
     auto_target = False
     
-    # Main combat loop with proper enemy check
-    while any(enemy.health > 0 for enemy in enemies) and player.health > 0:
-        # Process status effects
-        process_status_effects(player)
-        for enemy in enemies:
-            if enemy.health > 0:
-                process_status_effects(enemy)
-        
-        # Check if all enemies are defeated before player's turn
+    # Main combat loop
+    while True:
+        # Check for combat end conditions first
         if not any(enemy.health > 0 for enemy in enemies):
             break  # Exit combat loop if all enemies are dead
 
@@ -1640,41 +1634,33 @@ def combat(player, enemies):
         # Add tech points reward (only if there were enemies)
         if enemies:
             tech_points = calculate_tech_points_reward(player.level, isinstance(enemies[0], Boss))
+
+            
+            # Add rewards
+            player.exp += total_exp
+            player.gold += total_gold
             player.tech_points += tech_points
+            
+            print(f"Gained {total_exp} experience!")
+            print(f"Found {total_gold} gold!")
+            print(f"Earned {tech_points} tech points!")
+            return True
+            
+        if player.health <= 0:
+            return handle_player_death(player)
+
+        # Display battle status
+        print(f"\n{'-'*40}")
+        print(f"Your HP: {player.health}/{player.max_health}")
+        print(f"Your MP: {player.mana}/{player.max_mana}")
         
-        # Add gold and exp to player
-        player.gold += total_gold
-        player.exp += total_exp
-        
-        # Check for level up
-        level_up_exp = calculate_exp_requirement(player.level)
-        while player.exp >= level_up_exp:
-            old_level = player.level
-            player.level += 1
-            player.exp -= level_up_exp
-            
-            # Get level up rewards
-            rewards = calculate_level_rewards(player.level)
-            player.max_health += rewards['health']
-            player.health = player.max_health  # Heal to full on level up
-            player.max_mana += rewards['mana']
-            player.mana = player.max_mana  # Restore full mana on level up
-            
-            # Display level up
-            level_up_display(player, old_level, rewards)
-            
-            # Check companion unlock at level 5
-            if player.level == 5:
-                print("\n🎉 You've unlocked companions!")
-                player.unlock_companion()
-            
-            # Calculate next level requirement
-            level_up_exp = calculate_exp_requirement(player.level)
-        
-        print(f"Gained {total_exp} experience!")
-        print(f"Found {total_gold} gold!")
-        print(f"Earned {tech_points} tech points!")
-        return True
+        # Show only living enemies
+        living_enemies = [e for e in enemies if e.health > 0]
+        print("\nEnemies:")
+        for i, enemy in enumerate(living_enemies, 1):
+            print(f"{i}. {enemy.name} - HP: {enemy.health}")
+
+        # Rest of combat code remains the same...
 
 # Add gadget effect processing
 def process_gadget_effect(player, target, enemies, effect):
