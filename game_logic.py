@@ -2780,6 +2780,9 @@ def spawn_enemies(player, num_enemies):
     
     # Spawn requested number of enemies
     for _ in range(num_enemies):
+        if not eligible_enemies:  # Check if list is empty
+            break
+            
         # Calculate total chance for normalization
         total_chance = sum(chance for _, chance in eligible_enemies)
         if total_chance <= 0:
@@ -2788,6 +2791,7 @@ def spawn_enemies(player, num_enemies):
         # Roll for enemy type
         roll = random.uniform(0, total_chance)
         cumulative = 0
+        enemy_spawned = False
         
         for enemy_type, chance in eligible_enemies:
             cumulative += chance
@@ -2795,7 +2799,14 @@ def spawn_enemies(player, num_enemies):
                 # Create and scale enemy
                 enemy = enemy_type.scale_to_level(player.level)
                 enemies.append(enemy)
+                enemy_spawned = True
                 break
+                
+        if not enemy_spawned:
+            # Fallback to first enemy type if no spawn occurred
+            enemy_type, _ = eligible_enemies[0]
+            enemy = enemy_type.scale_to_level(player.level)
+            enemies.append(enemy)
     
     return enemies
 
@@ -3041,50 +3052,25 @@ def main():
         choice = input("> ")
         # Update the combat section in main()
         if choice == "1":
+            # Determine number of enemies based on player level
             num_enemies = 1
             if player.level >= 5:
                 num_enemies = random.randint(2, 3)
             
+            # Try to spawn enemies
             enemies = spawn_enemies(player, num_enemies)
             
+            # Only enter combat if we have enemies
             if enemies:
+                print(f"\nEncountered {len(enemies)} enemies!")
                 result = combat(player, enemies)
-                if result == False:  # Player died and chose not to continue
+                if isinstance(result, bool) and not result:  # Player died and chose not to continue
                     print(f"\nGame Over! Final Level: {player.level}")
                     print(f"Gold collected: {player.gold}")
                     break
             else:
                 print("\nNo enemies appeared! Try exploring a different area.")
-            
-            # Fix the enemy spawn loop
-            for _ in range(num_enemies):
-                roll = random.uniform(0, 100)
-                cumulative = 0
-                for enemy_type, chance, min_level in spawn_table:
-                    if player.level >= min_level:
-                        cumulative += chance
-                        if roll <= cumulative:
-                            # Use scale_to_level to create properly scaled enemy
-                            scaled_enemy = enemy_type.scale_to_level(player.level)
-                            enemies.append(scaled_enemy)
-                            break
-
-            # Add to main game loop after level check
-            if player.level >= 5 and not player.companions:
-                player.unlock_companion()
-
-            # Remove duplicate combat call and time.sleep
-            if enemies:
-                result = combat(player, enemies)
-                if result == False:  # Player died and chose not to continue
-                    print(f"\nGame Over! Final Level: {player.level}")
-                    print(f"Gold collected: {player.gold}")
-                    break
-                # If result is True, player was revived and continues playing
-            else:
-                print("\nNo suitable enemies found in this area!")
-                print("Try exploring a different area or coming back later.")
-                time.sleep(1)
+                continue
 
         elif choice == "2":
             if player.level < 5:
