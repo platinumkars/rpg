@@ -1444,7 +1444,11 @@ def combat(player, enemies):
         
         # Process player turn based on choice
         if choice == "1":  # Basic attack
-            target = get_target(enemies, auto_target)
+            living_enemies = [e for e in enemies if e.health > 0]
+            if not living_enemies:
+                print("No living enemies to target!")
+                continue
+            target = get_target(living_enemies, auto_target)
             if target:
                 process_attack(player, target, enemies)
             else:
